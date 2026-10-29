@@ -319,7 +319,7 @@ async def forecast_table(tickers: list[str], horizons: list[str], thai: bool) ->
     rows, ctx = [], []
     try:
         async with httpx.AsyncClient(timeout=20) as client:
-            for t in tickers[:4]:
+            for t in tickers[:6]:
                 items = (await client.get(f"{ENGINE_URL}/predictions", params={"subject": t})).json().get("items", [])
                 for p in items:
                     if p["horizon"] not in horizons:
@@ -775,7 +775,15 @@ async def execute_advisor(request: Request):
             _names = {"GC=F": ["gold", "ทอง"], "BZ=F": ["oil", "brent", "น้ำมัน"], "THB=X": ["baht", "usd/thb", "usdthb", "ค่าเงินบาท", "เงินบาท", "ดอลลาร์"],
                       "TDEX.BK": ["set index", "ตลาดหุ้นไทย", "ดัชนี set", "set50"], "^TNX": ["10y", "bond yield", "ผลตอบแทนพันธบัตร"]}
             tickers = list(dict.fromkeys(tickers + [k for k, ws in _names.items() if any(w in _ql for w in ws)]))
-            _subj = [t for t in tickers if t] or [h.get("ticker") for h in (portfolio_context or {}).get("holdings", []) if h.get("ticker")]
+            _held = [h.get("ticker") for h in (portfolio_context or {}).get("holdings", []) if h.get("ticker")]
+            if not _held:
+                try:
+                    async with httpx.AsyncClient(timeout=10) as _cl:
+                        _held = [i["ticker"] for i in (await _cl.get(f"{ENGINE_URL}/signals", params={"kind": "holding"})).json().get("items", [])]
+                except Exception:  # noqa: BLE001
+                    _held = []
+            _wants_port = any(w in _ql for w in ("portfolio", "holding", "พอร์ต", "ที่ถือ", "หุ้นของผม", "my stocks"))
+            _subj = list(dict.fromkeys([t for t in tickers if t] + (_held if (_wants_port or not tickers) else [])))
             _fc_ctx, _fc_table = await forecast_table(_subj, _hz, bool(re.search(r"[\u0E00-\u0E7F]", query)))
             if _fc_ctx:
                 context += "\n\n" + _fc_ctx
@@ -785,7 +793,8 @@ async def execute_advisor(request: Request):
                         "contributions, key inputs and assumptions) and the validated track record for that horizon. Say clearly that "
                         "confidence is low when P(up) is near 50%. The ONLY models are: drift (long-run average return), momentum, meanrev "
                         "(mean reversion), regime (macro risk-on/off), signal (composite signal score) and analyst (consensus target); "
-                        "do not name any other model. The track record is from the historical backfill until live forecasts mature.")
+                        "do not name any other model. The track record is from the historical backfill until live forecasts mature; it is "
+                        "reported PER HORIZON across all subjects (there is no per-ticker track record) - never invent sample sizes or rates.")
         enriched_prompt = build_system_prompt(context)
         advisory_route = model_router.route_for_task("advisory")
         response_text, llm_model_used = await generate_llm_response(
