@@ -1,0 +1,14 @@
+{
+  "_note": "Risk-engine config (Phase 3, 2026-10-29). Edit freely; values are starting defaults, not advice. Set holdings_confirmed=true once Tho has confirmed units/cost.",
+  "holdings_confirmed": false,
+  "risk_budget_per_trade_pct": 1.0,
+  "max_position_pct": 25.0,
+  "max_sector_pct": 40.0,
+  "var_confidence": [0.95, 0.99],
+  "mc_simulations": 20000,
+  "lookback_days": {"cov": 252, "hist_var": 504, "drawdown": 756},
+  "thai_board_lot": 100,
+  "sectors": {
+    "PTTEP.BK": "energy", "SCB.BK": "banks", "SCBGOLDE": "gold", "BAFS.BK": "energy_services"
+  }
+}
