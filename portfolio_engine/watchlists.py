@@ -636,14 +636,14 @@ FACTORS: list[dict[str, Any]] = [
      "affected": ["USD/THB", "SCBGOLDE", "US watch list"], "threshold": {"abs_change": 0.10},
      "threshold_text": "change >= 0.10pp"},
     {"key": "us10y", "name": "US 10-year Treasury yield", "category": "rates", "yf": "^TNX", "unit": "%", "flat": 0.05, "pct": False,
-     "affected": ["SCBGOLDE", "growth stocks"], "threshold": {"abs_5d_pt": 0.25}, "threshold_text": "|5d| >= 0.25pp"},
+     "affected": ["SCBGOLDE (-)", "growth stocks (-)"], "threshold": {"abs_5d_pt": 0.25}, "threshold_text": "|5d| >= 0.25pp"},
     {"key": "usdthb", "name": "USD/THB", "category": "fx", "yf": "THB=X", "unit": "THB per USD", "flat": 0.3,
-     "affected": ["SCBGOLDE (unhedged USD gold)", "US watch list", "PTTEP.BK (USD revenue)"],
+     "affected": ["SCBGOLDE (+) unhedged USD gold", "US watch list (+) in THB", "PTTEP.BK (+) USD revenue"],
      "threshold": {"abs_1d": 1.0, "abs_5d": 2.0}, "threshold_text": "|1d| >= 1% or |5d| >= 2%"},
     {"key": "gold", "name": "Gold (COMEX front month)", "category": "commodities", "yf": "GC=F", "unit": "USD/oz", "flat": 0.5,
-     "affected": ["SCBGOLDE"], "threshold": {"abs_1d": 2.0, "abs_5d": 5.0}, "threshold_text": "|1d| >= 2% or |5d| >= 5%"},
+     "affected": ["SCBGOLDE (+)"], "threshold": {"abs_1d": 2.0, "abs_5d": 5.0}, "threshold_text": "|1d| >= 2% or |5d| >= 5%"},
     {"key": "set_index", "name": "SET index (SET50 ETF TDEX for trend)", "category": "equity", "yf": SET_PROXY, "unit": "TDEX THB", "flat": 0.5,
-     "affected": ["PTTEP.BK", "SCB.BK", "Thai watch list"], "threshold": {"abs_1d": 1.5, "abs_5d": 4.0},
+     "affected": ["PTTEP.BK (+)", "SCB.BK (+)", "Thai watch list (+)"], "threshold": {"abs_1d": 1.5, "abs_5d": 4.0},
      "threshold_text": "|1d| >= 1.5% or |5d| >= 4%"},
     {"key": "set_foreign_flow", "name": "SET foreign investor net flow", "category": "flows", "fn": "set_flow",
      "affected": ["SCB.BK", "PTTEP.BK", "THB"], "threshold": {"abs_day_bn": 3.0, "abs_5d_bn": 10.0},
@@ -894,6 +894,105 @@ async def render_brief_sections(pool: Any) -> dict[str, str]:
     return {"opening": opening, "watchlist": "\n".join(wl)}
 
 
+async def sync_legacy_watchlist(pool: Any) -> dict[str, Any]:
+    """Overlay live macro LEVELS from market_factors onto data/watchlist.json.
+
+    risk_scorer and older modules read numeric levels (Brent, gold, Fed/BoT rate,
+    USD/THB) from the legacy file, which the paused nightly agent last wrote on
+    2026-08-11. We update only those numbers (with source + as-of in
+    _meta.live_levels); narrative fields and _meta.last_updated are left as-is so
+    stale narrative flags are still recognised as stale. Atomic write.
+    """
+    if not LEGACY_WATCHLIST.exists():
+        return {"skipped": "no legacy watchlist"}
+    f = {r["key"]: r for r in await get_market_factors(pool)}
+    data = json.loads(LEGACY_WATCHLIST.read_text(encoding="utf-8"))
+    mc = data.setdefault("macro_context", {})
+    wl = data.setdefault("watchlist", {})
+    meta = data.setdefault("_meta", {})
+    live: dict[str, Any] = {}
+
+    def ok(k: str) -> Optional[dict[str, Any]]:
+        r = f.get(k)
+        return r if r and r.get("reading") is not None and not r.get("stale") and not r.get("error") else None
+
+    highs: dict[str, Any] = {}
+    try:
+        yr = await asyncio.to_thread(download_closes, ["GC=F", "THB=X"], None, "1y", 3600)
+        for t in ("GC=F", "THB=X"):
+            s = yr[t].dropna()
+            highs[t] = (round(float(s.max()), 3), s.idxmax().date().isoformat())
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("1y highs unavailable: %s", exc)
+    if (r := ok("brent")):
+        mc["brent_crude_usd"] = round(float(r["reading"]), 2)
+        b = (wl.setdefault("commodities", {})).setdefault("BRENT", {"name": "Brent Crude"})
+        b["last_price_usd"], b["date"] = round(float(r["reading"]), 2), r["as_of"][:10]
+        live["brent_crude_usd"] = {"source": r["source"], "as_of": r["as_of"]}
+    if (r := ok("gold")):
+        mc["gold_current_usd"] = round(float(r["reading"]), 1)
+        g = (wl.setdefault("commodities", {})).setdefault("XAU/USD", {"name": "Gold spot"})
+        g["last_price_usd"], g["date"] = round(float(r["reading"]), 1), r["as_of"][:10]
+        live["gold_current_usd"] = {"source": r["source"] + " (COMEX front month ~ spot)", "as_of": r["as_of"]}
+        if "GC=F" in highs:
+            mc["gold_recent_high_usd"] = highs["GC=F"][0]
+            live["gold_recent_high_usd"] = {"source": "yfinance GC=F 1y max close", "as_of": highs["GC=F"][1]}
+    if (r := ok("usdthb")):
+        mc["usd_thb"] = round(float(r["reading"]), 3)
+        meta["usd_thb_rate"], meta["usd_thb_as_of"] = round(float(r["reading"]), 3), r["as_of"][:10]
+        c = (wl.setdefault("currencies", {})).setdefault("USD_THB", {"name": "USD/Thai Baht"})
+        c["last_rate"], c["date"] = round(float(r["reading"]), 3), r["as_of"][:10]
+        live["usd_thb"] = {"source": r["source"], "as_of": r["as_of"]}
+        if "THB=X" in highs:
+            mc["usd_thb_1yr_high"] = f"{highs['THB=X'][0]} ({highs['THB=X'][1]})"
+            live["usd_thb_1yr_high"] = {"source": "yfinance THB=X 1y max close", "as_of": highs["THB=X"][1]}
+    if (r := ok("fed_rate")):
+        det = r.get("details") or {}
+        if det.get("target_from") is not None and det.get("target_to") is not None:
+            mid = (float(det["target_from"]) + float(det["target_to"])) / 2
+            mc["us_fed_funds_rate_pct"] = round(mid, 3)
+            live["us_fed_funds_rate_pct"] = {"source": r["source"] + " target-range midpoint", "as_of": r["as_of"]}
+    if (r := ok("bot_rate")):
+        mc["bot_policy_rate_pct"] = float(r["reading"])
+        live["bot_policy_rate_pct"] = {"source": r["source"], "as_of": r["as_of"]}
+    meta["live_levels"] = live
+    meta["live_levels_updated_at"] = utcnow().isoformat()
+    meta["live_levels_note"] = ("Numeric levels above are refreshed from investor_db.market_factors (free sources). "
+                                "Narrative notes/flags are from the paused nightly agent (see last_updated).")
+    tmp = LEGACY_WATCHLIST.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    tmp.replace(LEGACY_WATCHLIST)
+    return {"updated_fields": sorted(live)}
+
+
+async def key_points(pool: Any, risk_summary: Optional[dict[str, Any]] = None) -> list[str]:
+    """Deterministic statements the AI commentary must not contradict."""
+    pts: list[str] = []
+    for f in await get_market_factors(pool):
+        if not f.get("breached") or f.get("stale"):
+            continue
+        c1 = f.get("change_1d")
+        if f.get("category") in ("commodities", "fx", "equity", "rates") and c1 is not None:
+            word = "ROSE" if float(c1) > 0 else "FELL"
+            impacts = []
+            for a in f.get("affected_holdings") or []:
+                if "(+)" in a:
+                    impacts.append(f"{'positive' if word == 'ROSE' else 'NEGATIVE'} for {a.replace('(+)', '').strip()}")
+                elif "(-)" in a:
+                    impacts.append(f"{'NEGATIVE' if word == 'ROSE' else 'positive'} for {a.replace('(-)', '').strip()}")
+            pts.append(f"{f['name']} {word} ({f.get('breach_reason')})" + (f" - this is {', '.join(impacts)}" if impacts else ""))
+        else:
+            pts.append(f"{f['name']}: {f.get('breach_reason')}")
+    rs = risk_summary or {}
+    if rs.get("limit_breaches"):
+        pts.append("Risk limits ARE exceeded: " + "; ".join(rs["limit_breaches"]))
+    elif rs:
+        pts.append("No position/sector risk limits are exceeded.")
+    if rs.get("provisional"):
+        pts.append("Risk-engine figures are PROVISIONAL (holdings not yet confirmed by Tho).")
+    return pts
+
+
 def write_status(info: dict[str, Any]) -> None:
     try:
         current = json.loads(STATUS_FILE.read_text()) if STATUS_FILE.exists() else {}
@@ -914,6 +1013,11 @@ async def run_watchlist_cycle(pool: Any, *, prices: bool = True, factors: bool =
         write_status({"investment_watchlist_refreshed_at": utcnow().isoformat(), "investment_prices": out["prices"]})
     if factors:
         out["factors"] = await refresh_market_factors(pool)
+        try:
+            out["legacy_sync"] = await sync_legacy_watchlist(pool)
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("legacy watchlist sync failed: %s", exc)
+            out["legacy_sync"] = {"error": str(exc)}
         write_status({"market_factors_refreshed_at": utcnow().isoformat(), "market_factors": out["factors"]})
     if alerts:
         out["alerts"] = await evaluate_alerts(pool)

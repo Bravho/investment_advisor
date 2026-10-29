@@ -258,13 +258,24 @@ def check_collector_process_log() -> dict[str, Any]:
         except Exception:
             tail = ""
 
-        if "Market collector stopped" in tail or "Shutdown requested by signal" in tail:
+        # 2026-10-30: judge by the LAST event in the tail, not mere presence - a
+        # restart after a clean shutdown (or a handled traceback) is healthy.
+        def _last(*needles: str) -> int:
+            return max((tail.rfind(n) for n in needles), default=-1)
+
+        _stop = _last("Market collector stopped", "Shutdown requested by signal")
+        _start = _last("Market collector started", "Collecting current prices", "Portfolio snapshot saved",
+                       "NAV SCBGOLDE", "Collecting end-of-day")
+        _tb = _last("Traceback")
+        if _start > max(_stop, _tb):
+            result["detail"] = f"{newest.name}: running — last event at {moment.astimezone().strftime('%Y-%m-%d %H:%M')} local"
+        elif _stop > _tb:
             result["detail"] = (
                 f"{newest.name}: last entry is a CLEAN SHUTDOWN — the daemon was stopped "
                 "deliberately and never restarted. Remedy is the supervisor/launchd job, "
                 "NOT the fetch code."
             )
-        elif "Traceback" in tail:
+        elif _tb >= 0:
             result["detail"] = f"{newest.name}: last entry contains a traceback — daemon likely crashed"
         else:
             result["detail"] = f"{newest.name}: last written {moment.date().isoformat()}"
@@ -317,7 +328,7 @@ def check_nightly_artifacts() -> dict[str, Any]:
     """
     result = _check(
         "nightly_artifacts",
-        "data/snapshots + data/watchlist.json — nightly agent outputs",
+        "dated snapshots + DB watch lists/factors (legacy watchlist.json narrative = info only)",
     )
     try:
         ages: list[float] = []
@@ -334,15 +345,37 @@ def check_nightly_artifacts() -> dict[str, Any]:
                     ages.append(age)
                 bits.append(f"latest snapshot {latest.stem}")
 
+        # 2026-10-30 (Phase 3): the live watch lists now live in investor_db and are
+        # refreshed by the portfolio engine; their freshness is what counts. The
+        # legacy data/watchlist.json narrative (paused nightly agent) is reported
+        # for information only and no longer drives this check's severity.
+        status_file = PROJECT_DIR / "data" / "watchlists_status.json"
+        if status_file.exists():
+            status = json.loads(status_file.read_text(encoding="utf-8"))
+            for key, label in (("investment_watchlist_refreshed_at", "watch-list prices"),
+                               ("market_factors_refreshed_at", "market factors")):
+                moment = _parse_iso(status.get(key))
+                age = _age_days(moment)
+                if age is not None:
+                    ages.append(age)
+                    bits.append(f"{label} {age * 24:.1f}h ago")
+                else:
+                    bits.append(f"{label} never refreshed")
+                    ages.append(999.0)
+        else:
+            bits.append("DB watch lists never refreshed (no data/watchlists_status.json)")
+            ages.append(999.0)
+
         watchlist = PROJECT_DIR / "data" / "watchlist.json"
         if watchlist.exists():
             payload = json.loads(watchlist.read_text(encoding="utf-8"))
             stamp = (payload.get("_meta") or {}).get("last_updated") or payload.get("last_updated")
-            moment = _parse_iso(stamp)
-            age = _age_days(moment)
-            if age is not None:
-                ages.append(age)
-            bits.append(f"watchlist {stamp}")
+            live = (payload.get("_meta") or {}).get("live_levels_updated_at")
+            n_age = _age_days(_parse_iso(stamp))
+            bits.append(f"legacy narrative {stamp} (~{n_age:.0f}d, info only)" if n_age is not None else f"legacy narrative {stamp}")
+            if live:
+                bits.append(f"legacy levels synced {live[:16]}Z")
+            result["legacy_narrative_age_days"] = round(n_age, 1) if n_age is not None else None
 
         if not ages:
             result["detail"] = "no nightly artefacts found"

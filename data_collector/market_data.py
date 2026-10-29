@@ -75,6 +75,14 @@ class Settings:
                 if ticker.strip()
             )
         )
+        # 2026-10-30 (Phase 3 #3): crypto is excluded from the advisor; skip it so the
+        # two-year backfill can complete instead of re-running (and failing) on every
+        # restart. Set INCLUDE_CRYPTO=1 to collect it again.
+        if os.getenv("INCLUDE_CRYPTO", "0") != "1":
+            skipped = [t for t in tickers if t in COINGECKO_IDS or t.endswith(("-USD", "-USDT"))]
+            if skipped:
+                LOGGER.info("Skipping crypto tickers (excluded from advisor): %s", ", ".join(skipped))
+            tickers = tuple(t for t in tickers if t not in skipped)
         return cls(
             db_host=required["DB_HOST"],
             db_port=int(os.getenv("DB_PORT", "5432")),
@@ -213,7 +221,13 @@ class MarketDataCollector:
         self.http.headers.update(
             {"User-Agent": "InvestorAdvisorMarketCollector/1.0"}
         )
-        self.fred = Fred(api_key=settings.fred_api_key) if settings.fred_api_key else None
+        # FRED keys are 32 lower-case alphanumerics; an invalid key only produces
+        # a traceback per indicator, so treat it as "not configured" (2026-10-30).
+        import re as _re
+        _valid = bool(_re.fullmatch(r"[a-z0-9]{32}", settings.fred_api_key or ""))
+        if settings.fred_api_key and not _valid:
+            LOGGER.warning("FRED_API_KEY is set but not a valid 32-char key; macro indicators skipped until replaced")
+        self.fred = Fred(api_key=settings.fred_api_key) if _valid else None
 
     def collect_current_prices(self) -> None:
         LOGGER.info("Collecting current prices")
