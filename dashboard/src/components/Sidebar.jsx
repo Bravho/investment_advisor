@@ -1,8 +1,9 @@
-import { BarChart3, Compass, Crosshair, Home, Menu, MessageSquare, Newspaper, X } from 'lucide-react'
+import { BarChart3, CandlestickChart, Compass, Crosshair, Home, Menu, MessageSquare, Newspaper, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const links = [
   { to: '/', label: 'แดชบอร์ด', en: 'Dashboard', icon: Home },
+  { to: '/desk', label: 'โต๊ะเทรด', en: 'Trading desk', icon: CandlestickChart },
   { to: '/analytics', label: 'วิเคราะห์พอร์ต', en: 'Analytics', icon: BarChart3 },
   { to: '/sentiment', label: 'ข่าวและอารมณ์ตลาด', en: 'Sentiment', icon: Newspaper },
   { to: '/recommendations', label: 'คำแนะนำ', en: 'Recommendations', icon: Crosshair },

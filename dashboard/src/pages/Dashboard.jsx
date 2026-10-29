@@ -16,6 +16,7 @@ import SignalsPanel from '../components/SignalsPanel'
 import BacktestPanel from '../components/BacktestPanel'
 import TradePlansPanel from '../components/TradePlansPanel'
 import PredictionsPanel from '../components/PredictionsPanel'
+import Stamp from '../components/Stamp'
 import ConstructionPanel from '../components/ConstructionPanel'
 import AttributionPanel from '../components/AttributionPanel'
 import { useAttribution, useConstruction, useBacktest, useJournal, usePaperTrades, usePredictionScoreboard, usePredictions, useSignalPerformance, useSignals, useTradePlans } from '../hooks/usePhase4'
@@ -48,6 +49,8 @@ export default function Dashboard() {
   const riskTone = riskScore < 33 ? 'green' : riskScore < 66 ? 'yellow' : 'red'
   const mood = brief.data?.macro_mood || 'unknown'
   const moodTone = mood === 'risk-on' ? 'green' : mood === 'risk-off' ? 'red' : 'gray'
+  const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k] : m), '')
+  const btAsOf = Object.values(backtest.data?.universes || {}).map(u => u?.run_at).filter(Boolean).sort().pop()
   return <div className="space-y-6">
     <div><h2 className="text-2xl font-semibold text-white">ภาพรวมการลงทุน</h2><p className="mt-1 text-sm text-slate-500">Investment overview · refreshes every 60 seconds</p></div>
     {portfolio.error && !portfolio.data ? <ServiceError retry={portfolio.refetch} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -57,15 +60,15 @@ export default function Dashboard() {
       <StatCard label="อารมณ์ตลาด" sublabel="Market Mood" value={mood} detail="Macro sentiment" icon={Landmark} tone={moodTone} loading={brief.loading} />
     </div>}
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px_340px]"><HoldingsTable holdings={portfolio.data?.holdings} loading={portfolio.loading} error={portfolio.error} retry={portfolio.refetch} /><OpportunityPanel opportunities={opportunities.data} loading={opportunities.loading} error={opportunities.error} retry={opportunities.refetch} /><AdvisoryCandidatesPanel payload={advisory.data} loading={advisory.loading} error={advisory.error} retry={advisory.refetch} /></div>
-    <BriefPanel brief={brief.data} loading={brief.loading} error={brief.error} retry={brief.refetch} />
-    <SignalsPanel payload={signals.data} plans={tradePlans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} />
+    <Stamp items={[{ source: 'brief_generator', asOf: brief.data?.generated_at }]}><BriefPanel brief={brief.data} loading={brief.loading} error={brief.error} retry={brief.refetch} /></Stamp>
+    <Stamp items={[{ source: 'signals · local LLM', asOf: maxTs(signals.data?.items, 'created_at') }]}><SignalsPanel payload={signals.data} plans={tradePlans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} /></Stamp>
     <ConstructionPanel data={cons.data} loading={cons.loading} error={cons.error} retry={cons.refetch} />
     <AttributionPanel data={attr.data} loading={attr.loading} error={attr.error} retry={attr.refetch} />
-    <PredictionsPanel preds={preds.data} board={predBoard.data} loading={preds.loading || predBoard.loading} error={preds.error || predBoard.error} retry={preds.refetch} />
-    <TradePlansPanel plans={tradePlans.data} journal={journal.data} loading={tradePlans.loading} error={tradePlans.error} retry={tradePlans.refetch} />
-    <BacktestPanel backtest={backtest.data} perf={sigPerf.data} paper={paper.data} loading={backtest.loading} error={backtest.error} retry={backtest.refetch} />
-    <FactorsPanel payload={factors.data} loading={factors.loading} error={factors.error} retry={factors.refetch} />
-    <RiskPanel report={riskReport.data} loading={riskReport.loading} error={riskReport.error} retry={riskReport.refetch} />
-    <WatchlistPanel payload={watch.data} loading={watch.loading} error={watch.error} retry={watch.refetch} />
+    <Stamp items={[{ source: 'predictions (frozen)', asOf: maxTs(preds.data?.items, 'made_at') }, { source: 'scoreboard', asOf: predBoard.data?.model_weights?.[0]?.as_of, staleHours: 48 }]}><PredictionsPanel preds={preds.data} board={predBoard.data} loading={preds.loading || predBoard.loading} error={preds.error || predBoard.error} retry={preds.refetch} /></Stamp>
+    <Stamp items={[{ source: 'trade plans · yfinance', asOf: maxTs(tradePlans.data?.plans, 'updated_at') }]}><TradePlansPanel plans={tradePlans.data} journal={journal.data} loading={tradePlans.loading} error={tradePlans.error} retry={tradePlans.refetch} /></Stamp>
+    <Stamp items={[{ source: 'walk-forward backtest', asOf: btAsOf, staleHours: 24 * 8 }]}><BacktestPanel backtest={backtest.data} perf={sigPerf.data} paper={paper.data} loading={backtest.loading} error={backtest.error} retry={backtest.refetch} /></Stamp>
+    <Stamp items={[{ source: 'market_factors', asOf: maxTs(factors.data?.factors, 'updated_at'), staleHours: 3 }]}><FactorsPanel payload={factors.data} loading={factors.loading} error={factors.error} retry={factors.refetch} /></Stamp>
+    <Stamp items={[{ source: 'risk engine', asOf: riskReport.data?.run_at }, { source: 'prices', asOf: riskReport.data?.price_as_of, staleHours: 96 }]}><RiskPanel report={riskReport.data} loading={riskReport.loading} error={riskReport.error} retry={riskReport.refetch} /></Stamp>
+    <Stamp items={[{ source: 'watchlist · yfinance', asOf: maxTs(watch.data?.items, 'price_as_of'), staleHours: 96 }]}><WatchlistPanel payload={watch.data} loading={watch.loading} error={watch.error} retry={watch.refetch} /></Stamp>
   </div>
 }
