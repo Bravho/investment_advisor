@@ -38,6 +38,7 @@ import signals as signals_mod
 import walkforward as wf_mod
 import predictions as pred_mod
 import portfolio_construction as pc_mod
+import attribution as attr_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -161,6 +162,11 @@ async def _startup_phase3() -> None:
         await _safe_job("portfolio_construction_startup", _construction_job)
 
 
+async def _attribution_job() -> dict[str, Any]:
+    r = await attr_mod.run_attribution(await db_pool.get_pool())
+    return {"live_twr_pct": (r.get("live") or {}).get("twr_pct")}
+
+
 async def _construction_job() -> dict[str, Any]:
     r = await pc_mod.run_construction(await db_pool.get_pool())
     return {"recommended": r["weights"]["recommended"], "trades": len(r["trades"])}
@@ -223,6 +229,7 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_validate", _predictions_validate_job], hour=8, minute=5, id="predictions_validate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["performance_attribution", _attribution_job], hour=18, minute=15, id="performance_attribution", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
 
 
@@ -796,3 +803,20 @@ async def portfolio_construction() -> dict[str, Any]:
 @app.post("/portfolio/construction/run")
 async def portfolio_construction_run() -> dict[str, Any]:
     return await pc_mod.run_construction(await db_pool.get_pool())
+
+
+# --------------------------------------------------------------------------
+# Pro #6 (2026-10-30): performance measurement & attribution
+# --------------------------------------------------------------------------
+@app.get("/performance/attribution")
+async def performance_attribution() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    r = await attr_mod.latest(pool)
+    if not r or r["created_at"][:10] != datetime.now(ZoneInfo("Asia/Bangkok")).date().isoformat():
+        r = await attr_mod.run_attribution(pool)
+    return r
+
+
+@app.post("/performance/attribution/run")
+async def performance_attribution_run() -> dict[str, Any]:
+    return await attr_mod.run_attribution(await db_pool.get_pool())

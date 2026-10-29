@@ -17,7 +17,8 @@ import BacktestPanel from '../components/BacktestPanel'
 import TradePlansPanel from '../components/TradePlansPanel'
 import PredictionsPanel from '../components/PredictionsPanel'
 import ConstructionPanel from '../components/ConstructionPanel'
-import { useConstruction, useBacktest, useJournal, usePaperTrades, usePredictionScoreboard, usePredictions, useSignalPerformance, useSignals, useTradePlans } from '../hooks/usePhase4'
+import AttributionPanel from '../components/AttributionPanel'
+import { useAttribution, useConstruction, useBacktest, useJournal, usePaperTrades, usePredictionScoreboard, usePredictions, useSignalPerformance, useSignals, useTradePlans } from '../hooks/usePhase4'
 import { usePerformance, usePortfolio, useRisk } from '../hooks/usePortfolio'
 import { money, normalizeRisk, number, valueOf } from '../utils/format'
 
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const journal = useJournal()
   const preds = usePredictions()
   const cons = useConstruction()
+  const attr = useAttribution()
   const predBoard = usePredictionScoreboard()
   const pnl = Number(valueOf(performance.data, ['daily_pnl_thb', 'pnl_thb'], portfolio.data?.total_unrealized_pnl_thb || 0))
   const pnlPct = Number(valueOf(performance.data, ['daily_pnl_pct', 'total_return_pct']))
@@ -58,6 +60,7 @@ export default function Dashboard() {
     <BriefPanel brief={brief.data} loading={brief.loading} error={brief.error} retry={brief.refetch} />
     <SignalsPanel payload={signals.data} plans={tradePlans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} />
     <ConstructionPanel data={cons.data} loading={cons.loading} error={cons.error} retry={cons.refetch} />
+    <AttributionPanel data={attr.data} loading={attr.loading} error={attr.error} retry={attr.refetch} />
     <PredictionsPanel preds={preds.data} board={predBoard.data} loading={preds.loading || predBoard.loading} error={preds.error || predBoard.error} retry={preds.refetch} />
     <TradePlansPanel plans={tradePlans.data} journal={journal.data} loading={tradePlans.loading} error={tradePlans.error} retry={tradePlans.refetch} />
     <BacktestPanel backtest={backtest.data} perf={sigPerf.data} paper={paper.data} loading={backtest.loading} error={backtest.error} retry={backtest.refetch} />
