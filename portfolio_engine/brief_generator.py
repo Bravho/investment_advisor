@@ -1104,6 +1104,12 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
         facts_md = f"{facts_md}\n\n{await _sg.brief_section(await db_pool.get_pool())}"
     except Exception as _exc:  # noqa: BLE001
         logger.warning("Phase 4 signals section unavailable: %s", _exc)
+    try:
+        import predictions as _pr
+        _pp = await db_pool.get_pool()
+        facts_md = f"{facts_md}\n\n{_pr.render_brief_section(await _pr.scoreboard(_pp), await _pr.latest_predictions(_pp))}"
+    except Exception as _exc:  # noqa: BLE001
+        logger.warning("Prediction section unavailable: %s", _exc)
     prompt = _commentary_prompt(facts_md, holdings_line)
     if _kp:
         prompt += "\n\nKEY POINTS (verified - your commentary must agree with every one of these):\n" + "\n".join(f"- {k}" for k in _kp)

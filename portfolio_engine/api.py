@@ -36,6 +36,7 @@ import risk_engine as risk_mod
 import trade_plans as plans_mod
 import signals as signals_mod
 import walkforward as wf_mod
+import predictions as pred_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -148,6 +149,27 @@ async def _startup_phase3() -> None:
     if _last_bt is None or (datetime.now(timezone.utc) - _last_bt).days >= 7:
         await _safe_job("walkforward_backtest_startup", _backtest_job)
     await _safe_job("paper_ledger_startup", _paper_job)
+    await pred_mod.ensure_tables(pool)
+    async with pool.acquire() as _c:
+        _bf = await _c.fetchval("SELECT count(*) FROM predictions WHERE source='backfill'")
+    if not _bf:
+        await _safe_job("predictions_backfill_startup", lambda: pred_mod.run_backfill(pool))
+    await _safe_job("predictions_generate_startup", _predictions_job)
+
+
+async def _predictions_job() -> dict[str, Any]:
+    return await pred_mod.generate_live(await db_pool.get_pool())
+
+
+async def _predictions_validate_job() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    v = await pred_mod.validate_matured(pool)
+    w = await pred_mod.learn(pool) if v.get("validated") else {"skipped": "nothing newly matured"}
+    return {"validated": v, "learned": bool(v.get("validated"))}
+
+
+async def _predictions_monthly_job() -> dict[str, Any]:
+    return await pred_mod.send_monthly_summary(await db_pool.get_pool())
 
 
 async def _outcome_job() -> dict[str, Any]:
@@ -189,6 +211,9 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["predictions_validate", _predictions_validate_job], hour=8, minute=5, id="predictions_validate", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
 
 
 @asynccontextmanager
@@ -682,3 +707,66 @@ async def journal_patch(entry_id: int, body: dict[str, Any] = Body(...)) -> dict
         return await plans_mod.journal_upsert(await db_pool.get_pool(), body, entry_id)
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# --------------------------------------------------------------------------
+# Phase 4+ (2026-10-30): prediction system (frozen forecasts, validation, RCA, learning)
+# --------------------------------------------------------------------------
+@app.get("/predictions")
+async def predictions_latest(subject: Optional[str] = None, with_method: bool = False) -> dict[str, Any]:
+    items = await pred_mod.latest_predictions(await db_pool.get_pool(), subject.upper() if subject else None, with_method)
+    return {"items": items, "count": len(items), "horizons": pred_mod.HORIZONS, "cadence": pred_mod.CADENCE,
+            "note": "Frozen (insert-only) quantitative forecasts. Not financial advice."}
+
+
+@app.get("/predictions/scoreboard")
+async def predictions_scoreboard() -> dict[str, Any]:
+    return await pred_mod.scoreboard(await db_pool.get_pool())
+
+
+@app.get("/predictions/lessons")
+async def predictions_lessons() -> dict[str, Any]:
+    sb = await pred_mod.scoreboard(await db_pool.get_pool())
+    return {"lessons": sb["lessons"], "model_weights": sb["model_weights"]}
+
+
+@app.get("/predictions/advisor-context")
+async def predictions_advisor_context(tickers: str = "") -> dict[str, Any]:
+    t = [x.strip().upper() for x in tickers.split(",") if x.strip()]
+    return {"context": await pred_mod.advisor_context(await db_pool.get_pool(), t)}
+
+
+@app.get("/predictions/monthly-summary")
+async def predictions_monthly_preview() -> dict[str, Any]:
+    return {"text": await pred_mod.monthly_summary_text(await db_pool.get_pool()), "note": "Preview only; sent by the 1st-of-month 09:00 job."}
+
+
+@app.post("/predictions/run")
+async def predictions_run() -> dict[str, Any]:
+    return await _predictions_job()
+
+
+@app.post("/predictions/validate")
+async def predictions_validate() -> dict[str, Any]:
+    return await _predictions_validate_job()
+
+
+@app.get("/predictions/{prediction_id}")
+async def prediction_get(prediction_id: int) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    async with pool.acquire() as conn:
+        p = await conn.fetchrow("SELECT * FROM predictions WHERE id=$1", prediction_id)
+        o = await conn.fetchrow("SELECT * FROM prediction_outcomes WHERE prediction_id=$1", prediction_id)
+    if not p:
+        raise HTTPException(status_code=404, detail="prediction not found")
+    out = pred_mod._prow(p)
+    if o:
+        od = dict(o)
+        for k, v in list(od.items()):
+            if hasattr(v, "isoformat"):
+                od[k] = v.isoformat()
+            elif isinstance(v, str) and k in ("rca_labels", "rca_detail", "model_returns"):
+                od[k] = json.loads(v)
+        out["outcome"] = od
+    out["explanation"] = pred_mod.explain(out)
+    return out
