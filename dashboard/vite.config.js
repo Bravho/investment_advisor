@@ -13,7 +13,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/portfolio/, ''),
       },
       '/api/advisor': {
-        target: 'http://127.0.0.1:8998',
+        target: 'http://127.0.0.1:8991',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/advisor/, ''),
       },
