@@ -401,8 +401,16 @@ async def tech_screener(top_n: int = 10) -> list[dict[str, Any]]:
             if hist is None or hist.empty:
                 logger.warning("tech_screener: no data for %s", ticker)
                 continue
-            prices = [float(p) for p in hist["Close"].dropna().tolist()]
-            volumes = [float(v) for v in hist["Volume"].dropna().tolist()]
+            close = hist["Close"]
+            # Fixed 2026-10-29: newer yfinance returns MultiIndex columns, so
+            # hist["Close"] is a 1-column DataFrame (no .tolist()).
+            if hasattr(close, "columns"):
+                close = close.iloc[:, 0]
+            prices = [float(p) for p in close.dropna().tolist()]
+            vol = hist["Volume"]
+            if hasattr(vol, "columns"):
+                vol = vol.iloc[:, 0]
+            volumes = [float(v) for v in vol.dropna().tolist()]
             if len(prices) < 5:
                 continue
             signals = _tech_momentum_signal(prices, volumes)

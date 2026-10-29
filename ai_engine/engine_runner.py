@@ -133,6 +133,7 @@ app = FastAPI(title="Investor AI Analysis Engine", version="2.0.0", lifespan=lif
 
 
 @app.get("/health")
+@app.get("/status")  # Added 2026-10-29: alias used by start_all.sh / dashboard checks
 async def health() -> dict[str, Any]:
     return {
         "status": "ok",
