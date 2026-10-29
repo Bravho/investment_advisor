@@ -31,6 +31,9 @@ from performance_analytics import get_performance_summary
 from rebalancer import generate_rebalancing_plan
 from utils.common import configure_logging, latest_price, load_snapshot, to_jsonable
 from utils.db_pool import db_pool
+import watchlists as watch_mod
+import risk_engine as risk_mod
+from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
 
@@ -104,6 +107,28 @@ async def _safe_job(name: str, function: Callable[[], Awaitable[Any]], cache: Op
         logger.exception("Scheduled job %s failed without stopping service", name)
 
 
+async def _watch_prices_job() -> dict[str, Any]:
+    return await watch_mod.run_watchlist_cycle(await db_pool.get_pool(), prices=True, factors=False, alerts=True)
+
+
+async def _factors_job() -> dict[str, Any]:
+    return await watch_mod.run_watchlist_cycle(await db_pool.get_pool(), prices=False, factors=True, alerts=False)
+
+
+async def _risk_job() -> dict[str, Any]:
+    rep = await risk_mod.run_risk_report(await db_pool.get_pool())
+    return rep.get("summary", {})
+
+
+async def _startup_phase3() -> None:
+    pool = await db_pool.get_pool()
+    await watch_mod.ensure_tables(pool)
+    await _safe_job("watchlist_startup", lambda: watch_mod.run_watchlist_cycle(pool))
+    latest = await risk_mod.latest_risk_report(pool)
+    if not latest or str(latest.get("run_at", ""))[:10] != datetime.now(ZoneInfo("Asia/Bangkok")).date().isoformat():
+        await _safe_job("risk_report_startup", _risk_job)
+
+
 def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["scan_opportunities", scan_opportunities, opportunity_cache], minutes=30, id="scan_opportunities", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["check_exit_signals", check_exit_signals, exit_cache], minutes=15, id="check_exit_signals", replace_existing=True)
@@ -113,6 +138,11 @@ def configure_schedules() -> None:
         scheduler.add_job(_safe_job, "cron", args=["retry_daily_brief", retry_daily_brief_if_needed], hour=_h, minute=_m, id=f"retry_daily_brief_{_h:02d}{_m:02d}", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["save_daily_performance", save_daily_performance], hour=17, minute=30, id="save_daily_performance", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["record_recommendation_outcomes", record_due_recommendation_outcomes], hour=8, minute=0, id="record_recommendation_outcomes", replace_existing=True)
+    # Phase 3 (2026-10-29): watch lists, market factors, risk engine
+    scheduler.add_job(_safe_job, "interval", args=["watchlist_prices_alerts", _watch_prices_job], minutes=30, id="watchlist_prices_alerts", replace_existing=True)
+    scheduler.add_job(_safe_job, "interval", args=["market_factors", _factors_job], minutes=60, id="market_factors", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["market_factors_prebrief", _factors_job], hour=6, minute=40, id="market_factors_prebrief", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
 
 
 @asynccontextmanager
@@ -129,6 +159,9 @@ async def lifespan(app: FastAPI):
         task = asyncio.create_task(_safe_job(name, function, cache))
         active_tasks.add(task)
         task.add_done_callback(active_tasks.discard)
+    _p3 = asyncio.create_task(_startup_phase3())
+    active_tasks.add(_p3)
+    _p3.add_done_callback(active_tasks.discard)
     logger.info("Portfolio engine started on ICT schedule")
     logger.info("Scheduled jobs: %s", ", ".join(sorted(j.id for j in scheduler.get_jobs())))
     try:
@@ -421,3 +454,65 @@ async def recommendation_history(ticker: Optional[str] = None, limit: int = Quer
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORTFOLIO_ENGINE_PORT", "8996")))
+
+
+# --------------------------------------------------------------------------
+# Phase 3 (2026-10-29): watch lists, market factors, risk engine
+# --------------------------------------------------------------------------
+@app.get("/watchlist")
+async def watchlist(include_dropped: bool = True) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    await watch_mod.ensure_tables(pool)
+    items = await watch_mod.get_investment_watchlist(pool, include_dropped=include_dropped)
+    return {"items": items, "count": len(items), "stale_after_days": watch_mod.STALE_PRICE_DAYS,
+            "note": "Entry zone/target/stop are set by Tho (PUT /watchlist/{ticker}); technical triggers are live."}
+
+
+@app.put("/watchlist/{ticker}")
+async def watchlist_update(ticker: str, fields: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    await watch_mod.ensure_tables(pool)
+    try:
+        return await watch_mod.upsert_watch_item(pool, ticker.upper(), fields)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/watchlist/refresh")
+async def watchlist_refresh(factors: bool = True) -> dict[str, Any]:
+    return to_jsonable(await watch_mod.run_watchlist_cycle(await db_pool.get_pool(), prices=True, factors=factors, alerts=True))
+
+
+@app.get("/factors")
+async def factors() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    await watch_mod.ensure_tables(pool)
+    rows = await watch_mod.get_market_factors(pool)
+    return {"factors": rows, "breached": [r["key"] for r in rows if r.get("breached") and not r.get("stale")],
+            "fred_key_valid": watch_mod._fred_key() is not None}
+
+
+@app.get("/risk/report")
+async def risk_report() -> dict[str, Any]:
+    rep = await risk_mod.latest_risk_report(await db_pool.get_pool())
+    if not rep:
+        raise HTTPException(status_code=404, detail="no risk report yet; POST /risk/run")
+    return rep
+
+
+@app.post("/risk/run")
+async def risk_run() -> dict[str, Any]:
+    rep = await risk_mod.run_risk_report(await db_pool.get_pool())
+    return rep.get("summary", {})
+
+
+@app.get("/risk/position-size")
+async def risk_position_size(ticker: str, entry: float, stop: float, sector: Optional[str] = None,
+                             risk_pct: Optional[float] = None) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    positions = await risk_mod._positions(pool)
+    total = sum(p["value_thb"] for p in positions)
+    try:
+        return risk_mod.position_size(ticker.upper(), entry, stop, total, positions, sector=sector, risk_pct=risk_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

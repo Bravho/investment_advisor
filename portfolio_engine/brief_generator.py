@@ -597,6 +597,8 @@ Below are VERIFIED FACTS. Write a short advisor commentary based ONLY on them.
 Rules: do not introduce any number, price, level or date that is not in the facts.
 If something important is missing, say it is unavailable. Advisory only, no trades.
 Do not mention asset classes or holdings that are not listed above (he holds no bonds unless listed).
+When you mention a price move, use exactly the direction and sign shown in the facts (e.g. "-4.6%" means it FELL).
+Risk-engine figures are provisional until Tho confirms his holdings; say so if you cite them.
 
 Respond ONLY as JSON:
 {{"commentary": "3-5 short bullet points (markdown '- '), max 220 words, covering the holdings, portfolio risk/concentration and any data warning",
@@ -1075,6 +1077,17 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
     except Exception:
         _snap_full = {}
     facts_md = _render_facts(context, [dict(r) for r in performance], _snap_full)
+    # Phase 3 (2026-10-29): open with factors past thresholds; add watch list + risk summaries.
+    try:
+        import watchlists as _wl
+        import risk_engine as _re
+        _pool3 = await db_pool.get_pool()
+        _sec = await _wl.render_brief_sections(_pool3)
+        _risk_md = _re.render_brief_section(await _re.latest_risk_report(_pool3))
+        facts_md = f"{_sec['opening']}\n\n{facts_md}\n\n{_sec['watchlist']}\n\n{_risk_md}"
+    except Exception as _exc:  # noqa: BLE001
+        logger.warning("Phase 3 brief sections unavailable: %s", _exc)
+        facts_md = f"ℹ️ Watch list / factor / risk sections unavailable ({type(_exc).__name__}).\n\n{facts_md}"
     prompt = _commentary_prompt(facts_md, holdings_line)
     content, action_items, failure = "", [], None
     for attempt in range(1, BRIEF_ATTEMPTS + 1):
