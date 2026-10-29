@@ -33,3 +33,17 @@ export const Badge = ({ children, tone = 'gray' }) => {
   }
   return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${tones[tone] || tones.gray}`}>{children}</span>
 }
+
+// 2026-10-30: data-source + timestamp badge with a stale flag. `asOf` = ISO string/date; staleHours = threshold.
+export const SourceBadge = ({ source, asOf, staleHours = 26 }) => {
+  if (!source && !asOf) return null
+  const t = asOf ? new Date(asOf) : null
+  const valid = t && !isNaN(t)
+  const ageH = valid ? (Date.now() - t.getTime()) / 3.6e6 : null
+  const stale = ageH != null && ageH > staleHours
+  const when = valid ? t.toLocaleString('en-GB', { timeZone: 'Asia/Bangkok', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' ICT' : (asOf || 'time n/a')
+  return <span title={`source: ${source || 'n/a'} · as of ${when}${stale ? ` · STALE (> ${staleHours}h)` : ''}`}
+    className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] ${stale ? 'border-red-500/50 bg-red-500/10 text-red-300' : 'border-slate-700 bg-slate-800/60 text-slate-400'}`}>
+    {source && <span>{source}</span>}<span>· {when}</span>{stale && <b>STALE</b>}
+  </span>
+}

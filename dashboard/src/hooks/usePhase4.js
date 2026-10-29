@@ -10,3 +10,6 @@ export const usePaperTrades = (refreshMs = 300000) => useApi(() => portfolioClie
 export const useJournal = (refreshMs = 600000) => useApi(() => portfolioClient.get('/journal'), [], refreshMs)
 export const usePredictions = (refreshMs = 600000) => useApi(() => portfolioClient.get('/predictions'), [], refreshMs)
 export const usePredictionScoreboard = (refreshMs = 600000) => useApi(() => portfolioClient.get('/predictions/scoreboard'), [], refreshMs)
+// Pro #4/#6 (2026-10-30)
+export const useConstruction = (refreshMs = 900000) => useApi(() => portfolioClient.get('/portfolio/construction'), [], refreshMs)
+export const useAttribution = (refreshMs = 900000) => useApi(() => portfolioClient.get('/performance/attribution'), [], refreshMs)

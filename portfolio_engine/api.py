@@ -37,6 +37,7 @@ import trade_plans as plans_mod
 import signals as signals_mod
 import walkforward as wf_mod
 import predictions as pred_mod
+import portfolio_construction as pc_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -155,6 +156,14 @@ async def _startup_phase3() -> None:
     if not _bf:
         await _safe_job("predictions_backfill_startup", lambda: pred_mod.run_backfill(pool))
     await _safe_job("predictions_generate_startup", _predictions_job)
+    _pc = await pc_mod.latest(pool)
+    if not _pc or _pc["created_at"][:10] != datetime.now(_ict).date().isoformat():
+        await _safe_job("portfolio_construction_startup", _construction_job)
+
+
+async def _construction_job() -> dict[str, Any]:
+    r = await pc_mod.run_construction(await db_pool.get_pool())
+    return {"recommended": r["weights"]["recommended"], "trades": len(r["trades"])}
 
 
 async def _predictions_job() -> dict[str, Any]:
@@ -213,6 +222,7 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_validate", _predictions_validate_job], hour=8, minute=5, id="predictions_validate", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
 
 
@@ -770,3 +780,19 @@ async def prediction_get(prediction_id: int) -> dict[str, Any]:
         out["outcome"] = od
     out["explanation"] = pred_mod.explain(out)
     return out
+
+
+# --------------------------------------------------------------------------
+# Pro #4 (2026-10-30): portfolio construction - DRAFT policy, suggestions only
+# --------------------------------------------------------------------------
+@app.get("/portfolio/construction")
+async def portfolio_construction() -> dict[str, Any]:
+    r = await pc_mod.latest(await db_pool.get_pool())
+    if not r:
+        r = await pc_mod.run_construction(await db_pool.get_pool())
+    return r
+
+
+@app.post("/portfolio/construction/run")
+async def portfolio_construction_run() -> dict[str, Any]:
+    return await pc_mod.run_construction(await db_pool.get_pool())

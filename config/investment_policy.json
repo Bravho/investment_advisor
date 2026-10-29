@@ -1,0 +1,29 @@
+{
+  "_status": "DRAFT - not reviewed or approved by Tho. Proposals derived from this file are suggestions only; no trades are executed.",
+  "_created": "2026-10-30",
+  "base_currency": "THB",
+  "asset_classes": {
+    "thai_equity": {"min": 40, "max": 50, "target": 45, "proxy": "TDEX.BK", "label": "Thai equities"},
+    "gold":        {"min": 10, "max": 15, "target": 12.5, "proxy": "GC=F*THB=X", "label": "Gold (THB)"},
+    "global_equity": {"min": 25, "max": 35, "target": 32.5, "proxy": "SPY*THB=X", "label": "Global equities (THB)"},
+    "cash_bonds":  {"min": 5, "max": 10, "target": 10, "proxy": "cash", "label": "Cash / short bonds"}
+  },
+  "classification": {
+    "PTTEP.BK": "thai_equity", "SCB.BK": "thai_equity", "SCBGOLDE": "gold",
+    "default_bk": "thai_equity", "GLDM": "gold", "IAU": "gold", "default_other": "global_equity"
+  },
+  "implementation": {
+    "thai_equity": {"core_proxy": "TDEX.BK", "note": "existing stocks kept within position/sector caps; remainder to the SET50 ETF as diversified core"},
+    "gold": {"core_proxy": "SCBGOLDE"},
+    "global_equity": {"core_proxy": "SPY", "note": "placeholder instrument; a THB-denominated global fund avoids FX conversion and the 2024 foreign-income remittance rule"},
+    "cash_bonds": {"core_proxy": "CASH", "yield_source": "BoT policy rate (market_factors.bot_rate)"}
+  },
+  "caps": {"use_risk_limits_json": true},
+  "tactical": {"max_tilt_pp": 2.5, "risk_on": {"thai_equity": 1.25, "global_equity": 1.25, "gold": -1.25, "cash_bonds": -1.25},
+               "risk_off": {"thai_equity": -1.25, "global_equity": -1.25, "gold": 1.25, "cash_bonds": 1.25}},
+  "rebalancing": {"band_abs_pp": 5, "band_rel_pct": 20, "min_trade_thb": 5000, "rule": "trade a class back to target only when it is outside min(abs band, relative band) or outside the policy range"},
+  "black_litterman": {"risk_aversion": 2.5, "tau": 0.05, "view_source": "frozen 1y forecasts (predictions table)", "view_confidence_floor": 0.05},
+  "tax": {"thai_listed_capital_gains": "exempt for individuals (SET)", "thai_mutual_fund_capital_gains": "exempt for individuals",
+          "dividends": "10% withholding (final) or include in PIT with dividend credit", "foreign_income": "taxable if remitted to Thailand (2024 rule) - verify with a tax adviser",
+          "lot_method": "HIFO when lots exist (minimises realised gains on taxable/offshore lots); for tax-exempt Thai lots prefer FIFO and avoid selling within 10 trading days before XD"}
+}
