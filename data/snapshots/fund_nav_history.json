@@ -13,6 +13,13 @@
       "recorded_at": "2026-10-07T06:05:40+00:00",
       "source_url": "https://www.settrade.com/th/mutualfund/quote/SCBGOLDE/overview",
       "note": "carried from 2026-10-05 last publish"
+    },
+    {
+      "date": "2026-10-29",
+      "nav_thb": 22.8146,
+      "source": "scbam_official",
+      "source_url": "https://www.scbam.com/en/fund/foreign-investment-fund-commodity/fund-information/scbgolde",
+      "recorded_at": "2026-10-29T16:46:37.307258+00:00"
     }
   ],
   "SCBGOLDHE": [

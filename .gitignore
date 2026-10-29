@@ -39,3 +39,10 @@ dashboard/dist/
 *.dump
 *.sqlite
 *.db
+
+# Live runtime state, overwritten every few minutes (Phase 2 #9, 2026-10-29).
+# Dated daily artifacts (data/snapshots/YYYY-MM-DD.json, data/oil_scenarios/*.json)
+# stay tracked as an audit trail.
+data/feed_health.json
+data_collector/portfolio_snapshot.json
+*.json.tmp

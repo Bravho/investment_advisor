@@ -1,0 +1,59 @@
+{
+  "snapshot_date": "2026-10-29",
+  "generated_at": "2026-10-29T11:30:16.320982+00:00",
+  "base_currency": "THB",
+  "usdthb_rate": 33.720001220703125,
+  "holdings": {
+    "PTTEP.BK": {
+      "current_price": 163.5,
+      "market_value_thb": 228900.0,
+      "pnl_thb": 23100.0,
+      "pnl_pct": 11.22,
+      "price_as_of": "2026-10-29",
+      "price_source": "yfinance",
+      "is_modelled": false
+    },
+    "SCB.BK": {
+      "current_price": 153.5,
+      "market_value_thb": 214900.0,
+      "pnl_thb": 10500.0,
+      "pnl_pct": 5.14,
+      "price_as_of": "2026-10-29",
+      "price_source": "yfinance",
+      "is_modelled": false
+    },
+    "SCBGOLDE": {
+      "error": "No NAV within tolerance for SCBGOLDE. This instrument has no exchange listing and is intentionally NOT routed to yfinance. Populate it by running portfolio_engine/fund_nav_tracker.run_nightly_nav_snapshot()."
+    }
+  },
+  "total_market_value_thb": 443800.0,
+  "total_pnl_thb": 33600.0,
+  "unpriced_holdings": [
+    "SCBGOLDE"
+  ],
+  "valuation_complete": false,
+  "total_value_caveat": "PARTIAL VALUATION — 1 holding(s) could not be priced (SCBGOLDE). total_market_value_thb EXCLUDES them and therefore understates the portfolio; any weight or concentration figure derived from this total is overstated for the priced sleeves. Do not use for rebalancing until complete.",
+  "risk_score": 0.5216,
+  "risk_level": "medium",
+  "currency_risk_score": 0.5,
+  "usd_thb_rate": 32.5,
+  "currency_regime_level": "low",
+  "currency_regime_break": false,
+  "baht_vs_neutral_pct": 0.0,
+  "concentrated_positions": [
+    "PTTEP.BK",
+    "SCB.BK"
+  ],
+  "oil_commodity_risk": 0.0333,
+  "oil_commodity_risk_level": "low",
+  "japan_carry_risk_level": "elevated",
+  "fed_policy_risk_level": "elevated",
+  "fed_policy_risk_score": 0.5875,
+  "gold_drawdown_classification": "fed_driven_dip",
+  "gold_drawdown_pct": 7.78,
+  "gold_drawdown_signal": "hold_or_add",
+  "gold_drawdown_current_level": 4150.0,
+  "lebanon_spillover_status": "walked_back",
+  "lebanon_spillover_risk_level": "low",
+  "lebanon_spillover_proxy": 0.12
+}
