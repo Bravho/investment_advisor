@@ -48,6 +48,9 @@ def extract_tickers(text: str, allowed_us: set[str]) -> list[str]:
     return list(dict.fromkeys(found))
 
 
+_TICKER_RE = re.compile(r"^[A-Z0-9][A-Z0-9.\-=^]{0,19}$")
+
+
 def normalized_result(raw: dict[str, Any]) -> dict[str, Any]:
     sentiment = str(raw.get("sentiment", "neutral")).lower()
     if sentiment not in {"bullish", "bearish", "neutral"}:
@@ -64,7 +67,9 @@ def normalized_result(raw: dict[str, Any]) -> dict[str, Any]:
             dict.fromkeys(
                 THAI_TICKERS.get(str(ticker).upper(), str(ticker).upper())
                 for ticker in raw.get("affected_tickers", [])
-                if ticker
+                # Fixed 2026-10-29: LLM sometimes returns company names / long
+                # strings here, which overflowed sentiment_scores.ticker.
+                if ticker and _TICKER_RE.match(str(ticker).strip().upper())
             )
         ),
         "reasoning": str(raw.get("reasoning", ""))[:1000],
