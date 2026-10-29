@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, '')
 // In local development, use Vite's same-origin proxies. This avoids browser
 // restrictions on direct localhost cross-port requests.
 export const PORTFOLIO_API = API_BASE ? `${API_BASE}:8996` : '/api/portfolio'
-export const ADVISOR_API = API_BASE ? `${API_BASE}:8998` : '/api/advisor'
+export const ADVISOR_API = API_BASE ? `${API_BASE}:8991` : '/api/advisor'
 export const ENGINE_API = API_BASE ? `${API_BASE}:8997` : '/api/engine'
 export const COUNCIL_API = API_BASE ? `${API_BASE}:8993` : '/api/council'
 
