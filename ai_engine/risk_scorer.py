@@ -1184,6 +1184,25 @@ def _build_snapshot_archive_payload(
     }
 
 
+def _shared_save_daily_snapshot():
+    """Load the stdlib-only archiver from the project root by file path.
+
+    Fixed 2026-10-29 (Phase 2): the old ``from portfolio_engine.performance_analytics
+    import save_daily_snapshot`` raised ModuleNotFoundError in the ai_engine process
+    (and would pick up the wrong ``utils`` package even if found).
+    """
+    import importlib.util
+    from pathlib import Path as _P
+
+    path = _P(__file__).resolve().parent.parent / "snapshot_archive.py"
+    spec = importlib.util.spec_from_file_location("ia_snapshot_archive", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module.save_daily_snapshot
+
+
+
 async def archive_daily_snapshot() -> dict[str, Any]:
     """
     Standalone nightly snapshot writer — fills data/snapshots/YYYY-MM-DD.json
@@ -1205,7 +1224,7 @@ async def archive_daily_snapshot() -> dict[str, Any]:
     path = snapshot_path()
     snapshot = json.loads(path.read_text(encoding="utf-8"))
 
-    from portfolio_engine.performance_analytics import save_daily_snapshot  # type: ignore
+    save_daily_snapshot = _shared_save_daily_snapshot()  # Fixed 2026-10-29: no cross-package import
 
     archive_payload = _build_snapshot_archive_payload(snapshot, risk)
     archive_path = save_daily_snapshot(archive_payload)
@@ -1254,7 +1273,7 @@ async def save_daily_performance() -> dict[str, Any]:
     # Added by nightly agent 2026-06-11: wire save_daily_snapshot() so every
     # nightly run builds a cumulative archive for trend/drawdown analysis.
     try:
-        from portfolio_engine.performance_analytics import save_daily_snapshot  # type: ignore
+        save_daily_snapshot = _shared_save_daily_snapshot()  # Fixed 2026-10-29: no cross-package import
         # Refactored 2026-06-22: payload now built by the shared helper so the
         # standalone archive_daily_snapshot() runner stays byte-for-byte in sync.
         archive_payload = _build_snapshot_archive_payload(snapshot, risk)
