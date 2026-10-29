@@ -490,7 +490,8 @@ def _load_feed_health() -> dict[str, Any]:
         "nightly_research": {
             "severity": research.get("severity") if research else "STALE_UNKNOWN",
             "age_days": research.get("age_days") if research else None,
-            "note": "Nightly research/watchlist artifacts (macro levels, market intel). "
+            "legacy_narrative_age_days": research.get("legacy_narrative_age_days") if research else None,
+            "note": "Dated snapshots + DB watch lists/market factors (refreshed by the portfolio engine). "
                     "Not a price feed.",
         },
     }
@@ -522,8 +523,14 @@ def _render_facts(ctx: dict[str, Any], perf_rows: list[dict[str, Any]], snap: di
     research = fh.get("nightly_research") or {}
     if research.get("severity") not in (None, "FRESH", "AGING"):
         lines.append(
-            f"ℹ️ Nightly research/macro inputs are {research.get('severity')} "
-            f"(~{_fmt_num(research.get('age_days'), 0)} days old) — macro levels omitted."
+            f"ℹ️ Watch-list/factor refresh is {research.get('severity')} "
+            f"(~{_fmt_num(research.get('age_days'), 1)} days old) — factor readings may be out of date."
+        )
+    _wl_age = (ctx.get("data_freshness") or {}).get("watchlist_macro_age_days")
+    if isinstance(_wl_age, (int, float)) and _wl_age > BRIEF_STALE_DAYS:
+        lines.append(
+            f"ℹ️ Legacy nightly-research narrative is ~{_wl_age:.0f} days old (agent paused) — its narrative "
+            "flags are omitted; live macro levels are in the market-factor list above."
         )
     lines.append("")
     lines.append("**Holdings (latest closes)**")
@@ -1085,10 +1092,19 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
         _sec = await _wl.render_brief_sections(_pool3)
         _risk_md = _re.render_brief_section(await _re.latest_risk_report(_pool3))
         facts_md = f"{_sec['opening']}\n\n{facts_md}\n\n{_sec['watchlist']}\n\n{_risk_md}"
+        _rr = await _re.latest_risk_report(_pool3)
+        _kp = await _wl.key_points(_pool3, (_rr or {}).get("summary"))
     except Exception as _exc:  # noqa: BLE001
         logger.warning("Phase 3 brief sections unavailable: %s", _exc)
         facts_md = f"ℹ️ Watch list / factor / risk sections unavailable ({type(_exc).__name__}).\n\n{facts_md}"
+        _kp, _rr = [], None
     prompt = _commentary_prompt(facts_md, holdings_line)
+    if _kp:
+        prompt += "\n\nKEY POINTS (verified - your commentary must agree with every one of these):\n" + "\n".join(f"- {k}" for k in _kp)
+    _limits_breached = bool(((_rr or {}).get("summary") or {}).get("limit_breaches"))
+    import re as _re_mod
+    _contra = _re_mod.compile(r"(limits?\s+(are|is|have)\s+not\s+(been\s+)?exceed|not\s+exceed(ed)?\s+(the\s+)?(risk\s+)?limit|within\s+(the\s+|its\s+|risk\s+)?limits)", _re_mod.I)
+    fact_check_note = ""
     content, action_items, failure = "", [], None
     for attempt in range(1, BRIEF_ATTEMPTS + 1):
         try:
@@ -1103,9 +1119,15 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
             action_items = [str(a) for a in (generated.get("action_items") or [])][:3]
             if len(commentary) < 120:
                 raise ValueError(f"model returned too little commentary ({len(commentary)} chars)")
+            fact_check_note = ""
+            if _limits_breached and _contra.search(commentary):
+                if attempt < BRIEF_ATTEMPTS:
+                    raise ValueError("commentary contradicts verified facts (claims limits not exceeded)")
+                fact_check_note = ("\n\n⚠️ Fact check: the commentary above wrongly suggests risk limits are not exceeded. "
+                                   "They ARE exceeded - see the Risk section. Trust the verified facts.")
             content = (
                 f"# Morning brief — {date.today().isoformat()}\n\n{facts_md}\n\n"
-                f"**Advisor commentary (AI, local model; opinion)**\n{commentary}\n\n"
+                f"**Advisor commentary (AI, local model; opinion)**\n{commentary}{fact_check_note}\n\n"
                 "_Advisory only. Not licensed financial advice. No trades are executed._"
             )
             failure = None

@@ -125,7 +125,9 @@ async def _startup_phase3() -> None:
     await watch_mod.ensure_tables(pool)
     await _safe_job("watchlist_startup", lambda: watch_mod.run_watchlist_cycle(pool))
     latest = await risk_mod.latest_risk_report(pool)
-    if not latest or str(latest.get("run_at", ""))[:10] != datetime.now(ZoneInfo("Asia/Bangkok")).date().isoformat():
+    _ict = ZoneInfo("Asia/Bangkok")
+    _last_day = (datetime.fromisoformat(latest["run_at"]).astimezone(_ict).date() if latest and latest.get("run_at") else None)
+    if _last_day != datetime.now(_ict).date():
         await _safe_job("risk_report_startup", _risk_job)
 
 
