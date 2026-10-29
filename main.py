@@ -140,14 +140,15 @@ async def generate_llm_response(
     if route.get("provider") == "ollama":
         try:
             logger.info("Generating response using Ollama model %s", route["model"])
-            async with httpx.AsyncClient(timeout=route.get("timeout", 60)) as client:
+            async with httpx.AsyncClient(timeout=max(route.get("timeout", 60), 150)) as client:
                 response = await client.post(
                     f"{route['url'].rstrip('/')}/api/chat",
                     json={
                         "model": route["model"],
                         "messages": messages,
                         "stream": False,
-                        "options": {"temperature": 0.3},
+                        "keep_alive": "30m",
+                        "options": {"temperature": 0.3, "num_ctx": 8192, "num_predict": 900},
                     },
                 )
                 response.raise_for_status()
@@ -157,7 +158,7 @@ async def generate_llm_response(
         except Exception as exc:
             logger.error("Ollama generation failed: %s", exc)
 
-    if OPENAI_API_KEY and not OPENAI_API_KEY.startswith("your_"):
+    if os.getenv("ALLOW_PAID_LLM") == "1" and OPENAI_API_KEY and not OPENAI_API_KEY.startswith("your_"):
         try:
             from openai import AsyncOpenAI
 
@@ -245,6 +246,99 @@ def fallback_response(user_message: str) -> str:
             "- 'What is the difference between stocks and mutual funds?'\n\n"
             "Disclaimer: Investment contains risk, investors should study information before making decisions."
         )
+
+
+ENGINE_URL = os.getenv("PORTFOLIO_ENGINE_URL", "http://127.0.0.1:8996")
+FORECAST_WORDS = ("forecast", "predict", "outlook", "target", "will", "expect", "next week", "next month", "next year",
+                  "คาด", "พยากรณ์", "ทำนาย", "แนวโน้ม", "เป้า", "ราคาจะ", "อนาคต", "เดือนหน้า", "ปีหน้า", "สัปดาห์หน้า")
+
+
+def _normalise_tickers(tickers: list[str], known: set[str]) -> list[str]:
+    out = []
+    for t in tickers:
+        if t in known:
+            out.append(t)
+        elif f"{t}.BK" in known:
+            out.append(f"{t}.BK")
+        else:
+            out.append(t)
+    return list(dict.fromkeys(out))
+
+
+async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]]:
+    """Phase 4 engine data for the advisor: frozen forecasts (+how, track record, lessons), signals, proposed plans."""
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            sig = (await client.get(f"{ENGINE_URL}/signals")).json()
+            known = {i["ticker"] for i in sig.get("items", [])} | {"BZ=F", "THB=X", "GC=F", "TDEX.BK", "^TNX", "^VIX"}
+            tickers = _normalise_tickers(tickers, known)
+            fc = (await client.get(f"{ENGINE_URL}/predictions/advisor-context", params={"tickers": ",".join(tickers)})).json().get("context", "")
+            plans = (await client.get(f"{ENGINE_URL}/trade-plans", params={"status": "proposed"})).json().get("plans", [])
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("engine context unavailable: %s", exc)
+        return "=== ENGINE DATA NOTE ===\n  Forecast/signal engine (8996) unreachable - do not quote forecasts.", tickers
+    reg = sig.get("regime") or {}
+    lines = [f"=== SIGNALS (as of {sig.get('as_of')}; macro regime {reg.get('regime')}) ==="]
+    items = sig.get("items", [])
+    focus = [i for i in items if i["ticker"] in tickers or i["kind"] == "holding"] + [i for i in items if i["kind"] == "idea"][:5]
+    seen = set()
+    for i in focus:
+        if i["ticker"] in seen or i.get("score") is None:
+            continue
+        seen.add(i["ticker"])
+        comps = ", ".join(f"{k} {v:.0f}" for k, v in (i.get("components") or {}).items() if v is not None)
+        lines.append(f"  - {i['ticker']} ({i['kind']}): score {i['score']:.0f}/100 rank {i.get('rank')}, confidence {i['confidence']:.2f}; percentiles: {comps}")
+    pm = {p["ticker"]: p for p in plans}
+    pl = [pm[t] for t in tickers if t in pm]
+    if pl:
+        lines.append("=== PROPOSED TRADE PLANS (engine, NOT approved by Tho) ===")
+        for p in pl:
+            lines.append(f"  - {p['ticker']}: entry {p['entry_low']:.4g}-{p['entry_high']:.4g}, stop {p['stop']:.4g}, target {p['target']:.4g}, "
+                         f"R:R {p['rr']:.2f}, checklist {'pass' if p.get('checklist_pass') else 'FAIL'}; {p.get('rationale', '')[:300]}")
+    return "\n".join(lines) + "\n\n" + fc, tickers
+
+
+HORIZON_WORDS = {
+    "3d": [r"\b3\s*-?\s*d(ay)?s?\b", r"3\s*วัน", "สามวัน", "this week", "สัปดาห์นี้", "few days", "ไม่กี่วัน"],
+    "1m": [r"\b1\s*-?\s*m(onth)?\b", r"\bone month\b", "next month", r"1\s*เดือน", "หนึ่งเดือน", "เดือนหน้า"],
+    "3m": [r"\b3\s*-?\s*m(onths?)?\b", r"\bthree months?\b", "quarter", r"3\s*เดือน", "สามเดือน", "ไตรมาส"],
+    "6m": [r"\b6\s*-?\s*m(onths?)?\b", r"\bsix months?\b", "half", r"6\s*เดือน", "หกเดือน", "ครึ่งปี"],
+    "1y": [r"\b1\s*-?\s*y(ea)?r?\b", r"\bone year\b", "next year", r"12\s*months?", r"1\s*ปี", "หนึ่งปี", r"(?<!ครึ่ง)ปีหน้า"],
+}
+HORIZON_TH = {"3d": "3 วัน", "1m": "1 เดือน", "3m": "3 เดือน", "6m": "6 เดือน", "1y": "1 ปี"}
+
+
+def requested_horizons(query: str) -> list[str]:
+    q = query.lower()
+    hs = [h for h, pats in HORIZON_WORDS.items() if any(re.search(p, q) for p in pats)]
+    return hs or list(HORIZON_WORDS)
+
+
+async def forecast_table(tickers: list[str], horizons: list[str], thai: bool) -> tuple[str, str]:
+    """(context block, verified table appended to the reply) built straight from the frozen predictions."""
+    rows, ctx = [], []
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            for t in tickers[:4]:
+                items = (await client.get(f"{ENGINE_URL}/predictions", params={"subject": t})).json().get("items", [])
+                for p in items:
+                    if p["horizon"] not in horizons:
+                        continue
+                    lab = HORIZON_TH[p["horizon"]] if thai else p["horizon"]
+                    d = ("ขึ้น" if p["direction"] == "up" else "ลง") if thai else p["direction"]
+                    line = (f"{t} {lab} (ถึง {p['target_date']}): {d}, P(up) {p['p_up']:.0%}, ช่วง 80% {p['band80_low']:.4g}–{p['band80_high']:.4g}, ความมั่นใจ {p['confidence']:.2f}"
+                            if thai else
+                            f"{t} {lab} (to {p['target_date']}): {d}, P(up) {p['p_up']:.0%}, 80% range {p['band80_low']:.4g}-{p['band80_high']:.4g}, confidence {p['confidence']:.2f}")
+                    rows.append(line)
+                    ctx.append(f"  - HORIZON {p['horizon']} = {HORIZON_TH[p['horizon']]} | {line} | prediction id {p['id']}")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("forecast table unavailable: %s", exc)
+        return "", ""
+    if not rows:
+        return "", ""
+    head = "📊 ตัวเลขพยากรณ์จากระบบ (frozen, ตรวจสอบได้)" if thai else "📊 Engine forecasts (frozen, verifiable)"
+    return ("=== REQUESTED FORECASTS (use exactly these; match each horizon label) ===\n" + "\n".join(ctx),
+            head + "\n" + "\n".join(f"• {r}" for r in rows))
 
 
 def extract_tickers(message: str) -> list[str]:
@@ -671,12 +765,35 @@ async def execute_advisor(request: Request):
                 context = secretary_portfolio_block + ("\n\n" + context if context else "")
                 logger.info("[AdvisorMessage] Portfolio context injected by secretary appended to context")
 
+        _eng, tickers = await engine_context(query, tickers)
+        context = (context + "\n\n" if context else "") + _eng
+        _is_fc = any(w in query.lower() for w in FORECAST_WORDS)
+        _fc_table = ""
+        if _is_fc:
+            _hz = requested_horizons(query)
+            _ql = query.lower()
+            _names = {"GC=F": ["gold", "ทอง"], "BZ=F": ["oil", "brent", "น้ำมัน"], "THB=X": ["baht", "usd/thb", "usdthb", "ค่าเงินบาท", "เงินบาท", "ดอลลาร์"],
+                      "TDEX.BK": ["set index", "ตลาดหุ้นไทย", "ดัชนี set", "set50"], "^TNX": ["10y", "bond yield", "ผลตอบแทนพันธบัตร"]}
+            tickers = list(dict.fromkeys(tickers + [k for k, ws in _names.items() if any(w in _ql for w in ws)]))
+            _subj = [t for t in tickers if t] or [h.get("ticker") for h in (portfolio_context or {}).get("holdings", []) if h.get("ticker")]
+            _fc_ctx, _fc_table = await forecast_table(_subj, _hz, bool(re.search(r"[\u0E00-\u0E7F]", query)))
+            if _fc_ctx:
+                context += "\n\n" + _fc_ctx
+        if _is_fc:
+            context += ("\n\nTHE USER IS ASKING FOR A FORECAST: answer with the frozen forecasts above for the relevant horizon(s): "
+                        "direction, P(up), the 80% price range and confidence; then explain HOW it was predicted (the models and their "
+                        "contributions, key inputs and assumptions) and the validated track record for that horizon. Say clearly that "
+                        "confidence is low when P(up) is near 50%. The ONLY models are: drift (long-run average return), momentum, meanrev "
+                        "(mean reversion), regime (macro risk-on/off), signal (composite signal score) and analyst (consensus target); "
+                        "do not name any other model. The track record is from the historical backfill until live forecasts mature.")
         enriched_prompt = build_system_prompt(context)
         advisory_route = model_router.route_for_task("advisory")
         response_text, llm_model_used = await generate_llm_response(
             enriched_prompt, query, history, advisory_route
         )
 
+        if _is_fc and _fc_table:
+            response_text = f"{response_text.rstrip()}\n\n{_fc_table}"
         recommendation = detect_recommendation(response_text)
         if recommendation and tickers:
             await _db_call(

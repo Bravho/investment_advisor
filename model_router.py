@@ -68,5 +68,8 @@ class SmartModelRouter:
 
     @staticmethod
     def _configured(name: str) -> bool:
+        # 2026-10-30: paid LLM APIs are opt-in only (ALLOW_PAID_LLM=1). Default = local Ollama.
+        if os.getenv("ALLOW_PAID_LLM") != "1":
+            return False
         value = os.getenv(name, "")
         return bool(value and not value.startswith("your_"))
