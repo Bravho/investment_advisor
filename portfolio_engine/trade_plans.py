@@ -307,7 +307,8 @@ def factor_betas(ticker: str) -> dict[str, Any]:
     raw = download_closes(sorted({ticker, *fac.values()}), None, "1y", 3600)
     y = raw[ticker] if ticker.endswith(".BK") else raw[ticker] * raw["THB=X"]
     X = pd.DataFrame({k: (raw[v].diff() if k == "us10y" else raw[v].pct_change(fill_method=None)) for k, v in fac.items()})
-    return re_mod._ols(y.pct_change(fill_method=None), X)
+    with np.errstate(all="ignore"):  # macOS Accelerate emits spurious matmul warnings
+        return re_mod._ols(y.pct_change(fill_method=None), X)
 
 
 def _usdthb() -> float:
@@ -488,7 +489,7 @@ async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[s
                     """UPDATE investment_watchlist SET entry_low=$2, entry_high=$3, stop_price=$4, target_price=$5,
                            status_note=$6, updated_at=now() WHERE ticker=$1""",
                     plan["ticker"], plan["entry_low"], plan["entry_high"], plan["stop"], plan["target"],
-                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone.utc):%Y-%m-%d})")
+                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone(timedelta(hours=7))):%Y-%m-%d} ICT)")
         row = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
     cl = await build_checklist(pool, dict(row))
     async with pool.acquire() as conn:
