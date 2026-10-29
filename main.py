@@ -56,8 +56,9 @@ app.add_middleware(
 # In-memory query log for the dashboard
 query_logs: List[Dict[str, Any]] = []
 
-# Mock Investment Portfolio for dashboard aesthetics
-mock_portfolio = [
+# DEMO ONLY - never used for advice or shown as real holdings (Phase 2 #8, 2026-10-29).
+# Kept for reference; the dashboard shows an explicit "no holdings" row instead.
+_DEMO_PORTFOLIO_NOT_REAL = [
     {"asset": "Bitcoin (BTC)", "category": "Crypto", "allocation": "15%", "price": "$68,500.00", "change": "+3.4%", "trend": "up"},
     {"asset": "Ethereum (ETH)", "category": "Crypto", "allocation": "10%", "price": "$3,820.00", "change": "-1.2%", "trend": "down"},
     {"asset": "S&P 500 ETF (SPY)", "category": "Equities", "allocation": "40%", "price": "$525.50", "change": "+0.8%", "trend": "up"},
@@ -314,7 +315,10 @@ async def dashboard():
             </div>
             """
 
-    portfolio_items = mock_portfolio
+    portfolio_items = [{
+        "asset": "No live holdings (DB unavailable or empty)",
+        "category": "-", "allocation": "-", "price": "-", "change": "-", "trend": "neutral",
+    }]
     if db_holdings:
         portfolio_items = []
         for holding in db_holdings:
@@ -644,10 +648,14 @@ async def execute_advisor(request: Request):
 
         # Always enrich with the live portfolio snapshot injected by the secretary
         # (this covers current value and unrealised P&L that the DB may not store)
-        if portfolio_context:
+        if portfolio_context and portfolio_context.get("unavailable"):
+            note = ("=== PORTFOLIO DATA NOTE ===\n  " + str(portfolio_context["unavailable"]))
+            context = note + ("\n\n" + context if context else "")
+            logger.warning("[AdvisorMessage] Secretary reports live portfolio unavailable")
+        elif portfolio_context:
             holdings = portfolio_context.get("holdings", [])
             if holdings:
-                lines = ["=== CURRENT PORTFOLIO (from secretary) ==="]
+                lines = ["=== CURRENT PORTFOLIO (live, portfolio engine via secretary) ==="]
                 for h in holdings:
                     line = f"  - {h['ticker']} ({h['name']}): {h.get('quantity', '?')} {h.get('asset_class', '')}"
                     if h.get("current_value_thb"):
@@ -656,6 +664,8 @@ async def execute_advisor(request: Request):
                         pnl = h['unrealised_pnl_thb']
                         sign = "+" if pnl >= 0 else ""
                         line += f" | Unrealised P&L: {sign}{pnl:,.0f} THB"
+                    if h.get("price_as_of"):
+                        line += f" | price as of {h['price_as_of']}"
                     lines.append(line)
                 secretary_portfolio_block = "\n".join(lines)
                 context = secretary_portfolio_block + ("\n\n" + context if context else "")
