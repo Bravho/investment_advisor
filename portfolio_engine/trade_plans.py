@@ -294,8 +294,20 @@ async def _context(pool: Any) -> dict[str, Any]:
                 "SELECT ticker, score FROM signal_scores WHERE as_of = (SELECT max(as_of) FROM signal_scores)")}
         except Exception:  # noqa: BLE001
             pass
+    rep = await re_mod.latest_risk_report(pool)
+    port_fx = ((rep or {}).get("factor_exposures") or {}).get("portfolio") or {}
     return {"positions": positions, "cfg": cfg, "total": total, "sectors": {**(cfg.get("sectors") or {}), **sectors},
-            "regime": regime_row["regime"] if regime_row else None, "scores": scores}
+            "regime": regime_row["regime"] if regime_row else None, "scores": scores, "port_fx": port_fx}
+
+
+def factor_betas(ticker: str) -> dict[str, Any]:
+    """1y daily OLS betas of the candidate (in THB terms) to the same factors the risk engine uses."""
+    import risk_engine as re_mod
+    fac = re_mod.FACTOR_TICKERS
+    raw = download_closes(sorted({ticker, *fac.values()}), None, "1y", 3600)
+    y = raw[ticker] if ticker.endswith(".BK") else raw[ticker] * raw["THB=X"]
+    X = pd.DataFrame({k: (raw[v].diff() if k == "us10y" else raw[v].pct_change(fill_method=None)) for k, v in fac.items()})
+    return re_mod._ols(y.pct_change(fill_method=None), X)
 
 
 def _usdthb() -> float:
@@ -364,10 +376,30 @@ async def build_checklist(pool: Any, plan: dict[str, Any], ctx: Optional[dict[st
         corrs = {h: round(float(r[t].corr(r[h])), 2) for h in held if h in r.columns and t in r.columns and h != t}
         mx = max(corrs.values()) if corrs else None
         same_sector = [p["ticker"] for p in positions if ctx["sectors"].get(p["ticker"]) == ctx["sectors"].get(t)]
-        add("factor_overlap", (mx is None or mx <= 0.6) and not same_sector,
+        add("correlation_overlap", (mx is None or mx <= 0.6) and not same_sector,
             f"max corr with holdings {mx} {corrs}; same-sector holdings: {same_sector or 'none'}", required=False)
     except Exception as exc:  # noqa: BLE001
-        add("factor_overlap", None, f"not computed ({exc})", required=False)
+        add("correlation_overlap", None, f"not computed ({exc})", required=False)
+    try:
+        cb = await asyncio.to_thread(factor_betas, t)
+        pf = ctx.get("port_fx") or {}
+        shared = []
+        # Market beta ('set') is judged by the regime/beta checks; here we look for concentration in the
+        # macro factors the portfolio already carries: the candidate must be significant (|t|>=3), same sign
+        # as a significant portfolio exposure (|t|>=2) and at least 1.5x the portfolio's own beta.
+        for k, tv in (cb.get("t_stats") or {}).items():
+            if k == "set":
+                continue
+            pt, pb, cbeta = (pf.get("t_stats") or {}).get(k), (pf.get("betas") or {}).get(k), (cb.get("betas") or {}).get(k)
+            if None in (tv, pt, pb, cbeta):
+                continue
+            if abs(tv) >= 3 and abs(pt) >= 2 and (cbeta > 0) == (pb > 0) and abs(cbeta) >= 1.5 * abs(pb):
+                shared.append(f"{k} (candidate beta {cbeta:+.2f} vs portfolio {pb:+.2f})")
+        add("factor_beta_overlap", not shared,
+            ("adds to existing portfolio factor exposure: " + "; ".join(shared)) if shared else
+            f"no significant same-sign factor exposure shared with the portfolio (betas {cb.get('betas')})", required=False)
+    except Exception as exc:  # noqa: BLE001
+        add("factor_beta_overlap", None, f"not computed ({exc})", required=False)
     try:
         df = (await asyncio.to_thread(download_ohlc, [t], "6mo")).get(t)
         adv = float((df["Close"] * df["Volume"]).iloc[-20:].mean()) * fx if df is not None else None

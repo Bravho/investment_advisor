@@ -642,3 +642,43 @@ async def signals_outcomes_run() -> dict[str, Any]:
 @app.get("/paper-trades")
 async def paper_trades() -> dict[str, Any]:
     return await plans_mod.paper_summary(await db_pool.get_pool())
+
+
+# --------------------------------------------------------------------------
+# Phase 4 (2026-10-30): trade discipline - plan record/checklist + journal (pro layer #5)
+# --------------------------------------------------------------------------
+@app.get("/trade-plans/{plan_id}")
+async def trade_plan_get(plan_id: int, refresh_checklist: bool = False) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    if refresh_checklist:
+        try:
+            return await plans_mod.update_plan(pool, plan_id, {})
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="plan not found") from exc
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="plan not found")
+    return plans_mod._row(row)
+
+
+@app.get("/journal")
+async def journal_list() -> dict[str, Any]:
+    items = await plans_mod.journal_list(await db_pool.get_pool())
+    return {"items": items, "count": len(items), "fields": sorted(plans_mod.JOURNAL_FIELDS)}
+
+
+@app.post("/journal")
+async def journal_create(body: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    try:
+        return await plans_mod.journal_upsert(await db_pool.get_pool(), body)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.patch("/journal/{entry_id}")
+async def journal_patch(entry_id: int, body: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    try:
+        return await plans_mod.journal_upsert(await db_pool.get_pool(), body, entry_id)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
