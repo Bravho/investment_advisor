@@ -325,7 +325,7 @@ def check_nightly_artifacts() -> dict[str, Any]:
 
         snap_dir = PROJECT_DIR / "data" / "snapshots"
         if snap_dir.is_dir():
-            snaps = sorted(p for p in snap_dir.glob("*.json"))
+            snaps = sorted(p for p in snap_dir.glob("20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].json"))  # dated only (fund_nav_history.json sorted last)
             if snaps:
                 latest = snaps[-1]
                 moment = _parse_iso(latest.stem)
