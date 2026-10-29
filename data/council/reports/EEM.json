@@ -1,0 +1,297 @@
+{
+  "investment": {
+    "ticker": "EEM",
+    "name": "EEM",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 70.79000091552734,
+    "price_display": "70.79",
+    "change_pct": 2.77,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 18.74,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/EEM/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 1.77,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/EEM/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 113.32,
+        "unit": "USD",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "conservative 30× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 60.1,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:39+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 2 live (Yahoo), remainder curated",
+      "ROE unavailable — analysis treats it as unconfirmed"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Pass",
+      "conviction": 40,
+      "confidence": 50,
+      "thesis": "EEM ranks poorly against peers, with a higher P/E and lower dividend yield (2/2).",
+      "key_risk": "Valuation may not support growth expectations.",
+      "metrics_used": [
+        "P/E",
+        "Dividend yield",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Accumulate",
+      "conviction": 70,
+      "confidence": 75,
+      "thesis": "EEM shows solid growth potential compared to VNM, benefiting from favorable macro trends.",
+      "key_risk": "Market volatility affecting emerging markets.",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Pass",
+      "conviction": 40,
+      "confidence": 50,
+      "thesis": "EEM ranks poorly on dividend yield compared to VNM (1.77% vs 20.0%).",
+      "key_risk": "High FX risk may impact returns.",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 45,
+      "confidence": 60,
+      "thesis": "EEM ranks poorly on P/E relative to VNM, indicating valuation fragility.",
+      "key_risk": "High FX risk may impact returns.",
+      "metrics_used": [
+        "P/E",
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Caution",
+    "overall_label": "CAUTION — wait for a better setup (council split)",
+    "blended_conviction": 49,
+    "agreement": "the business/asset facts themselves are not in dispute.",
+    "disagreement": "Macro & Tech-Trends see enough to lean in, while Value Analyst, Cross-Asset Linkage, Risk & Control flag valuation or fragility risk.",
+    "net": "CAUTION — wait for a better setup (council split). Blended conviction 49/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Valuation may not support growth expectations.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 113.32,
+      "upside_pct": 60.1,
+      "fair_pe": 30.0
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    }
+  },
+  "peers": {
+    "peers": [
+      "VNM"
+    ],
+    "table": {
+      "EEM": {
+        "P/E": 18.74,
+        "Dividend yield": 1.77
+      },
+      "VNM": {
+        "P/E": 16.63,
+        "Dividend yield": 20.0
+      }
+    }
+  },
+  "peer_advice": {
+    "available": true,
+    "scores": {
+      "EEM": 0,
+      "VNM": 100
+    },
+    "ranked": [
+      [
+        "VNM",
+        100
+      ],
+      [
+        "EEM",
+        0
+      ]
+    ],
+    "target": "EEM",
+    "target_rank": 2,
+    "total": 2,
+    "better_overall": [
+      {
+        "ticker": "VNM",
+        "score": 100
+      }
+    ],
+    "candidates": [
+      {
+        "ticker": "VNM",
+        "score": 100
+      }
+    ],
+    "field_beats": [
+      {
+        "metric": "P/E",
+        "winner": "VNM",
+        "winner_value": 16.63,
+        "target_value": 18.74
+      },
+      {
+        "metric": "Dividend yield",
+        "winner": "VNM",
+        "winner_value": 20.0,
+        "target_value": 1.77
+      }
+    ],
+    "metrics_used": [
+      "P/E",
+      "Dividend yield"
+    ]
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/EEM",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/EEM/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 2 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=EEM",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=EEM",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T11:20:45+00:00",
+  "discovered_idea": true,
+  "idea_theme": "Global ETFs",
+  "idea_reason": "Emerging markets poised for growth; diversification opportunity.",
+  "candidates": [
+    {
+      "ticker": "VNM",
+      "name": "VNM",
+      "conviction": 78
+    }
+  ]
+}

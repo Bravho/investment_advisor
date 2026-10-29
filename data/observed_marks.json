@@ -1,0 +1,214 @@
+{
+ "_meta": {
+  "last_written": "2026-08-13T19:43:19.133972+00:00",
+  "written_by": "nightly agent 2026-08-14",
+  "session_note": "Latest SET session is 2026-08-13. PTTEP and BAFS advanced to FIRST-PARTY confirmed closes for that session. SCB did NOT advance: its retrieval was Status='Open1' at 13 Aug 09:59:37 ICT, an intraday print, and was rejected. The book is therefore NO LONGER fully same-session - a regression from 2026-08-11, stated rather than hidden."
+ },
+ "marks": {
+  "BAFS.BK": {
+   "ticker": "BAFS.BK",
+   "close": 11.4,
+   "currency": "THB",
+   "observed_as_of": "2026-08-13",
+   "retrieved_at": "2026-08-13T19:45:00+00:00",
+   "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+   "source_url": "https://www.set.or.th/en/market/product/stock/quote/BAFS/price",
+   "corroboration": 1,
+   "sources": [
+    {
+     "source_name": "aio.panphol.com",
+     "source_url": "https://aio.panphol.com/stock/BAFS/price",
+     "close": 11.6,
+     "observed_as_of": "2026-08-07",
+     "retrieved_at": "2026-08-10T19:38:16.077770+00:00"
+    },
+    {
+     "source_name": "stockanalysis.com",
+     "source_url": "https://stockanalysis.com/quote/bkk/BAFS/",
+     "close": 8.45,
+     "observed_as_of": "2026-05-18",
+     "retrieved_at": "2026-08-10T19:38:16.081104+00:00",
+     "stale_relative_to": "2026-08-07"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+     "close": 11.3,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-11T19:39:25.871755+00:00",
+     "supersedes": "2026-08-07"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+     "close": 11.2,
+     "observed_as_of": "2026-08-10",
+     "retrieved_at": "2026-08-11T19:39:25.874173+00:00",
+     "stale_relative_to": "2026-08-11"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+     "close": 11.3,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+     "note": "Second independent retrieval of the same session on a later exchange publish (03:20:09). Same value. Raises confidence without being a second SOURCE."
+    },
+    {
+     "close": 11.3,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+     "superseded_on": "2026-08-14"
+    }
+   ],
+   "conflicts": [],
+   "note": "Unchanged from last night, RE-CONFIRMED on a later publish. Stamp advanced 12 Aug 02:34:39 -> 12 Aug 03:20:09 with identical figures: close 11.30, +0.10 (+0.89%), prior 11.20, H 11.30 L 11.00, vol 514,576, value 5,752.31k. Value/volume 11.1787 vs published 11.18. Band 7.85/14.50 reconciles. 52w 7.90-11.80.",
+   "is_confirmed_close": true,
+   "status_raw": "Closed",
+   "high": 11.4,
+   "low": 11.2,
+   "volume_shares": 319014,
+   "value_thousand_baht": 3596.28,
+   "prior": 11.3
+  },
+  "PTTEP.BK": {
+   "ticker": "PTTEP.BK",
+   "close": 150.5,
+   "currency": "THB",
+   "observed_as_of": "2026-08-13",
+   "retrieved_at": "2026-08-13T19:45:00+00:00",
+   "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+   "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+   "corroboration": 1,
+   "sources": [
+    {
+     "source_name": "aio.panphol.com",
+     "source_url": "https://aio.panphol.com/stock/PTTEP/price",
+     "close": 149.0,
+     "observed_as_of": "2026-08-07",
+     "retrieved_at": "2026-08-10T19:38:16.078345+00:00"
+    },
+    {
+     "source_name": "stockinvest.us",
+     "source_url": "https://stockinvest.us/stock-price/PTTEP.BK",
+     "close": 149.0,
+     "observed_as_of": "2026-08-07",
+     "retrieved_at": "2026-08-10T19:38:16.079492+00:00"
+    },
+    {
+     "source_name": "stockinvest.us",
+     "source_url": "https://stockinvest.us/stock-price/PTTEP.BK",
+     "close": 149.5,
+     "observed_as_of": "2026-08-10",
+     "retrieved_at": "2026-08-10T19:38:16.080025+00:00",
+     "supersedes": "2026-08-07"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+     "close": 152.0,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-11T19:39:25.872559+00:00",
+     "supersedes": "2026-08-10"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+     "close": 149.5,
+     "observed_as_of": "2026-08-10",
+     "retrieved_at": "2026-08-11T19:39:25.874805+00:00",
+     "stale_relative_to": "2026-08-11"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+     "close": 152.0,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+     "note": "Second retrieval of the same session on a later publish. Same value."
+    },
+    {
+     "close": 152.0,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+     "superseded_on": "2026-08-14"
+    }
+   ],
+   "conflicts": [],
+   "note": "Unchanged from last night, RE-CONFIRMED on the later 03:20:09 publish. Close 152.00, +2.50 (+1.67%), prior 149.50, Open 150.50, H 152.00 L 150.00, vol 24,455,699, value 3,694,375.93k, avg 151.06. Value/volume 151.0640 vs published 151.06. Band 105.00/194.00 from prior 149.50 reconciles. 52w 104.00-164.00. NOTE: 13 Aug is the LAST CUM-DIVIDEND day (DPS 4.50, XD 14 Aug, pay 28 Aug).",
+   "is_confirmed_close": true,
+   "status_raw": "Closed",
+   "open": 151.5,
+   "high": 151.5,
+   "low": 149.5,
+   "volume_shares": 20592787,
+   "value_thousand_baht": 3104940.36,
+   "published_avg": 150.78,
+   "floor": 106.5,
+   "ceiling": 197.5,
+   "prior": 152.0
+  },
+  "SCB.BK": {
+   "ticker": "SCB.BK",
+   "close": 152.0,
+   "currency": "THB",
+   "observed_as_of": "2026-08-11",
+   "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+   "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+   "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+   "corroboration": 1,
+   "sources": [
+    {
+     "source_name": "aio.panphol.com",
+     "source_url": "https://aio.panphol.com/stock/SCB/price",
+     "close": 153.5,
+     "observed_as_of": "2026-08-07",
+     "retrieved_at": "2026-08-10T19:38:16.078951+00:00"
+    },
+    {
+     "source_name": "stockinvest.us",
+     "source_url": "https://stockinvest.us/stock-price/SCB.BK",
+     "close": 155.5,
+     "observed_as_of": "2026-07-15",
+     "retrieved_at": "2026-08-10T19:38:16.080568+00:00",
+     "stale_relative_to": "2026-08-07"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+     "close": 152.0,
+     "observed_as_of": "2026-08-10",
+     "retrieved_at": "2026-08-11T19:39:25.873415+00:00",
+     "supersedes": "2026-08-07"
+    },
+    {
+     "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+     "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+     "close": 152.0,
+     "observed_as_of": "2026-08-11",
+     "retrieved_at": "2026-08-13T19:35:00.000000+00:00",
+     "supersedes": "2026-08-10",
+     "note": "Prior field on this page reads 152.00 and independently confirms the 10 Aug close already on file - a genuine cross-check, since the two figures were read from different page states two nights apart."
+    }
+   ],
+   "conflicts": [],
+   "note": "SET quote page, state=FINAL (stamp 12 Aug 2026 03:20:09, outside SET hours, therefore reporting the 11 Aug session). Last 152.00, Change 0.00 (0.00%), Prior 152.00, Open 152.50, H 153.00 L 151.50, vol 11,159,883, value 1,697,715.66k, avg 152.13. Value/volume = 152.1267 vs published 152.13 (ok). Band floor 106.50 / ceiling 197.50 from prior 152.00 reconciles. 52w 125.00-160.00. RESOLVES the 11 Aug pre-open-cache gap: SCB was UNCHANGED on 11 Aug, so last night’s mixed-date total of 631,260 happens to have been correct - by luck, not by method.",
+   "rejected_observation_2026_08_14_run": {
+    "reason": "Status='Open1', Last Update 13 Aug 2026 09:59:37 ICT - intraday, not a close",
+    "last": 152.0,
+    "high": 152.5,
+    "low": 152.0,
+    "volume_shares": 805164,
+    "value_thousand_baht": 122384.99,
+    "note": "Equals the genuine 11 Aug close of 152.00, which is exactly why it was dangerous.",
+    "retrieved_at": "2026-08-13T19:45:00+00:00",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price"
+   },
+   "mark_age_sessions": 1
+  }
+ }
+}

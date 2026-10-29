@@ -1,0 +1,28 @@
+{
+  "snapshot_date": "2026-08-03",
+  "_note": "Written by the nightly agent 2026-08-03. First snapshot to carry a genuinely FRESH holding print since the archive gap: PTTEP re-priced to ~148 THB (Aug-03, post-Q2 rally to the 147-151 band, up from the 141.00 Jul-24 carry). SCB 152-vs-155 flag RESOLVED — an Aug-03 quote confirms 155.00 with previous close 152.50, so the 155.00 (Jul-24) close is correct. BAFS still on its last clean print 9.25 (Jul-28); H1 ~Aug-14. Share counts carried from the 2026-06-21 seed (BAFS 18,200; PTTEP 1,400; SCB 1,400). Gold fund tracked via NAV estimate (no live unit price). risk_score left null because the blended score requires the Postgres risk path (python -m ai_engine.risk_scorer on the live host).",
+  "base_currency": "THB",
+  "usdthb_rate": 33.39,
+  "holdings": {
+    "BAFS.BK": {"shares": 18200, "current_price": 9.25, "price_date": "2026-07-28", "market_value_thb": 168350.0},
+    "PTTEP.BK": {"shares": 1400, "current_price": 148.0, "price_date": "2026-08-03", "market_value_thb": 207200.0, "price_note": "fresh Aug-03 print (post-Q2 rally 147-151 band, mid ~148); interim div THB 4.50 pay Aug-28"},
+    "SCB.BK": {"shares": 1400, "current_price": 155.0, "price_date": "2026-07-24", "market_value_thb": 217000.0, "price_note": "152-vs-155 flag RESOLVED: 152.50 was the previous close, 155.00 the Jul-24 close (confirmed Aug-03)"},
+    "SCB_GOLD_FUND": {"note": "no live unit price; est NAV ~4.14 THB/unit (gold $4,044 x USD/THB 33.39)"}
+  },
+  "total_market_value_thb_ex_gold": 592550.0,
+  "prior_total_ex_gold_thb": 582750.0,
+  "delta_ex_gold_thb": 9800.0,
+  "delta_note": "+THB 9,800 vs the 2026-08-01 snapshot, entirely from PTTEP re-pricing 141->148 (post-Q2 rally); BAFS + SCB unchanged.",
+  "risk_score": null,
+  "risk_level": "pending_live_run",
+  "usd_thb_rate": 33.39,
+  "usd_thb_note": "baht STEADY at ~33.39 (Aug-2, range 33.34-33.51); no regime change vs last run",
+  "brent_usd": 88.0,
+  "brent_note": "consolidation ~$87.93 (Jul-31 settle); up ~23% on the month; Jul-29 $90.74 spike un-acted-on; oil_scenario ranking unchanged [7,25,32,21,15]",
+  "gold_usd": 4044.0,
+  "gold_house_band_usd": [4000, 4900],
+  "gold_est_nav_thb_per_unit": 4.14,
+  "fed_policy_risk_level": "elevated",
+  "gold_drawdown_signal": "hold",
+  "catalysts_next": ["PTTEP interim-div ex-date (pay Aug-28)", "SCB interim-dividend declaration watch Aug-Sep", "US July jobs report ~Aug-7", "Vietnam FTSE constituent list Aug-21 (upgrade Sep-21)", "BAFS H1 ~Aug-14"]
+}

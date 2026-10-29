@@ -1,0 +1,709 @@
+{
+  "investment": {
+    "ticker": "MSFT",
+    "name": "Microsoft",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 379.3999938964844,
+    "price_display": "379.40",
+    "change_pct": -0.75,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 22.57,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            32.0
+          ],
+          [
+            2021,
+            35.0
+          ],
+          [
+            2022,
+            28.0
+          ],
+          [
+            2023,
+            34.0
+          ],
+          [
+            2024,
+            37.0
+          ],
+          [
+            2025,
+            36.0
+          ],
+          [
+            2026,
+            37.0
+          ]
+        ]
+      },
+      "ROIC": {
+        "metric": "ROIC",
+        "value": 30.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "FY2025",
+        "retrieved_at": "2026-06-21T17:06:39+00:00",
+        "confidence": 1.0,
+        "note": "curated",
+        "history": [
+          [
+            2020,
+            24.0
+          ],
+          [
+            2021,
+            30.0
+          ],
+          [
+            2022,
+            28.0
+          ],
+          [
+            2023,
+            27.0
+          ],
+          [
+            2024,
+            29.0
+          ],
+          [
+            2025,
+            30.0
+          ],
+          [
+            2026,
+            30.0
+          ]
+        ]
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 34.01,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2022,
+            43.7
+          ],
+          [
+            2023,
+            35.1
+          ],
+          [
+            2024,
+            32.8
+          ],
+          [
+            2025,
+            29.6
+          ]
+        ]
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.3,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 96.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            1.0
+          ],
+          [
+            2021,
+            0.8
+          ],
+          [
+            2022,
+            1.0
+          ],
+          [
+            2023,
+            0.8
+          ],
+          [
+            2024,
+            0.7
+          ],
+          [
+            2025,
+            0.7
+          ],
+          [
+            2026,
+            0.7
+          ]
+        ]
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 1.31,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            3.6
+          ],
+          [
+            2021,
+            3.0
+          ],
+          [
+            2022,
+            3.2
+          ],
+          [
+            2023,
+            2.6
+          ],
+          [
+            2024,
+            2.5
+          ],
+          [
+            2025,
+            2.8
+          ],
+          [
+            2026,
+            2.9
+          ]
+        ]
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 18.3,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            6.9
+          ],
+          [
+            2024,
+            15.7
+          ],
+          [
+            2025,
+            14.9
+          ]
+        ]
+      },
+      "Price/FCF": {
+        "metric": "Price/FCF",
+        "value": 35.0,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:39+00:00",
+        "confidence": 1.0,
+        "note": "curated",
+        "history": [
+          [
+            2020,
+            28.0
+          ],
+          [
+            2021,
+            34.0
+          ],
+          [
+            2022,
+            30.0
+          ],
+          [
+            2023,
+            38.0
+          ],
+          [
+            2024,
+            40.0
+          ],
+          [
+            2025,
+            36.0
+          ],
+          [
+            2026,
+            35.0
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 2818.35,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "$2.82T",
+        "history": null
+      },
+      "News sentiment": {
+        "metric": "News sentiment",
+        "value": 0.35,
+        "unit": "score",
+        "source_name": "News headlines (RSS)",
+        "source_url": "https://news.google.com/rss/search?q=MSFT",
+        "period": "24h",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Bullish — AI capex / Copilot",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 504.3,
+        "unit": "USD",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "conservative 30× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 32.9,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      },
+      "Dividend WHT": {
+        "metric": "Dividend WHT",
+        "value": 15.0,
+        "unit": "%",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "treaty",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Repatriation drag": {
+        "metric": "Repatriation drag",
+        "value": 19.87,
+        "unit": "%/yr",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:40+00:00",
+        "confidence": 1.0,
+        "note": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT.; FX round-trip ~1.0% over ~1.5yr.",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated",
+      "High repatriation drag (~19.9%/yr) for a Thai investor",
+      "Dividend yield=96.0% implausibly high — verify source"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Accumulate",
+      "conviction": 75,
+      "confidence": 70,
+      "thesis": "MSFT ranks 2nd in P/E and 3rd in FCF yield among peers, offering a strong margin of safety.",
+      "key_risk": "High repatriation drag for foreign investors.",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "ROIC",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Caution",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "MSFT ranks 4/6 in revenue growth among peers, indicating slower growth relative to competitors.",
+      "key_risk": "High repatriation drag for Thai investors.",
+      "metrics_used": [
+        "Revenue growth",
+        "News sentiment"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "News headlines (RSS)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Caution",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "High repatriation drag and FX risk outweighs peer-leading dividend yield (rank 1/5).",
+      "key_risk": "High FX risk and repatriation costs.",
+      "metrics_used": [
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "repatriation.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Accumulate",
+      "conviction": 70,
+      "confidence": 75,
+      "thesis": "MSFT ranks 2nd in both Debt/Equity and P/E among peers, indicating strong relative fundamentals.",
+      "key_risk": "High FX risk and repatriation drag.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py",
+        "repatriation.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT — accumulate on dips",
+    "blended_conviction": 66,
+    "agreement": "the business/asset facts themselves are not in dispute.",
+    "disagreement": "Value Analyst, Risk & Control see enough to lean in, while Macro & Tech-Trends, Cross-Asset Linkage flag valuation or fragility risk.",
+    "net": "WAIT — accumulate on dips. Blended conviction 66/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (High repatriation drag for Thai investors.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 504.3,
+      "upside_pct": 32.9,
+      "fair_pe": 30.0
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    },
+    "repatriation": {
+      "origin": "US",
+      "is_etf": false,
+      "dividend_wht_pct": 15.0,
+      "effective_dividend_tax_pct": 20.0,
+      "dividend_drag_pct": 19.2,
+      "fx_drag_pct": 0.67,
+      "total_drag_pct": 19.87,
+      "remit_exempt_assumed": false,
+      "notes": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT. FX round-trip ~1.0% over ~1.5yr.",
+      "suggestion": "",
+      "disclaimer": "Estimate — confirm with a Thai tax professional."
+    }
+  },
+  "peers": {
+    "peers": [
+      "AAPL",
+      "GOOGL",
+      "AMZN",
+      "META",
+      "ORCL"
+    ],
+    "table": {
+      "MSFT": {
+        "P/E": 22.57,
+        "ROIC": 30.0,
+        "ROE": 34.01,
+        "Debt/Equity": 0.3,
+        "Dividend yield": 96.0,
+        "FCF yield": 1.31,
+        "Revenue growth": 18.3,
+        "Price/FCF": 35.0,
+        "Market cap": 2818.35
+      },
+      "AAPL": {
+        "P/E": 36.12,
+        "ROE": 141.47,
+        "Dividend yield": 36.0,
+        "Debt/Equity": 0.8,
+        "Revenue growth": 16.6,
+        "Market cap": 4376.98,
+        "FCF yield": 2.31
+      },
+      "GOOGL": {
+        "P/E": 28.09,
+        "ROE": 38.88,
+        "Dividend yield": 24.0,
+        "Debt/Equity": 0.2,
+        "Revenue growth": 21.8,
+        "Market cap": 4490.91,
+        "FCF yield": 0.62
+      },
+      "AMZN": {
+        "P/E": 31.66,
+        "ROE": 24.29,
+        "Debt/Equity": 0.53,
+        "Revenue growth": 16.6,
+        "Market cap": 2628.93,
+        "FCF yield": 0.37
+      },
+      "META": {
+        "P/E": 21.01,
+        "ROE": 32.93,
+        "Dividend yield": 36.0,
+        "Debt/Equity": 0.36,
+        "Revenue growth": 33.1,
+        "Market cap": 1465.23,
+        "FCF yield": 1.74
+      },
+      "ORCL": {
+        "P/E": 31.66,
+        "ROE": 53.38,
+        "Dividend yield": 1.09,
+        "Debt/Equity": 3.63,
+        "Revenue growth": 20.6,
+        "Market cap": 530.03,
+        "FCF yield": -3.84
+      }
+    }
+  },
+  "peer_advice": {
+    "available": true,
+    "scores": {
+      "MSFT": 65,
+      "AAPL": 53,
+      "GOOGL": 49,
+      "AMZN": 38,
+      "META": 72,
+      "ORCL": 13
+    },
+    "ranked": [
+      [
+        "META",
+        72
+      ],
+      [
+        "MSFT",
+        65
+      ],
+      [
+        "AAPL",
+        53
+      ],
+      [
+        "GOOGL",
+        49
+      ],
+      [
+        "AMZN",
+        38
+      ],
+      [
+        "ORCL",
+        13
+      ]
+    ],
+    "target": "MSFT",
+    "target_rank": 2,
+    "total": 6,
+    "better_overall": [
+      {
+        "ticker": "META",
+        "score": 72
+      }
+    ],
+    "candidates": [
+      {
+        "ticker": "META",
+        "score": 72
+      }
+    ],
+    "field_beats": [
+      {
+        "metric": "P/E",
+        "winner": "META",
+        "winner_value": 21.01,
+        "target_value": 22.57
+      },
+      {
+        "metric": "FCF yield",
+        "winner": "AAPL",
+        "winner_value": 2.31,
+        "target_value": 1.31
+      },
+      {
+        "metric": "ROE",
+        "winner": "AAPL",
+        "winner_value": 141.47,
+        "target_value": 34.01
+      },
+      {
+        "metric": "Revenue growth",
+        "winner": "META",
+        "winner_value": 33.1,
+        "target_value": 18.3
+      },
+      {
+        "metric": "Debt/Equity",
+        "winner": "GOOGL",
+        "winner_value": 0.2,
+        "target_value": 0.3
+      }
+    ],
+    "metrics_used": [
+      "P/E",
+      "FCF yield",
+      "ROE",
+      "Dividend yield",
+      "Revenue growth",
+      "Debt/Equity"
+    ]
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/MSFT",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/MSFT/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 9 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=MSFT",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=MSFT",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 1 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T17:06:50+00:00",
+  "discovered_idea": true,
+  "idea_theme": "AI growth",
+  "idea_reason": "Microsoft's investments in AI position it for significant growth.",
+  "candidates": []
+}

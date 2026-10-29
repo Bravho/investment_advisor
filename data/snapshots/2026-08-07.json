@@ -1,0 +1,320 @@
+{
+  "_meta": {
+    "date": "2026-08-07",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-07",
+    "base_currency": "THB",
+    "marks_are_carried": true,
+    "carried_from": "2026-08-04",
+    "carried_run_count": 3,
+    "carried_note": "THIRD consecutive run with no confirmed official SET close for any holding. The zero portfolio delta below is an ABSENCE OF DATA, not a flat market. Positive evidence the market was NOT flat: the SET index traded to a low of 1,607.51 on 2026-08-06 against a 1,617.13 close on 2026-08-04, alongside reported foreign net selling of Thai stocks and bonds."
+  },
+  "prices_thb": {
+    "BAFS.BK": 9.8,
+    "PTTEP.BK": 145.0,
+    "SCB.BK": 151.5
+  },
+  "shares": {
+    "BAFS.BK": 18200,
+    "PTTEP.BK": 1400,
+    "SCB.BK": 1400
+  },
+  "position_values_thb": {
+    "BAFS.BK": 178360.0,
+    "PTTEP.BK": 203000.0,
+    "SCB.BK": 212100.0
+  },
+  "total_ex_gold_thb": 593460.0,
+  "prior_total_ex_gold_thb": 593460.0,
+  "delta_vs_prior_thb": 0.0,
+  "delta_vs_prior_pct": 0.0,
+  "weights_pct": {
+    "BAFS.BK": 30.05,
+    "PTTEP.BK": 34.21,
+    "SCB.BK": 35.74
+  },
+  "concentration_review": {
+    "source": "portfolio_engine/rebalancer.py :: single_name_concentration_review()",
+    "name_flag_pct": 30.0,
+    "country_flag_pct": 70.0,
+    "materiality_margin_pct": 1.0,
+    "min_material_trim_thb": 5000.0,
+    "_materiality_added": "2026-08-07",
+    "country_weights_pct": {
+      "TH": 100.0
+    },
+    "country_breaches_pct": {
+      "TH": 100.0
+    },
+    "name_breaches": [
+      "SCB.BK",
+      "PTTEP.BK",
+      "BAFS.BK"
+    ],
+    "material_name_breaches": [
+      "SCB.BK",
+      "PTTEP.BK"
+    ],
+    "immaterial_name_breaches": [
+      "BAFS.BK"
+    ],
+    "trim_to_clear_flags": {
+      "SCB.BK": {
+        "thb": 34062.0,
+        "shares": 224,
+        "excess_pct": 5.74,
+        "material": true
+      },
+      "PTTEP.BK": {
+        "thb": 24962.0,
+        "shares": 172,
+        "excess_pct": 4.21,
+        "material": true
+      },
+      "BAFS.BK": {
+        "thb": 322.0,
+        "shares": 32,
+        "excess_pct": 0.05,
+        "material": false
+      }
+    },
+    "total_trim_to_clear_name_flags_thb": 59346.0,
+    "material_trim_thb": 59024.0,
+    "status": "action_suggested",
+    "immaterial_breach_note": "BAFS.BK at 30.05% (+0.05pp, THB 322) is reported but NOT actioned - below the 1.00pp / THB 5,000 materiality floor added 2026-08-07. It is inside the uncertainty of a carried mark and too small to survive commission and the SET transaction levy.",
+    "sequencing_note": "PTTEP goes ex on 2026-08-14 (last cum day 2026-08-13). Trimming PTTEP before then forfeits THB 6,300 gross of entitled income to correct a 4.21pp weight breach. Sequence after XD."
+  },
+  "currency_exposure": {
+    "source": "portfolio_engine/currency_exposure.py :: look_through_currency_exposure()",
+    "_added_by_nightly_agent": "2026-08-07",
+    "fx_convention": "USD/THB = baht per dollar. A RISE is a WEAKER baht.",
+    "scope": "ex-gold (gold sleeve unit count not tracked in this snapshot series)",
+    "listed_currency_thb_pct": 100.0,
+    "economic_usd_exposure_pct": 34.88,
+    "economic_thb_exposure_pct": 65.12,
+    "portfolio_thb_depreciation_beta": 0.094,
+    "per_position": [
+      {
+        "ticker": "SCB.BK",
+        "weight_pct": 35.74,
+        "usd_revenue_share": 0.05,
+        "thb_depreciation_beta": -0.3,
+        "confidence": "medium_low"
+      },
+      {
+        "ticker": "PTTEP.BK",
+        "weight_pct": 34.21,
+        "usd_revenue_share": 0.95,
+        "thb_depreciation_beta": 0.5,
+        "confidence": "high_on_direction_medium_on_magnitude"
+      },
+      {
+        "ticker": "BAFS.BK",
+        "weight_pct": 30.05,
+        "usd_revenue_share": 0.02,
+        "thb_depreciation_beta": 0.1,
+        "confidence": "medium"
+      }
+    ],
+    "headline": "By listing currency the book is 100.0% THB. By the currency the underlying businesses actually earn, roughly 34.9% of it is USD-linked. The concentration screen sees the first number and none of the second.",
+    "net_position_read": "Portfolio beta to a 1% baht depreciation is estimated at +0.09%. The book is therefore NET LONG the US dollar / NET SHORT the baht in economic terms, which is the opposite of what a '100% Thailand' label implies. A weaker baht is, on these assumptions, mildly HELPFUL to this specific portfolio.",
+    "what_this_does_not_change": "This does not reduce COUNTRY risk. A Thai political, regulatory, SET-liquidity or sovereign event hits all four positions regardless of what currency the revenue is denominated in. Look-through FX exposure and country concentration are different risks and this module only addresses the first. The 100% TH country flag from rebalancer.single_name_concentration_review() STANDS.",
+    "thb_scenarios": [
+      {
+        "name": "baht_recovers",
+        "usd_thb": 32.0,
+        "thb_move_vs_base_pct": -4.16,
+        "est_portfolio_thb": 591141.0,
+        "est_change_thb": -2319.0,
+        "est_change_pct": -0.39,
+        "narrative": "Fed cuts land, differential narrows, tourism season returns, oil falls."
+      },
+      {
+        "name": "current_mark",
+        "usd_thb": 33.39,
+        "thb_move_vs_base_pct": 0.0,
+        "est_portfolio_thb": 593460.0,
+        "est_change_thb": 0.0,
+        "est_change_pct": 0.0,
+        "narrative": "2026-08-06 mark. 13-15 month low; -5.5% year to date."
+      },
+      {
+        "name": "drift_continues",
+        "usd_thb": 34.5,
+        "thb_move_vs_base_pct": 3.32,
+        "est_portfolio_thb": 595311.86,
+        "est_change_thb": 1851.86,
+        "est_change_pct": 0.31,
+        "narrative": "BOT pinned at 1.00%, current account stays negative on the energy bill."
+      },
+      {
+        "name": "stress",
+        "usd_thb": 36.0,
+        "thb_move_vs_base_pct": 7.82,
+        "est_portfolio_thb": 597814.38,
+        "est_change_thb": 4354.38,
+        "est_change_pct": 0.73,
+        "narrative": "Sustained foreign outflow plus an oil re-spike; disorderly move."
+      }
+    ],
+    "magnitude_caveat": "The spread across this table is small relative to a single day's equity move. That is the honest finding: for a book this size, FX is a real but second-order driver of value, and it is a FIRST-order driver only of the gold sleeve. Sizing decisions should not be made on this table alone.",
+    "betas_are_assumptions_not_measurements": "To replace these structural assumptions with measured betas, load a 3-year daily series of BAFS.BK / PTTEP.BK / SCB.BK closes and USDTHB into data/research/, then regress each name's daily THB return on the USDTHB daily return with Brent as a control. Until that exists, every beta in this module is an assumption with a stated rationale, and the report says so on every line."
+  },
+  "gold_sleeve": {
+    "fund": "SCBGOLDE",
+    "gold_usd_oz": 4252.59,
+    "gold_usd_oz_prior": 4184.0,
+    "gold_source": "CNBC 2026-08-06 09:00 ET (conservative end of range)",
+    "gold_feed_range_usd_oz": [
+      4252.59,
+      4309.0
+    ],
+    "usd_thb": 33.39,
+    "usd_thb_prior": 33.09,
+    "est_nav_thb_per_unit": 4.34,
+    "est_nav_thb_per_unit_prior": 4.23,
+    "fx_attribution": {
+      "label": "SCBGOLDE",
+      "asset_return_usd_pct": 1.6393,
+      "usd_thb_start": 33.09,
+      "usd_thb_end": 33.39,
+      "thb_move_pct": 0.9066,
+      "thb_direction": "weaker_baht",
+      "fx_return_pct": 0.9066,
+      "cross_term_pct": 0.014863,
+      "total_return_thb_pct": 2.5608,
+      "fx_share_of_total_pct": 35.4,
+      "reading": "SCBGOLDE: +1.64% in USD became +2.56% in THB. The currency contributed +0.91pp of that."
+    },
+    "reading": "Gold +1.64% in USD became +2.56% in THB. The weaker baht ADDED 0.91pp, i.e. 35.4% of the total THB gain. This is the exact mirror of 2026-08-06, when a stronger baht gave back a third of the move. Two consecutive sessions, opposite signs: the unhedged FX line is volatility, not a one-way drag."
+  },
+  "macro_marks": {
+    "brent_usd": 83.64,
+    "brent_date": "2026-08-06",
+    "brent_source": "Fortune 07:00 ET Brent benchmark",
+    "brent_feed_dispersion": {
+      "brent_usd": 83.64,
+      "wti_usd": 77.75,
+      "unlabelled_crude_print_usd": 75.0,
+      "note": "Brent-specific figure used; dispersion logged rather than averaged."
+    },
+    "weighted_scenario_brent_usd": 88.08,
+    "weighted_scenario_brent_usd_prior": 87.11,
+    "usd_thb": 33.39,
+    "usd_thb_prior": 33.09,
+    "usd_thb_source_conflict": {
+      "taken": 33.39,
+      "range_seen": [
+        33.39,
+        33.64
+      ],
+      "note": "13-month-low (33.40) vs 15-month-low (33.640) framings conflict on magnitude; direction corroborated. THB -5.5% YTD."
+    },
+    "gold_usd_oz": 4252.59,
+    "set_index_last_close": 1617.13,
+    "set_index_last_close_date": "2026-08-04",
+    "set_index_intraday_low": 1607.51,
+    "set_index_intraday_low_date": "2026-08-06",
+    "bot_policy_rate_pct": 1.0,
+    "bot_gdp_forecast_2026_pct": 2.3,
+    "bot_gdp_forecast_2026_pct_prior": 1.5,
+    "us_indices_2026_08_06": {
+      "dow_pct": -0.7,
+      "sp500_pct": -0.1,
+      "nasdaq_pct": 0.0
+    },
+    "us_indices_2026_08_04_close": {
+      "dow": 54085.88,
+      "sp500": 7736.52,
+      "nasdaq": 26584.99
+    },
+    "asia_2026_08_06": {
+      "nikkei": 65683.26,
+      "nikkei_pct": -0.93,
+      "hang_seng": 25530.28,
+      "hang_seng_pct": -1.49,
+      "shanghai": 3900.35,
+      "shanghai_pct": 0.57,
+      "sensex_open": 78782.43,
+      "sensex_pts": 201.43
+    },
+    "eu_2026_08_06": {
+      "eu50": 6512.0,
+      "eu50_pct": 0.49,
+      "dax_pct": -0.1,
+      "ftse100_pct": 0.3,
+      "cac40_pct": 0.7
+    }
+  },
+  "oil_scenario_rerank": {
+    "date": "2026-08-07",
+    "probabilities": {
+      "deal_signed_hormuz_open": 14,
+      "deal_partial": 44,
+      "status_quo": 21,
+      "lebanon_spillover_reclosure": 12,
+      "nuclear_track_breakdown": 9
+    },
+    "prior": {
+      "deal_signed_hormuz_open": 17,
+      "deal_partial": 38,
+      "status_quo": 24,
+      "lebanon_spillover_reclosure": 12,
+      "nuclear_track_breakdown": 9
+    },
+    "sum": 100,
+    "weighted_brent_usd": 88.08,
+    "key_call": "First DOWNGRADE of deal_signed in the series. The bilateral leg firmed (Iran-Oman route coordinates agreed in principle) while the trilateral leg did not (US conditions unmet, Trump's 48 hours lapsed). An Iran/Oman-managed corridor under Iranian sovereignty is close to the OPPOSITE of the US-guaranteed free-transit regime deal_signed requires."
+  },
+  "price_caveats": [
+    "THIRD run with no confirmed official SET close - BAFS/PTTEP/SCB all carried from 2026-08-04.",
+    "SET index 1,607.51 (2026-08-06) is an INTRADAY LOW, not a close.",
+    "USD/THB 33.39 taken; sources conflict on whether the low is 33.40 (13-month) or 33.640 (15-month).",
+    "Gold feed dispersion ~$56/oz (4,252.59 CNBC to 4,309 Yahoo); conservative end taken.",
+    "Oil feed dispersion: Brent 83.64 vs WTI 77.75 vs an unlabelled ~75 print.",
+    "PTTEP 147.00 reference is dated 2026-07-21, not a fresh close. The rejected 162.50 did not reappear.",
+    "SCB 137.50 stale-quote conflict still unre-verified (open since 2026-08-05).",
+    "PTTEP 2026 capex still unretrievable (open since 2026-08-03).",
+    "JPM $6,000/oz gold headline surfaced a THIRD time from secondary aggregators - again NOT adopted."
+  ],
+  "catalysts": [
+    {
+      "date": "2026-08-07",
+      "item": "US July non-farm payrolls (cons. ~80k, u-rate 4.2%)"
+    },
+    {
+      "date": "2026-08-13",
+      "item": "PTTEP LAST CUM DAY - THB 4.50 interim, THB 6,300 gross",
+      "urgent": true
+    },
+    {
+      "date": "2026-08-14",
+      "item": "PTTEP XD; BAFS H1-2026 result (est.)"
+    },
+    {
+      "date": "2026-08-21",
+      "item": "Vietnam FTSE checkpoint - monitoring only, verdict is do-not-buy"
+    },
+    {
+      "date": "2026-08-26",
+      "item": "BOT MPC (policy 1.00%)"
+    },
+    {
+      "date": "2026-08-27",
+      "item": "Nvidia Q2 FY2026 results"
+    },
+    {
+      "date": "2026-08-28",
+      "item": "PTTEP interim pay date; BAFS investor meeting"
+    },
+    {
+      "date": "2026-09-21",
+      "item": "Vietnam FTSE EM upgrade effective"
+    },
+    {
+      "date": "2026-10/12",
+      "item": "Hormuz interim arrangement expiry (2-4 months from agreement)"
+    }
+  ],
+  "risk_score": null
+}

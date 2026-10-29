@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+httpx
+python-dotenv
+openai
+anthropic
+asyncpg
+
+-r data_collector/requirements.txt
+-r ai_engine/requirements.txt

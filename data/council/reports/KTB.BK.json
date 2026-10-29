@@ -1,0 +1,314 @@
+{
+  "investment": {
+    "ticker": "KTB.BK",
+    "name": "KTB.BK",
+    "asset_class": "SET Equity",
+    "currency": "THB",
+    "price": 36.0,
+    "price_display": "36.00",
+    "change_pct": -0.69,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 10.29,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 10.99,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            9.0
+          ],
+          [
+            2023,
+            9.1
+          ],
+          [
+            2024,
+            10.5
+          ],
+          [
+            2025,
+            10.4
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 10.04,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": -1.2,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            19.1
+          ],
+          [
+            2024,
+            6.7
+          ],
+          [
+            2025,
+            -1.2
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 15.29,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "฿503.14B",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 41.98,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "conservative 12× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 16.6,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:02+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 5 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "KTB.BK looks undervalued relative to its peers, with a high dividend yield and decent ROE. More peer data would help assess its competitive advantage.",
+      "key_risk": "Reliance on the cyclical banking sector could lead to underperformance if economic conditions deteriorate.",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "Dividend yield",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "Lack of peer data limits conviction. Wait for more clarity.",
+      "key_risk": "Fails to grow revenue in a challenging environment.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "KTB's low FX risk makes it a relatively attractive play in an otherwise volatile sector, but its high dividend yield suggests a mature business that may struggle to grow.",
+      "key_risk": "Reliance on mature business model; peers could outperform if they have more growth potential",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "KTB.BK looks fairly valued relative to peers, but lacks clear competitive advantages. Wait for a more compelling entry point.",
+      "key_risk": "Leverage and valuation fragility could amplify any downturn.",
+      "metrics_used": [
+        "P/E",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 60,
+    "agreement": "all four analysts land on a neutral, wait-and-see stance.",
+    "disagreement": "no material disagreement — differences are of degree, not direction.",
+    "net": "WAIT. Blended conviction 60/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Reliance on the cyclical banking sector could lead to underperformance if economic conditions deteriorate.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 41.98,
+      "upside_pct": 16.6,
+      "fair_pe": 12.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "KTB.BK": {
+        "P/E": 10.29,
+        "ROE": 10.99,
+        "Dividend yield": 10.04,
+        "Revenue growth": -1.2,
+        "Market cap": 15.29
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/KTB.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/KTB.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 5 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=KTB.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=KTB.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:58:22+00:00",
+  "discovered": true,
+  "candidates": []
+}

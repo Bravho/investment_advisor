@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guru Council — UI Mockup</title>
+<style>
+  :root{
+    --bg:#0b0f19; --card:rgba(17,24,39,.72); --border:rgba(255,255,255,.07);
+    --muted:#94a3b8; --txt:#e5e7eb; --blue:#3b82f6; --emerald:#10b981;
+    --amber:#f59e0b; --rose:#f43f5e; --slate:#64748b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,Arial,sans-serif;
+    background-image:radial-gradient(at 8% 10%,rgba(59,130,246,.10) 0,transparent 45%),
+      radial-gradient(at 92% 85%,rgba(16,185,129,.08) 0,transparent 45%);background-attachment:fixed;}
+  .wrap{max-width:1240px;margin:0 auto;padding:24px 20px 60px;}
+  h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .banner{font-size:11px;background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.25);
+    padding:6px 10px;border-radius:8px;display:inline-block;margin-top:10px}
+  .glass{background:var(--card);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(10px)}
+  .tabs{display:flex;gap:6px;margin:22px 0;flex-wrap:wrap}
+  .tab{padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:#0e1422;color:var(--muted);
+    cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+  .tab:hover{color:#fff}
+  .tab.active{background:var(--blue);color:#fff;border-color:transparent}
+  .screen{display:none}.screen.active{display:block}
+  .h2{font-size:15px;font-weight:700;margin:0 0 4px}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  /* source review */
+  .src-row{display:grid;grid-template-columns:26px 1.1fr 2.4fr 130px 120px;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--border)}
+  .src-row:last-child{border-bottom:0}
+  .src-head{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  input[type=text]{width:100%;background:#0a0f1c;border:1px solid var(--border);border-radius:8px;color:#dbeafe;padding:7px 9px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px}
+  .toggle{width:38px;height:21px;border-radius:20px;background:#1f2937;position:relative;cursor:pointer;transition:.15s}
+  .toggle.on{background:var(--emerald)}
+  .toggle .knob{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s}
+  .toggle.on .knob{left:19px}
+  .method{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7dd3fc;background:#0a1626;border:1px solid rgba(59,130,246,.22);padding:3px 8px;border-radius:6px;white-space:nowrap}
+  .btn{padding:9px 18px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer}
+  .btn-run{background:var(--emerald);color:#04231a}
+  .btn-ghost{background:#0e1422;color:var(--muted);border:1px dashed var(--border)}
+  .status-ok{color:var(--emerald);font-size:11px}.status-warn{color:var(--amber);font-size:11px}
+  /* badges */
+  .badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;display:inline-block}
+  .b-buy,.b-accum{background:rgba(16,185,129,.14);color:#34d399;border:1px solid rgba(16,185,129,.28)}
+  .b-wait{background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+  .b-pass{background:rgba(100,116,139,.16);color:#cbd5e1;border:1px solid rgba(100,116,139,.3)}
+  .b-caution{background:rgba(244,63,94,.14);color:#fb7185;border:1px solid rgba(244,63,94,.3)}
+  /* report layout */
+  .rep-grid{display:grid;grid-template-columns:248px 1fr;gap:16px}
+  .pick{padding:12px}
+  .pick .li{padding:10px 11px;border-radius:10px;border:1px solid var(--border);background:#0c1322;cursor:pointer;margin-bottom:8px;transition:.12s}
+  .pick .li:hover{border-color:rgba(59,130,246,.4)}
+  .pick .li.active{background:rgba(59,130,246,.12);border-color:var(--blue)}
+  .pick .li .nm{font-weight:700;font-size:13px}
+  .pick .li .tk{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+  .pick .li .row2{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .pick .li .cv{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700}
+  .rep-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;padding:20px}
+  .price{font-size:28px;font-weight:700;letter-spacing:-.02em}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;padding:0 20px 18px}
+  .fact{background:#0a101e;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .fact .v{font-size:15px;font-weight:600;font-family:'JetBrains Mono',monospace}
+  .fact a{color:#60a5fa;font-size:10px;text-decoration:none}.fact a:hover{text-decoration:underline}
+  .fact.clickable{cursor:pointer;transition:.12s}
+  .fact.clickable:hover{border-color:rgba(59,130,246,.5);background:#0c1426}
+  .chico{font-size:10px;opacity:.8}
+  .modal{display:none;position:fixed;inset:0;background:rgba(2,6,18,.72);backdrop-filter:blur(4px);z-index:50;align-items:center;justify-content:center;padding:20px}
+  .modal-card{background:#0c1322;border:1px solid var(--border);border-radius:16px;padding:18px 20px;max-width:600px;width:100%}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;padding:4px 20px 18px}
+  .card{background:#0c1322;border:1px solid var(--border);border-radius:14px;padding:16px}
+  .card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .card .who{font-weight:700;font-size:13px}.card .lens{font-size:10px;color:var(--muted)}
+  .bar{height:7px;border-radius:7px;background:#1e293b;overflow:hidden;margin:8px 0 4px}
+  .bar > span{display:block;height:100%;border-radius:7px}
+  .conv-hi{background:var(--emerald)}.conv-mid{background:var(--amber)}.conv-lo{background:var(--rose)}
+  .card .thesis{font-size:12px;color:#cbd5e1;line-height:1.5;margin:8px 0}
+  .card .risk{font-size:11px;color:#fb9aa8;margin-top:6px}.card .src{font-size:10px;color:#64748b;margin-top:8px}
+  .chair{margin:4px 20px 18px;padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(16,185,129,.06));border:1px solid rgba(59,130,246,.2)}
+  .chair h3{margin:0 0 8px;font-size:14px}
+  .strip{display:flex;gap:20px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--border);font-size:12px}
+  .strip b{font-family:'JetBrains Mono',monospace}
+  .disc{padding:14px 20px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);line-height:1.6}
+  /* scorecard */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:9px 9px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+  th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;user-select:none}
+  th.sortable{cursor:pointer}th.sortable:hover{color:#fff}
+  thead tr.grp th{font-size:10px;color:#7dd3fc;border-bottom:1px solid var(--border);text-align:center;background:#0c1322}
+  td.inv{font-weight:700;color:#fff}td .tk{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+  .conv-cell{font-family:'JetBrains Mono',monospace;font-weight:700}
+  td.num{font-family:'JetBrains Mono',monospace}
+  tr.row:hover{background:rgba(59,130,246,.06)}
+  .mini{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:700}
+  .anote{white-space:normal;min-width:230px;max-width:280px;color:#cbd5e1;font-size:11px;line-height:1.45}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:14px 20px 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:9px;height:9px;border-radius:50%}
+  .vsep{border-left:2px solid rgba(59,130,246,.18)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Investment Guru Council — UI Mockup</h1>
+  <div class="sub">Three-screen web display · field-specialist council · illustrative data only</div>
+  <div class="banner">⚠ MOCKUP — sample/illustrative numbers, not live analysis. Layout preview for the redesign plan.</div>
+
+  <div class="tabs">
+    <div class="tab" data-s="a">1 · Data Sources</div>
+    <div class="tab active" data-s="b">2 · Investment Report</div>
+    <div class="tab" data-s="c">3 · Compare (Scorecard)</div>
+  </div>
+
+  <!-- ===================== SCREEN A ===================== -->
+  <div class="screen" id="a">
+    <div class="glass" style="padding:18px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="h2">Data sources for <span style="color:#60a5fa">MSFT</span> — review before analysis</div>
+          <div class="sub">Edit a URL, toggle off, or add a source, then re-run. Each source keeps its extraction method for reuse.</div>
+        </div>
+        <button class="btn btn-run" onclick="alert('(mockup) would re-run the full pipeline on the current source set')">▶ Run analysis</button>
+      </div>
+      <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div class="src-row src-head"><div>On</div><div>Source</div><div>URL</div><div>Method</div><div>Last fetched</div></div>
+        <div class="src-row"><div class="toggle on" onclick="this.classList.toggle('on')"><div class="knob"></div></div><div>Yahoo Finance — quote</div><input type="text" value="https://finance.yahoo.com/quote/MSFT"><div><span class="method">yahoo_quote</span></div><div class="status-ok">✓ 2m ago</div></div>
+        <div class="src-row"><div class="toggle on" onclick="this.classList.toggle('on')"><div class="knob"></div></div><div>Macrotrends — SBC / buybacks</div><input type="text" value="https://www.macrotrends.net/stocks/charts/MSFT/stock-based-compensation"><div><span class="method">fundamentals</span></div><div class="status-ok">✓ 2m ago</div></div>
+        <div class="src-row"><div class="toggle on" onclick="this.classList.toggle('on')"><div class="knob"></div></div><div>SEC EDGAR — 10-K</div><input type="text" value="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MSFT"><div><span class="method">sec_filing</span></div><div class="status-warn">⚠ capex split unconfirmed</div></div>
+        <div class="src-row"><div class="toggle on" onclick="this.classList.toggle('on')"><div class="knob"></div></div><div>News RSS — MSFT</div><input type="text" value="https://news.google.com/rss/search?q=Microsoft+MSFT"><div><span class="method">rss</span></div><div class="status-ok">✓ 5m ago</div></div>
+        <div class="src-row" style="opacity:.55"><div class="toggle" onclick="this.classList.toggle('on')"><div class="knob"></div></div><div>FRED — VIX (optional)</div><input type="text" value="https://fred.stlouisfed.org/series/VIXCLS"><div><span class="method">fred_api</span></div><div style="color:var(--muted);font-size:11px">off</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="alert('(mockup) add a custom URL → pick or auto-detect an extractor method')">＋ Add source</button>
+        <button class="btn btn-ghost" onclick="alert('(mockup) saved Source Set for MSFT — reused next time')">💾 Save source set</button>
+      </div>
+      <div class="sub" style="margin-top:12px">Provenance rule: every number in the report links back to one of these sources. Missing data is flagged, never invented.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN B ===================== -->
+  <div class="screen active" id="b">
+    <div class="rep-grid">
+      <div class="glass pick">
+        <div class="label" style="padding:4px 4px 8px">Interesting options · pick to view</div>
+        <div id="pickList"></div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:4px" onclick="alert('(mockup) analyze a new ticker → opens the Data Sources screen first')">＋ Analyze new</button>
+      </div>
+      <div class="glass" id="reportPanel"></div>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN C ===================== -->
+  <div class="screen" id="c">
+    <div class="glass" style="overflow:hidden">
+      <div style="padding:18px 20px 4px">
+        <div class="h2">Compare investments — ranked scorecard</div>
+        <div class="sub">Council verdict + conviction, key financial ratios, recommendation, and the analysis date. Click a header to sort.</div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--emerald)"></span>Buy/Accumulate</span>
+        <span><span class="dot" style="background:var(--amber)"></span>Wait</span>
+        <span><span class="dot" style="background:var(--rose)"></span>Caution</span>
+        <span><span class="dot" style="background:var(--slate)"></span>Pass / n/a</span>
+      </div>
+      <div style="overflow-x:auto;padding:12px 8px 18px">
+        <table id="scorecard">
+          <thead>
+            <tr class="grp">
+              <th colspan="2"></th>
+              <th colspan="6">Council</th>
+              <th colspan="6" class="vsep">Key financials</th>
+              <th colspan="2" class="vsep">Cost &amp; risk</th>
+              <th colspan="2" class="vsep">Analysis</th>
+            </tr>
+            <tr>
+              <th class="sortable" onclick="sortT(0,'s')">Investment</th>
+              <th class="sortable" onclick="sortT(1,'s')">Class</th>
+              <th class="sortable" onclick="sortT(2,'s')">Verdict</th>
+              <th class="sortable" onclick="sortT(3,'n')">Conv ▼</th>
+              <th>Value</th><th>Macro</th><th>Cross</th><th>Risk</th>
+              <th class="sortable vsep num" onclick="sortT(8,'n')">Mkt cap</th>
+              <th class="sortable num" onclick="sortT(9,'n')">P/E</th>
+              <th class="sortable num" onclick="sortT(10,'n')">ROE</th>
+              <th class="sortable num" onclick="sortT(11,'n')">D/E</th>
+              <th class="sortable num" onclick="sortT(12,'n')">Div yld</th>
+              <th class="sortable num" onclick="sortT(13,'n')">FCF yld</th>
+              <th class="sortable vsep num" onclick="sortT(14,'n')">Fee p.a.</th>
+              <th class="sortable" onclick="sortT(15,'s')">FX</th>
+              <th class="vsep">Recommendation</th>
+              <th class="sortable" onclick="sortT(17,'s')">Analyzed</th>
+            </tr>
+          </thead>
+          <tbody id="scoreBody"></tbody>
+        </table>
+        <div class="sub" style="padding:6px 12px 0">* SET equities fee ≈ 0.18% round-trip (brokerage + VAT + exchange/clearing). Ratios from fundamentals/valuation/fees tools; n/a where not meaningful (e.g. commodity fund). Banks show book-based metrics; D/E n/m.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="chartModal" class="modal" onclick="if(event.target===this)closeChart()">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><div id="chartTitle" style="font-weight:700;font-size:15px"></div><div id="chartSub" class="sub"></div></div>
+      <span onclick="closeChart()" style="cursor:pointer;color:#94a3b8;font-size:22px;line-height:1">×</span>
+    </div>
+    <div id="chartBox" style="margin-top:12px"></div>
+    <div class="sub" style="margin-top:8px">Illustrative history. The live version pulls a 5–10yr time series via the historical extractor and caches it for fast, provenance-tracked charts.</div>
+  </div>
+</div>
+
+<script>
+const convCls = c => c>=70?'conv-hi':c>=45?'conv-mid':'conv-lo';
+// multi-year history for clickable ratios (illustrative)
+const CHARTS={
+  MSFT:{
+    'Price/FCF':{unit:'×',src:'Macrotrends',points:[[2020,28],[2021,34],[2022,30],[2023,38],[2024,40],[2025,36],[2026,35]]},
+    'ROIC':{unit:'%',src:'Macrotrends',points:[[2020,24],[2021,30],[2022,28],[2023,27],[2024,29],[2025,30],[2026,30]]},
+    'Rev growth':{unit:'%',src:'Yahoo',points:[[2020,14],[2021,18],[2022,18],[2023,7],[2024,16],[2025,15],[2026,14]]}},
+  SCB:{
+    'P/E':{unit:'×',src:'Yahoo',points:[[2020,9.5],[2021,10],[2022,8.5],[2023,8],[2024,7.6],[2025,8],[2026,8]]},
+    'ROE':{unit:'%',src:'Macrotrends',points:[[2020,7],[2021,8],[2022,8.5],[2023,9],[2024,9.2],[2025,9],[2026,9]]},
+    'Div yield':{unit:'%',src:'SET',points:[[2020,4],[2021,5],[2022,6],[2023,7],[2024,7.2],[2025,7.5],[2026,7.5]]}},
+  PTTEP:{
+    'P/E':{unit:'×',src:'Yahoo',points:[[2020,13],[2021,10],[2022,6],[2023,8],[2024,9],[2025,9],[2026,9]]},
+    'FCF yield':{unit:'%',src:'valuation.py',points:[[2020,3],[2021,6],[2022,12],[2023,10],[2024,8],[2025,8],[2026,8]]},
+    'Div yield':{unit:'%',src:'SET',points:[[2020,4],[2021,4.2],[2022,6],[2023,5],[2024,4.8],[2025,4.5],[2026,4.5]]}},
+  SCBGOLDE:{
+    'NAV':{unit:'฿',src:'fund_nav_tracker',points:[[2020,3.0],[2021,3.1],[2022,3.3],[2023,3.6],[2024,4.0],[2025,4.5],[2026,4.24]]},
+    'Gold':{unit:'',src:'market_data',points:[[2020,1900],[2021,1830],[2022,1820],[2023,2060],[2024,2630],[2025,4500],[2026,4140]]}},
+  BAFS:{
+    'P/E':{unit:'×',src:'Yahoo',points:[[2020,24],[2021,28],[2022,26],[2023,22],[2024,19],[2025,18],[2026,18]]},
+    'ROE':{unit:'%',src:'Macrotrends',points:[[2020,6],[2021,4],[2022,6],[2023,7],[2024,8],[2025,8],[2026,8]]},
+    'Div yield':{unit:'%',src:'SET',points:[[2020,2.5],[2021,2],[2022,2.5],[2023,3],[2024,3],[2025,3],[2026,3]]}},
+};
+function buildChart(pts,unit){
+  const w=540,h=250,pad=40;
+  const ys=pts.map(p=>p[1]); const minY=Math.min(...ys),maxY=Math.max(...ys);
+  const span=(maxY-minY)||1; const lo=minY-span*0.15, hi=maxY+span*0.15;
+  const x=i=>pad+(w-pad-14)*(i/(pts.length-1));
+  const y=v=>h-pad-(h-pad-18)*((v-lo)/(hi-lo));
+  const line=pts.map((p,i)=>`${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');
+  const area=`${pad},${(h-pad).toFixed(1)} ${line} ${x(pts.length-1).toFixed(1)},${(h-pad).toFixed(1)}`;
+  let grid='',yl='';
+  for(let g=0;g<=4;g++){const gv=lo+(hi-lo)*g/4,gy=y(gv);
+    grid+=`<line x1="${pad}" y1="${gy.toFixed(1)}" x2="${w-14}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,.06)"/>`;
+    yl+=`<text x="${pad-6}" y="${(gy+3).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="9">${gv.toFixed(gv<10?1:0)}${unit}</text>`;}
+  const xl=pts.map((p,i)=>`<text x="${x(i).toFixed(1)}" y="${h-pad+16}" text-anchor="middle" fill="#64748b" font-size="9">${p[0]}</text>`).join('');
+  const dots=pts.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p[1]).toFixed(1)}" r="${i===pts.length-1?4:2.5}" fill="${i===pts.length-1?'#34d399':'#3b82f6'}"/>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%">${grid}<polygon points="${area}" fill="rgba(59,130,246,.12)"/><polyline points="${line}" fill="none" stroke="#3b82f6" stroke-width="2"/>${dots}${yl}${xl}</svg>`;
+}
+function openChart(k,label){
+  const c=CHARTS[k][label],r=REPORTS[k],last=c.points[c.points.length-1];
+  document.getElementById('chartTitle').innerHTML=`${r.name} <span style="color:#64748b;font-family:monospace;font-size:12px">${r.ticker}</span> — ${label}`;
+  document.getElementById('chartSub').textContent=`${c.points.length}-year history · latest ${last[1]}${c.unit} (${last[0]}) · source: ${c.src}`;
+  document.getElementById('chartBox').innerHTML=buildChart(c.points,c.unit);
+  document.getElementById('chartModal').style.display='flex';
+}
+function closeChart(){document.getElementById('chartModal').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChart();});
+const REPORTS = {
+  SCB:{name:'SCB X',ticker:'SCB.BK',cls:'SET Bank',price:'฿142.50',chg:'▲ +0.4%',up:true,asof:'2026-06-20',ccy:'THB',
+    verdictCls:'b-accum',verdict:'ACCUMULATE — top income pick',conv:71,
+    facts:[['P/E','~8×','Yahoo'],['ROE','~9%','Macrotrends'],['Div yield','7.5%','SET'],['CAR','strong','filing'],['NPL','~3.3%','filing'],['Earnings','Jul 17','earnings_tracker']],
+    analysts:[
+      ['Value Analyst','Buffett-style · value','Accumulate','b-accum',70,80,'Trades ~8× earnings and ~1× book with a ~7.5% yield; well-capitalized. Cheap for the quality.','asset quality if economy slows','Yahoo, filing'],
+      ['Macro & Tech-Trends','rates · cycle','Accumulate','b-accum',74,78,'Clearest beneficiary of higher-for-longer Fed/BOT rates — NIM supported into 2026.','rate cuts compress NIM','macro_aggregator'],
+      ['Cross-Asset Linkage','rate / FX linkages','Accumulate','b-accum',70,70,'Positive rate↔bank linkage; THB-denominated so negligible FX cost for you.','BOT easing cycle','correlations.py'],
+      ['Risk & Control','Taleb-style · risk','Wait','b-wait',60,72,'Solid balance sheet; Jul-17 earnings is a near event risk — wait or size in ahead of it.','earnings surprise Jul 17','risk.py']],
+    chair:{a:'income quality and rate tailwind are agreed by all four.',d:'only timing — Risk wants to respect the Jul-17 event.',net:'Accumulate; the highest-conviction holding on the board.',flip:'a dovish BOT/Fed pivot or weak Jul-17 results.'},
+    strip:['~0.18% round-trip','Low','7.5%','NIM compression on cuts'],fxCls:'#34d399'},
+  PTTEP:{name:'PTT E&P',ticker:'PTTEP.BK',cls:'SET Energy',price:'฿118.50',chg:'▲ +0.2%',up:true,asof:'2026-06-20',ccy:'THB',
+    verdictCls:'b-accum',verdict:'ACCUMULATE — on yield > 4.5%',conv:68,
+    facts:[['P/E','~9×','Yahoo'],['FCF yield','~8%','valuation.py'],['Breakeven','~$45/bbl','oil.py'],['Div yield','4.5%','SET'],['Brent','$80.6','market_data'],['NI vs base','~−11%','oil_scenario']],
+    analysts:[
+      ['Value Analyst','Buffett-style · value','Accumulate','b-accum',70,78,'~9× earnings, breakeven ~$45, dividend safe; cheap on ~8% FCF yield.','sustained Brent < $60','Yahoo, valuation.py'],
+      ['Macro & Tech-Trends','cycle · demand','Wait','b-wait',58,70,'Oil premium fully unwound to ~$80; an earnings-growth headwind, not a thesis break.','global demand slowdown','macro_aggregator'],
+      ['Cross-Asset Linkage','commodity linkage','Accumulate','b-accum',72,75,'Brent↔PTTEP is the core driver; at ~$80 dividend capacity intact — add on yield > 4.5%.','Iran deal path → oil re-spike (both tails)','oil.py'],
+      ['Risk & Control','Taleb-style · risk','Wait','b-wait',62,72,'Not a solvency risk (breakeven ~$45); commodity cyclicality — keep size moderate.','Brent < $70 dividend trim','risk.py']],
+    chair:{a:'dividend safety and cheap valuation are agreed.',d:'near-term oil direction — Macro cautious, Cross-asset constructive.',net:'Accumulate on dips that push the yield above 4.5%.',flip:'a Brent regime shift (deal collapse up / demand slump down).'},
+    strip:['~0.18% round-trip','Low','4.5%','Brent < $70'],fxCls:'#34d399'},
+  SCBGOLDE:{name:'SCB Gold',ticker:'SCBGOLDE',cls:'Gold Fund',price:'฿4.24 / unit',chg:'▼ −1.4% NAV',up:false,asof:'2026-06-20',ccy:'THB',
+    verdictCls:'b-wait',verdict:'WAIT / HOLD — add on Fed-driven dip',conv:58,
+    facts:[['NAV','฿4.24/u','fund_nav_tracker'],['TER','0.50% p.a.','fee_analyzer'],['Gold','$4,140','market_data'],['Drawdown','−8% off high','risk.py'],['USD/THB','32.93','FRED'],['GS target','$5,400','news RSS']],
+    analysts:[
+      ['Value Analyst','Buffett-style · value','n/a','b-pass',0,0,'A commodity fund — no earnings or cash flows to value. Outside this lens.','—','—'],
+      ['Macro & Tech-Trends','rates · Fed','Wait','b-wait',55,68,'Fed higher-for-longer is the near-term headwind; long-term targets (GS $5,400) intact.','real-yield spike','macro_aggregator'],
+      ['Cross-Asset Linkage','gold ↔ yields/USD','Accumulate','b-accum',65,72,'Gold↔real-yields/USD; baht weakness cushions NAV. The −8% Fed-driven dip is an add zone, not a break.','USD strength deepens','fx.py, correlations.py'],
+      ['Risk & Control','Taleb-style · risk','Wait','b-wait',60,70,'Useful diversifier; 0.50% TER drag; hold/add unless drawdown breaks >12% off the high.','trend break > 12%','risk.py']],
+    chair:{a:'this is a Fed-driven dip, not a demand break — three lenses agree.',d:'Value abstains; the call rests on cross-asset + risk.',net:'Hold and add the dip in tranches; mind the 0.50% fee drag vs a cheaper ETF.',flip:'a dovish Fed (add) or a >12% break off the high (reduce).'},
+    strip:['0.50% p.a.','Med','0%','real-yield spike'],fxCls:'#fbbf24'},
+  MSFT:{name:'Microsoft',ticker:'MSFT',cls:'US Equity',price:'$498.20',chg:'▲ +0.9%',up:true,asof:'2026-06-20',ccy:'USD',
+    verdictCls:'b-wait',verdict:'WAIT — accumulate on dips',conv:52,
+    facts:[['Price/FCF','~35×','Yahoo'],['ROIC','~30%','Macrotrends'],['Net buyback','SBC unconf.','SEC',1],['Rev growth','~14% YoY','Yahoo'],['DCF (conserv.)','~$430','valuation.py'],['USD/THB','32.93','FRED']],
+    analysts:[
+      ['Value Analyst','Buffett-style · value','Wait','b-wait',45,80,'Exceptional moat, ROIC ~30% — but ~35× FCF leaves no margin of safety vs a conservative ~$430 DCF.','paying up for quality','Yahoo, valuation.py'],
+      ['Macro & Tech-Trends','AI cycle · rates','Accumulate','b-accum',72,75,'AI-capex supercycle + Azure/Copilot monetization; hawkish Fed pressures the multiple only at the margin.','Fed re-rates growth multiples','news RSS'],
+      ['Cross-Asset Linkage','FX · rate linkage','Wait','b-wait',55,65,'Low commodity link; rate-driven multiple. USD strength is a mild headwind for a THB buyer on entry.','real-yield spike + strong USD','fx.py'],
+      ['Risk & Control','Taleb-style · risk','Caution','b-caution',38,70,'~10 AI names ≈ 40% of S&P value — crowded and fragile to a sentiment break. Size small, stagger.','AI-concentration unwind','risk.py']],
+    chair:{a:'business quality is undisputed across all four.',d:'the price — Macro sees upside; Value and Risk see no margin of safety and crowding.',net:'Wait at $498; accumulate in tranches on a ~10–15% pullback toward the DCF zone.',flip:'a pullback to ~$430, FCF re-acceleration, or a dovish Fed pivot.'},
+    strip:['broker comm.','High','0.7%','AI concentration'],fxCls:'#fbbf24'},
+  BAFS:{name:'Bangkok Aviation',ticker:'BAFS.BK',cls:'SET Aviation',price:'฿26.50',chg:'▲ +0.1%',up:true,asof:'2026-06-18',ccy:'THB',
+    verdictCls:'b-wait',verdict:'WAIT — better entry needed',conv:49,
+    facts:[['P/E','~18×','Yahoo'],['ROE','~8%','Macrotrends'],['Div yield','~3%','SET'],['Jet fuel','~$80','market_data'],['Tourism','strong','news RSS'],['H1 results','~Aug 14','earnings_tracker']],
+    analysts:[
+      ['Value Analyst','Buffett-style · value','Wait','b-wait',48,65,'~18× earnings, modest ROE ~8%; fairly valued with a ~3% yield. No clear discount.','limited margin upside','Yahoo'],
+      ['Macro & Tech-Trends','tourism cycle','Accumulate','b-accum',60,68,'Stable tourism/aviation demand; cheaper jet fuel a mild margin positive.','fuel price spike','macro_aggregator'],
+      ['Cross-Asset Linkage','fuel pass-through','Wait','b-wait',50,62,'Low direct commodity link, but a jet-fuel cost pass-through lag can squeeze margins.','Brent spike','oil.py'],
+      ['Risk & Control','Taleb-style · risk','Caution','b-caution',42,65,'Thinner liquidity and single-sector exposure — keep position small.','demand shock / fuel volatility','risk.py']],
+    chair:{a:'stable demand backdrop is agreed.',d:'valuation offers no margin and liquidity is thin.',net:'Wait for a better entry; not compelling at current price.',flip:'a pullback or a positive tourism/earnings surprise.'},
+    strip:['~0.18% round-trip','Low','~3%','jet-fuel margin'],fxCls:'#34d399'},
+};
+const ORDER=['SCB','PTTEP','SCBGOLDE','MSFT','BAFS'];
+
+function renderPick(sel){
+  document.getElementById('pickList').innerHTML = ORDER.map(k=>{
+    const r=REPORTS[k];
+    return `<div class="li ${k===sel?'active':''}" onclick="renderReport('${k}')">
+      <div class="nm">${r.name} <span class="tk">${r.ticker}</span></div>
+      <div class="row2"><span class="badge ${r.verdictCls}">${r.verdict.split(' — ')[0]}</span>
+      <span class="cv ${convCls(r.conv)==='conv-hi'?'':''}" style="color:${r.conv>=70?'#34d399':r.conv>=45?'#fbbf24':'#fb7185'}">${r.conv}</span></div>
+    </div>`;}).join('');
+}
+function renderReport(k){
+  const r=REPORTS[k]; renderPick(k);
+  const facts=r.facts.map(f=>{const hist=(CHARTS[k]||{})[f[0]];
+    return `<div class="fact ${hist?'clickable':''}" ${hist?`onclick="openChart('${k}','${f[0]}')"`:''}>
+      <div class="label">${f[0]} ${hist?'<span class="chico">📈</span>':''}</div>
+      <div class="v" ${f[3]?'style="color:#fbbf24"':''}>${f[1]}</div>
+      <a href="#" onclick="event.stopPropagation()">${f[2]} ↗</a></div>`;}).join('');
+  const cards=r.analysts.map(a=>{
+    const naBar = a[4]===0 ? `<div class="bar"><span style="width:0"></span></div><div class="label">n/a · outside lens</div>` :
+      `<div class="bar"><span class="${convCls(a[4])}" style="width:${a[4]}%"></span></div><div class="label">conviction ${a[4]} · confidence ${a[5]}</div>`;
+    return `<div class="card"><div class="top"><div><div class="who">${a[0]}</div><div class="lens">${a[1]}</div></div><span class="badge ${a[3]}">${a[2]}</span></div>
+      ${naBar}<div class="thesis">${a[6]}</div>${a[7]!=='—'?`<div class="risk">⚠ key risk: ${a[7]}</div>`:''}<div class="src">sources: ${a[8]}</div></div>`;}).join('');
+  document.getElementById('reportPanel').innerHTML=`
+    <div class="rep-head">
+      <div><div class="label">${r.cls} · medium-term (3m–2y) lens</div>
+        <div style="font-size:20px;font-weight:700;margin-top:2px">${r.name} <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px">${r.ticker}</span></div>
+        <div class="sub">as of ${r.asof} · ${r.ccy}</div></div>
+      <div style="text-align:right"><div class="price">${r.price}</div><div style="color:${r.up?'var(--emerald)':'var(--rose)'};font-size:13px">${r.chg}</div></div>
+      <div style="text-align:right"><div class="label">Council verdict</div><div style="margin-top:6px"><span class="badge ${r.verdictCls}">${r.verdict}</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;margin-top:6px;color:${r.conv>=70?'#34d399':r.conv>=45?'#fbbf24':'#fb7185'}">Blended conviction ${r.conv} / 100</div></div>
+    </div>
+    <div class="label" style="padding:0 20px 6px">Verified data snapshot</div><div class="facts">${facts}</div>
+    <div class="label" style="padding:0 20px 6px">Council — four field specialists</div><div class="cards">${cards}</div>
+    <div class="chair"><h3>🪑 Council Chair — synthesis</h3>
+      <div style="font-size:12.5px;line-height:1.6;color:#dbeafe"><b>Agreement:</b> ${r.chair.a} <b>Disagreement:</b> ${r.chair.d}<br><b>Net:</b> ${r.chair.net} <b>What would flip it:</b> ${r.chair.flip}</div></div>
+    <div class="strip"><div>Est. cost: <b>${r.strip[0]}</b></div><div>FX risk: <b style="color:${r.fxCls}">${r.strip[1]}</b></div><div>Div yield: <b>${r.strip[2]}</b></div><div>Top risk flag: <b style="color:#fb7185">${r.strip[3]}</b></div></div>
+    <div class="disc">Analyzed ${r.asof}. The council informs; <b>you decide</b> — no auto-trading. การลงทุนมีความเสี่ยง ผู้ลงทุนควรศึกษาข้อมูลก่อนการตัดสินใจลงทุน</div>`;
+}
+
+// scorecard rows: [name,tk,class,verdictCls,verdictLabel,conv, V,M,C,R(mini cls+label), mktcapDisp,mktcapN, pe, roe, de, divy, fcfy, feeDisp,feeN, fx,fxN, recommendation, date]
+const SCORE=[
+  ['SCB X','SCB.BK','SET Bank','b-accum','Accumulate',71,['b-accum','Accum'],['b-accum','Accum'],['b-accum','Accum'],['b-wait','Wait'],'฿470B',14,'8.0','9.0','n/m','7.5','n/m','~0.18%',0.18,'Low',1,'Top income pick; higher-for-longer rates support NIM. Earnings Jul 17 is the swing event.','2026-06-20'],
+  ['PTT E&P','PTTEP.BK','SET Energy','b-accum','Accumulate',68,['b-accum','Accum'],['b-wait','Wait'],['b-accum','Accum'],['b-wait','Wait'],'฿470B',14,'9.0','13.0','0.30','4.5','8.0','~0.18%',0.18,'Low',1,'Oil premium unwound; breakeven ~$45, dividend safe. Add on yield > 4.5%.','2026-06-20'],
+  ['SCB Gold','SCBGOLDE','Gold Fund','b-wait','Wait',58,['b-pass','n/a'],['b-wait','Wait'],['b-accum','Accum'],['b-wait','Wait'],'—',0,'n/a','n/a','n/a','0.0','n/a','0.50%',0.50,'Med',2,'Fed-driven dip −8% off high → hold/add, not a trend break. Watch 0.50% fee drag.','2026-06-20'],
+  ['Microsoft','MSFT','US Equity','b-wait','Wait',52,['b-wait','Wait'],['b-accum','Accum'],['b-wait','Wait'],['b-caution','Caution'],'$3.7T',3700,'37.0','35.0','0.30','0.7','2.9','broker',0,'High',3,'Quality undisputed; no margin of safety at ~35× FCF. Accumulate on a ~10–15% dip.','2026-06-20'],
+  ['Bangkok Aviation','BAFS.BK','SET Aviation','b-wait','Wait',49,['b-wait','Wait'],['b-accum','Accum'],['b-wait','Wait'],['b-caution','Caution'],'฿22B',0.7,'18.0','8.0','0.60','3.0','n/a','~0.18%',0.18,'Low',1,'Stable demand; cheaper jet fuel a mild positive. Fairly valued — wait for a better entry.','2026-06-18'],
+];
+function color(c){return c>=70?'#34d399':c>=45?'#fbbf24':'#fb7185';}
+function renderScore(){
+  document.getElementById('scoreBody').innerHTML=SCORE.map(r=>`
+    <tr class="row">
+      <td class="inv">${r[0]}<div class="tk">${r[1]}</div></td>
+      <td>${r[2]}</td>
+      <td><span class="badge ${r[3]}">${r[4]}</span></td>
+      <td class="conv-cell" data-n="${r[5]}" style="color:${color(r[5])}">${r[5]}</td>
+      <td><span class="mini ${r[6][0]}">${r[6][1]}</span></td>
+      <td><span class="mini ${r[7][0]}">${r[7][1]}</span></td>
+      <td><span class="mini ${r[8][0]}">${r[8][1]}</span></td>
+      <td><span class="mini ${r[9][0]}">${r[9][1]}</span></td>
+      <td class="num vsep" data-n="${r[11]}">${r[10]}</td>
+      <td class="num" data-n="${r[12]==='n/a'?-1:r[12]}">${r[12]==='n/a'?'n/a':r[12]+'×'}</td>
+      <td class="num" data-n="${r[13]==='n/a'?-1:r[13]}">${r[13]==='n/a'?'n/a':r[13]+'%'}</td>
+      <td class="num">${r[14]}</td>
+      <td class="num" data-n="${r[15]}">${r[15]}%</td>
+      <td class="num" data-n="${r[16]==='n/a'?-1:r[16]}">${r[16]==='n/a'?'n/a':r[16]+'%'}</td>
+      <td class="num vsep" data-n="${r[18]}">${r[17]}</td>
+      <td data-n="${r[20]}">${r[19]}</td>
+      <td class="anote vsep">${r[21]}</td>
+      <td class="num">${r[22]}</td>
+    </tr>`).join('');
+}
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); document.getElementById(t.dataset.s).classList.add('active');
+});
+let sortDir={};
+function sortT(col,type){
+  const tb=document.getElementById('scoreBody'); const rows=[...tb.querySelectorAll('tr')];
+  sortDir[col]=!sortDir[col];
+  rows.sort((a,b)=>{let av,bv;
+    if(type==='n'){av=parseFloat(a.children[col].dataset.n);bv=parseFloat(b.children[col].dataset.n);}
+    else{av=a.children[col].innerText.toLowerCase();bv=b.children[col].innerText.toLowerCase();}
+    if(av<bv)return sortDir[col]?-1:1; if(av>bv)return sortDir[col]?1:-1; return 0;});
+  rows.forEach(r=>tb.appendChild(r));
+}
+renderReport('MSFT'); renderScore();
+</script>
+</body>
+</html>

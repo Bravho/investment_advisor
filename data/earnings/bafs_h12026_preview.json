@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "ticker": "BAFS.BK",
+    "company_name": "Bangkok Aviation Fuel Services PCL",
+    "period": "H1-2026 / Q2-2026",
+    "earnings_date_est": "2026-08-14",
+    "earnings_date_confidence": "estimated — SET large-cap H1 filings cluster Aug 10-14; BAFS has not published a confirmed date. Verify on the SET/BAFS IR calendar.",
+    "confirmed_investor_meeting": "2026-08-28",
+    "pre_earnings_alert_date": "2026-08-09",
+    "created_by": "nightly-agent",
+    "created_date": "2026-08-05",
+    "_added_by_nightly_agent": "2026-08-05",
+    "note": "PRE-EARNINGS PREVIEW. This is the first hard read on whether the Brent collapse (~$100 late-Jul -> $79.47 Aug-04) is actually reaching BAFS margins, or whether the pass-through lag defers it to H2. Figures below are house assumptions and structural reasoning, NOT company guidance and NOT sell-side consensus (no broker note on BAFS H1-2026 was retrievable at run time). Loaded by earnings_tracker.load_earnings_preview('BAFS.BK'). Replace with bafs_h12026_actual.json once results print.",
+    "why_this_matters_for_tho": "BAFS is ~29% of the ex-gold portfolio and is the ONE holding that the Aug-04/05 oil regime change helps rather than hurts. PTTEP (~35%) is the mirror image. This print tells him whether the hedge is working."
+  },
+  "price_context": {
+    "last_price_thb": 9.8,
+    "last_price_date": "2026-08-04",
+    "prior_price_thb": 9.25,
+    "prior_price_date": "2026-07-28",
+    "move_pct": 5.9,
+    "52w_range_thb": "6.70-17.60",
+    "position_in_52w_range_pct": 28.4,
+    "trailing_yield_est_pct": 3.28,
+    "shares_held_by_tho": 18200,
+    "position_value_thb": 178360,
+    "read": "The stock has ALREADY moved +5.9% on the oil relief before any reported evidence of it. That is the market pricing the input-cost read, not the earnings. Still deep in the lower half of a 6.70-17.60 range, so the recovery is early rather than stretched — but it does mean an in-line H1 is not automatically a positive catalyst."
+  },
+  "structural_model": {
+    "business": "Jet-fuel storage, hydrant pipeline and into-plane refuelling at Suvarnabhumi/Don Mueang plus the Fuel Pipeline Transportation (FPT) network and a small renewable-power arm.",
+    "revenue_driver": "VOLUME (aircraft refuelled / litres throughput), not the fuel price itself — BAFS charges a SERVICE fee per unit, it does not take outright fuel-price risk on the core into-plane business.",
+    "cost_driver": "Energy and power costs, pipeline pumping cost, finance cost on the FPT capex, and D&A.",
+    "oil_transmission_channel": "INDIRECT and LAGGED. Lower jet fuel does not lift BAFS revenue per litre; it works through (a) airline economics -> more flights/frequency -> higher throughput volume, and (b) BAFS's own energy/pumping cost line. Channel (a) is the bigger one and takes 1-2 quarters to show in schedules.",
+    "common_mistake_to_avoid": "Treating BAFS as a short-oil proxy. It is a VOLUME/TOURISM proxy with a modest cost-side oil kicker. A cheap-oil quarter with weak arrivals is a BAD quarter for BAFS."
+  },
+  "house_estimates": {
+    "confidence": "LOW — house reasoning only, no broker consensus retrievable at run time. Treat the bands as scenario framing, not forecasts.",
+    "h1_2026_revenue_direction": {
+      "base": "flat_to_modestly_up_yoy",
+      "note": "Driven by foreign-arrival throughput. Thailand's 2026 arrivals target is ~35.5m but the Jan-Nov 2025 run-rate CONTRACTED ~8% YoY, and the World Bank cut 2026 Thai growth to 1.6% partly on a slower tourism recovery. So volume is the risk, not the fuel price."
+    },
+    "h1_2026_margin_direction": {
+      "base": "stable_to_slightly_better",
+      "note": "H1 = Jan-Jun 2026. Brent spent most of that window ELEVATED (the collapse to $79 only happened Aug-03/04). So the H1 print largely PRE-DATES the relief. Expect the oil benefit to show in H2/Q3-Q4, not in this report."
+    },
+    "key_swing_factor": "Foreign arrivals / flight frequency at Suvarnabhumi. A throughput beat matters far more than any input-cost line."
+  },
+  "reaction_scenarios": {
+    "beat_on_volume": {
+      "trigger": "Throughput/refuelling volume up YoY with revenue growth >5%.",
+      "read": "The genuinely bullish case — tourism recovery is real AND the oil relief is still to come in H2. This is the scenario in which the +5.9% move so far is under- rather than over-priced.",
+      "action_for_tho": "Thesis strengthens. Still no chase — size is already ~29% of the ex-gold book."
+    },
+    "in_line": {
+      "trigger": "Revenue flat, margin stable, no volume surprise.",
+      "read": "MOST LIKELY. H1 pre-dates the oil collapse, so an in-line print is not a disappointment — it just means the catalyst is deferred to the Q3 print (Nov) and the Aug-28 investor meeting is where forward volume guidance matters.",
+      "action_for_tho": "Hold. Do not read an in-line H1 as the oil thesis failing — check the Aug-28 meeting commentary on H2 throughput instead."
+    },
+    "miss_on_volume": {
+      "trigger": "Throughput down YoY; revenue contraction; arrivals shortfall confirmed.",
+      "read": "THE REAL RISK, and the one the +5.9% rally is not pricing. If arrivals are weak, cheap jet fuel does not save the quarter — it is a service-fee-per-litre business. Would also validate the World Bank's 1.6% Thai growth cut.",
+      "action_for_tho": "Re-examine the position. This is the scenario that turns BAFS from 'the holding the oil regime change helps' into a tourism-cycle problem."
+    }
+  },
+  "key_watch_items": [
+    "Refuelling VOLUME / throughput YoY — the single most important line. Revenue growth without volume growth is just tariff mix.",
+    "Foreign arrival trend commentary — reconcile against the 35.5m 2026 target vs the ~8% YoY contraction seen through Jan-Nov 2025.",
+    "FPT (Fuel Pipeline Transportation) segment contribution and its finance cost / gearing — the capex drag on this arm has historically been the margin swing factor.",
+    "Any interim dividend declaration alongside H1 (BAFS trailing yield ~3.28%; a declaration would be a second-order positive).",
+    "Energy/power cost line — the only place the Brent collapse can show up directly in H1, and it will be small.",
+    "Management's H2 guidance at the CONFIRMED 2026-08-28 investor meeting — arguably more decision-relevant than the H1 numbers themselves."
+  ],
+  "oil_regime_context_2026_08_05": {
+    "brent_usd": 79.47,
+    "brent_date": "2026-08-04",
+    "brent_late_july_peak_usd": 100.0,
+    "drawdown_from_peak_pct": -20.5,
+    "weighted_scenario_brent_usd": 87.49,
+    "read": "Brent has fallen ~20% from the late-July peak and printed its first sub-$80 of the conflict series. For BAFS this is unambiguously the right direction — but the transmission is lagged and indirect, so it should be expected in the Q3/Q4 prints and in airline scheduling decisions, NOT in this H1 report.",
+    "two_sided_risk": "The oil_scenario model still carries 24% combined weight on the two escalation tails ($105/$115) because Iran denies direct US talks, Rubio confirms no final agreement, and Trump framed the Aug-04 round as Iran's 'last chance'. A collapse of that round reverses the BAFS input-cost tailwind quickly."
+  },
+  "advisory_note_for_tho": "Set expectations correctly before Aug-14: H1-2026 covers Jan-Jun, a window in which Brent was mostly ELEVATED. The oil relief that pushed BAFS +5.9% happened in AUGUST and cannot be in these numbers. So judge this print on VOLUME (arrivals/throughput), not on margin, and treat the confirmed Aug-28 investor meeting as the more important event because that is where H2 guidance lands. The genuine risk to watch is not oil at all — it is Thai tourist arrivals, which contracted ~8% YoY through late 2025 and which the World Bank cited when cutting 2026 Thai growth to 1.6%. Informational, not a trade recommendation.",
+  "next_actions_for_nightly_agent": [
+    "Confirm the exact BAFS H1 release date on the SET/BAFS IR calendar — currently ESTIMATED at 2026-08-14.",
+    "On release, create data/earnings/bafs_h12026_actual.json on the PTTEP pattern and add 'BAFS.BK' to earnings_tracker.load_earnings_actual().actual_map.",
+    "Capture the Aug-28 investor meeting H2 guidance into the actuals file as a dated section (same pattern as pttep analyst_meeting_2026_08_03).",
+    "Retrieve a genuine broker consensus if any note surfaces — the house_estimates block is explicitly LOW confidence."
+  ]
+}

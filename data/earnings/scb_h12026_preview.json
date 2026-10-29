@@ -1,0 +1,67 @@
+{
+  "_meta": {
+    "ticker": "SCB.BK",
+    "company_name": "SCB X PCL",
+    "period": "H1-2026 / Q2-2026",
+    "earnings_date": "2026-07-17",
+    "pre_earnings_alert_date": "2026-07-14",
+    "created_by": "nightly-agent",
+    "created_date": "2026-06-14",
+    "note": "Consensus / estimated metrics for the pre-earnings brief. Figures are analyst-estimate and house assumptions, NOT confirmed company guidance. Refresh as sell-side notes land closer to Jul 17. Loaded by earnings_tracker.load_earnings_preview('SCB.BK')."
+  },
+  "price_context": {
+    "last_price_thb": 137.50,
+    "last_price_date": "2026-06-11",
+    "52w_range_thb": "115.00-149.50",
+    "trailing_yield_est_pct": 7.5,
+    "market_cap_rank": "Top-5 SET financials"
+  },
+  "consensus_estimates": {
+    "net_profit_h1_2026_bn_thb": {
+      "low": 22.0,
+      "base": 23.5,
+      "high": 25.0,
+      "note": "Estimate range; FY2025 net profit ~THB 44-45bn. H1 typically ~50-52% of full year."
+    },
+    "net_interest_margin_pct": {
+      "base": 3.7,
+      "trend": "stable_to_slightly_lower",
+      "note": "BOT policy rate held at 1.00% supports funding cost; NIM compression risk if BOT eases later in 2026. Watch loan-yield vs deposit-cost spread."
+    },
+    "npl_ratio_pct": {
+      "base": 3.3,
+      "trend": "stable",
+      "note": "Asset quality watch: SME and unsecured consumer book. Coverage ratio expected ~160%+. Any uptick >3.5% would be a negative surprise."
+    },
+    "loan_growth_yoy_pct": {
+      "base": 2.0,
+      "note": "Muted system loan growth given Thailand GDP ~1.5% 2026. Quality over volume."
+    },
+    "cost_to_income_ratio_pct": {
+      "base": 42.0,
+      "note": "Digital/Gen2 (virtual bank, InnovestX) investment spend vs core bank efficiency."
+    }
+  },
+  "dividend_outlook": {
+    "h1_2026_interim_div_est_thb": {
+      "low": 5.0,
+      "base": 5.75,
+      "high": 6.25,
+      "note": "Interim dividend usually announced WITH H1 results (Jul 17) or shortly after; ex-date est. ~Sep 2026. FY2025 total was THB 11.28 (final THB 5.64 paid May 7)."
+    },
+    "payout_policy": "SCB X targets high payout (~80%+); attractive for Tho's income-oriented medium-term hold."
+  },
+  "key_watch_items": [
+    "NIM direction vs BOT rate path (hold at 1.00% is supportive; any dovish BOT pivot pressures NIM).",
+    "NPL ratio and credit cost — unsecured/SME book is the main asset-quality risk.",
+    "H1 interim dividend declaration (size + ex-date) — primary catalyst for a yield holder.",
+    "Gen2 business (virtual bank, InnovestX, digital assets) losses vs core-bank earnings.",
+    "Capital ratio / CET1 and any buyback signal."
+  ],
+  "scenario_reaction": {
+    "beat": "Net profit > THB 25bn AND interim div >= THB 6.0 → likely positive re-rating toward upper 52w range (145-149.50). Reinforces high-yield thesis.",
+    "inline": "Net profit ~THB 23-24bn, div ~THB 5.5-5.75 → muted reaction; yield support keeps price range-bound 135-142.",
+    "miss": "NPL > 3.5% OR div cut below THB 5.0 → downside toward 125-130; reassess yield-trap risk."
+  },
+  "advisory_note_for_tho": "SCB is a high-yield medium-term hold. The Jul 17 release is the single most important catalyst this quarter. The pre-earnings brief (triggers Jul 14) should remind Tho NOT to add aggressively into the print given binary div/NPL outcomes, and to treat any beat-driven dip-buy opportunity below THB 130 as the preferred entry. This is informational, not a recommendation to trade."
+}

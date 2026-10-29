@@ -1,0 +1,76 @@
+{
+  "_meta": {
+    "date": "2026-08-08",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-08",
+    "base_currency": "THB",
+    "marks_are_carried": true,
+    "carried_from": "2026-08-04",
+    "carried_run_count": 4,
+    "carried_note": "FOURTH consecutive run with no confirmed official SET close. The zero delta below is an ABSENCE OF DATA, not a flat market. ROOT CAUSE NOW ESTABLISHED (this run): the live market-data collector has not run since 2026-07-15 23:53 ICT — its process log ends in a clean SIGTERM shutdown and it was never restarted. The three prior runs attributed this to a scraper/retrieval defect; that diagnosis was wrong three times. There is no fetch bug to fix — the daemon is down. Remedy is the supervisor/launchd job. See data/feed_health.json.",
+    "feed_health_severity": "DEAD",
+    "feed_health_report": "data/feed_health.json",
+    "gold_sleeve_excluded": "Gold sleeve excluded from these totals, as in prior runs: the series tracks SCBGOLDE by NAV per unit with no unit count, so including it would require a guess."
+  },
+  "prices_thb": {
+    "BAFS.BK": 9.8,
+    "PTTEP.BK": 145.0,
+    "SCB.BK": 151.5
+  },
+  "shares": {
+    "BAFS.BK": 18200,
+    "PTTEP.BK": 1400,
+    "SCB.BK": 1400
+  },
+  "position_values_thb": {
+    "BAFS.BK": 178360.0,
+    "PTTEP.BK": 203000.0,
+    "SCB.BK": 212100.0
+  },
+  "total_ex_gold_thb": 593460.0,
+  "prior_total_ex_gold_thb": 593460.0,
+  "delta_vs_prior_thb": 0.0,
+  "delta_vs_prior_pct": 0.0,
+  "delta_interpretation": "ZERO BY CONSTRUCTION, NOT BY OBSERVATION. Identical inputs produce an identical total. This number carries no information about market movement and must not be read as \"the book was flat\".",
+  "weights_pct": {
+    "BAFS.BK": 30.05,
+    "PTTEP.BK": 34.21,
+    "SCB.BK": 35.74
+  },
+  "weights_caveat": "Derived from 4-day-old carried marks; every weight inherits that staleness.",
+  "confirmed_events": {
+    "PTTEP.BK": {
+      "event": "Q2-2026 results + interim dividend",
+      "net_profit_usd_m": 833,
+      "yoy_pct": 104,
+      "sales_volume_boed": 572882,
+      "asp_usd_per_boe": 52.89,
+      "dps_thb": 4.5,
+      "ex_date": "2026-08-14",
+      "pay_date": "2026-08-28",
+      "board_approved": "2026-07-31",
+      "holder_impact_thb_gross": 6300.0,
+      "holder_impact_thb_net_10pct_wht": 5670.0,
+      "action": "Hold through 2026-08-13. No purchase before XD."
+    }
+  },
+  "macro_marks": {
+    "usdthb": 33.118,
+    "usdthb_as_of": "2026-08-06",
+    "usdthb_prior_mark": 33.39,
+    "usdthb_change_pct": -0.81,
+    "gold_comex_dec_usd": 4401,
+    "gold_week_pct": 5.0,
+    "brent_usd": 83.29,
+    "fx_read": "Baht STRENGTHENED 0.81% vs the carried mark. SCBGOLDE is unhedged, so this SUBTRACTS ~0.8pp from the THB NAV gain. The \"weak baht cushions the gold sleeve\" tailwind is now FADING, not building."
+  },
+  "open_conflicts": [
+    "SET Aug-07 full-day close (4th run)",
+    "BAFS/PTTEP/SCB confirmed closes",
+    "US unemployment 4.1% (CNBC+RTE) vs 4.2% (Seeking Alpha)",
+    "VN-Index 1,768 vs 1,929",
+    "Gold print dispersion ~$110",
+    "Brent dispersion $82.15/$83.29/$86.04",
+    "SCB 137.50 (carried, unverified)"
+  ]
+}

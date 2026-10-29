@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "date": "2026-08-11",
+    "generated_by": "nightly agent (investment-advisor-self-develop)",
+    "run_time_ict": "2026-08-11T02:30:00+07:00",
+    "base_currency": "THB",
+    "mark_policy": "Every mark carries the SESSION DATE it was observed for, never the date it was copied. Source URL recorded. See data/observed_marks.json.",
+    "price_feed_status": "Primary collector DEAD 27 days (clean SIGTERM 2026-07-15 23:53 ICT, never restarted). Fallback module th_price_fallback.py CANNOT run in the nightly agent's sandbox (egress proxy 403, verified tonight) — it is a host-side tool only. Marks below were retrieved by the agent's own tooling and deposited via data_collector/observed_marks.py.",
+    "pnl_status": "SUPPRESSED — avg_cost_price is 0 for every holdings row. See data/cost_basis_audit.json and portfolio_engine/cost_basis_guard.py. Only Tho can clear this."
+  },
+  "equity_book": {
+    "positions": {
+      "BAFS.BK": {
+        "quantity": 18200,
+        "close": 11.6,
+        "value": 211120.0,
+        "observed_as_of": "2026-08-07",
+        "source_name": "aio.panphol.com",
+        "source_url": "https://aio.panphol.com/stock/BAFS/price",
+        "corroboration": 1,
+        "is_corroborated": false
+      },
+      "PTTEP.BK": {
+        "quantity": 1400,
+        "close": 149.5,
+        "value": 209300.0,
+        "observed_as_of": "2026-08-10",
+        "source_name": "stockinvest.us",
+        "source_url": "https://stockinvest.us/stock-price/PTTEP.BK",
+        "corroboration": 1,
+        "is_corroborated": false
+      },
+      "SCB.BK": {
+        "quantity": 1400,
+        "close": 153.5,
+        "value": 214900.0,
+        "observed_as_of": "2026-08-07",
+        "source_name": "aio.panphol.com",
+        "source_url": "https://aio.panphol.com/stock/SCB/price",
+        "corroboration": 1,
+        "is_corroborated": false
+      }
+    },
+    "unpriced": [],
+    "valuation_complete": true,
+    "total_value": 635320.0,
+    "mark_dates": [
+      "2026-08-07",
+      "2026-08-10"
+    ],
+    "mark_date_mixed": true,
+    "as_of_range": [
+      "2026-08-07",
+      "2026-08-10"
+    ],
+    "weights_pct": {
+      "BAFS.BK": 33.2305,
+      "PTTEP.BK": 32.944,
+      "SCB.BK": 33.8255
+    },
+    "caveat": "Legs are marked on different sessions (2026-08-07 .. 2026-08-10). This total is not a portfolio value on any single date; the older legs have not been observed since their session."
+  },
+  "reconciliation": {
+    "prev_snapshot": "2026-08-10",
+    "prev_total_thb": 634620.0,
+    "total_thb": 635320.0,
+    "delta_thb": 700.0,
+    "delta_pct": 0.1103,
+    "delta_attribution": "Entirely PTTEP: 149.00 -> 149.50 on 1,400 shares = +700.00. BAFS and SCB legs unchanged because they were NOT re-observed, not because they did not move.",
+    "observed_movers": [
+      "PTTEP.BK"
+    ],
+    "unobserved_since_2026_08_07": [
+      "BAFS.BK",
+      "SCB.BK"
+    ]
+  },
+  "excluded_from_totals": {
+    "SCBGOLDE": {
+      "reason": "NAV per unit is known; UNIT COUNT IS NOT. The module refuses to guess. This is Tho's largest position (~35% of the whole book) and remains unvalued for the 8th consecutive run.",
+      "blocking_input": "unit count held",
+      "gold_spot_usd_context": 4393.9,
+      "gold_context_as_of": "2026-08-10",
+      "gold_context_note": "Aug-10 early-session futures print. Gold ~+7% month-to-date but still ~21% below the 2026-01-28 peak of 5,589.38 — a bounce inside a deep correction."
+    }
+  },
+  "catalysts": {
+    "2026-08-12": "US July CPI. The single most consequential print of the week for both the gold sleeve and the baht.",
+    "2026-08-13": "PTTEP LAST CUM DAY — hold through the close. THB 4.50 x 1,400 = 6,300 gross / ~5,670 net of 10% WHT.",
+    "2026-08-14": "PTTEP XD. Log the open against the 4.50 theoretical drop. BAFS H1-2026 expected on or about this date.",
+    "2026-08-21": "FTSE constituent list and cap thresholds publish — the Vietnam decision date.",
+    "2026-08-26": "BOT MPC (policy currently 1.00%, held 7-0 on 2026-06-24)."
+  }
+}

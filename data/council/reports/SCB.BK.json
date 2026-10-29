@@ -1,0 +1,448 @@
+{
+  "investment": {
+    "ticker": "SCB.BK",
+    "name": "SCB X",
+    "asset_class": "SET Bank",
+    "currency": "THB",
+    "price": 142.5,
+    "price_display": "฿142.50",
+    "change_pct": 0.4,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 8.0,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": [
+          [
+            2020,
+            9.5
+          ],
+          [
+            2021,
+            10.0
+          ],
+          [
+            2022,
+            8.5
+          ],
+          [
+            2023,
+            8.0
+          ],
+          [
+            2024,
+            7.6
+          ],
+          [
+            2025,
+            8.0
+          ],
+          [
+            2026,
+            8.0
+          ]
+        ]
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 9.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "FY2025",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": [
+          [
+            2020,
+            7.0
+          ],
+          [
+            2021,
+            8.0
+          ],
+          [
+            2022,
+            8.5
+          ],
+          [
+            2023,
+            9.0
+          ],
+          [
+            2024,
+            9.2
+          ],
+          [
+            2025,
+            9.0
+          ],
+          [
+            2026,
+            9.0
+          ]
+        ]
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": null,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "FY2025",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "n/m (bank)",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 7.5,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": [
+          [
+            2020,
+            4.0
+          ],
+          [
+            2021,
+            5.0
+          ],
+          [
+            2022,
+            6.0
+          ],
+          [
+            2023,
+            7.0
+          ],
+          [
+            2024,
+            7.2
+          ],
+          [
+            2025,
+            7.5
+          ],
+          [
+            2026,
+            7.5
+          ]
+        ]
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": null,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "n/m (bank)",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 5.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "NPL ratio": {
+        "metric": "NPL ratio",
+        "value": 3.3,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "Q1",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 14.0,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "฿470B",
+        "history": null
+      },
+      "Next earnings": {
+        "metric": "Next earnings",
+        "value": "2026-07-17",
+        "unit": "",
+        "source_name": "News headlines (RSS)",
+        "source_url": "https://news.google.com/rss/search?q=SCB.BK",
+        "period": "event",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "27 days · offline sample",
+        "history": null
+      },
+      "News sentiment": {
+        "metric": "News sentiment",
+        "value": 0.2,
+        "unit": "score",
+        "source_name": "News headlines (RSS)",
+        "source_url": "https://news.google.com/rss/search?q=SCB.BK",
+        "period": "24h",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "Neutral-positive — rate beneficiary · offline sample",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 160.31,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "conservative 9× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 12.5,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      },
+      "Dividend WHT": {
+        "metric": "Dividend WHT",
+        "value": 10.0,
+        "unit": "%",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "treaty",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Repatriation drag": {
+        "metric": "Repatriation drag",
+        "value": 0.75,
+        "unit": "%/yr",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:30:19+00:00",
+        "confidence": 1.0,
+        "note": "Thai-domestic: 10% dividend WHT, no remittance tax, no FX.",
+        "history": null
+      }
+    },
+    "flags": [
+      "Live quote unavailable — using curated sample prices",
+      "Fundamentals: curated dataset (live unavailable)"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Unscored",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Score unavailable — no LLM reachable (AI scoring required).",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "unavailable"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Unscored",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Score unavailable — no LLM reachable (AI scoring required).",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "unavailable"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Unscored",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Score unavailable — no LLM reachable (AI scoring required).",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "unavailable"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Unscored",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Score unavailable — no LLM reachable (AI scoring required).",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "unavailable"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Unscored",
+    "overall_label": "SCORE UNAVAILABLE (no LLM)",
+    "blended_conviction": 0,
+    "agreement": "",
+    "disagreement": "",
+    "net": "AI scoring is required but no LLM was reachable. Configure an LLM (OpenAI/Anthropic/Ollama) and re-run.",
+    "flip": ""
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 160.31,
+      "upside_pct": 12.5,
+      "fair_pe": 9.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    },
+    "repatriation": {
+      "origin": "TH",
+      "is_etf": false,
+      "dividend_wht_pct": 10.0,
+      "effective_dividend_tax_pct": 10.0,
+      "dividend_drag_pct": 0.75,
+      "fx_drag_pct": 0.0,
+      "total_drag_pct": 0.75,
+      "remit_exempt_assumed": false,
+      "notes": "Thai-domestic: 10% dividend WHT, no remittance tax, no FX.",
+      "suggestion": "",
+      "disclaimer": "Estimate — confirm with a Thai tax professional."
+    }
+  },
+  "peers": {
+    "peers": [
+      "KBANK.BK",
+      "BBL.BK",
+      "KTB.BK",
+      "TTB.BK"
+    ],
+    "table": {
+      "SCB.BK": {
+        "P/E": 8.0,
+        "ROE": 9.0,
+        "Dividend yield": 7.5,
+        "Revenue growth": 5.0,
+        "NPL ratio": 3.3,
+        "Market cap": 14.0
+      },
+      "KBANK.BK": {},
+      "BBL.BK": {},
+      "KTB.BK": {},
+      "TTB.BK": {}
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/SCB.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/SCB.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 8 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=SCB.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=SCB.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 2 facts"
+    }
+  ],
+  "llm_used": false,
+  "created_at": "2026-06-21T11:30:19+00:00",
+  "candidates": []
+}

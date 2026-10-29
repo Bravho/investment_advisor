@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "date": "2026-08-05",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-05",
+    "base_currency": "THB",
+    "note": "Daily portfolio snapshot. Prices are the best available marks at run time, NOT all confirmed official SET closes — see price_caveats."
+  },
+  "prices_thb": {
+    "BAFS.BK": 9.8,
+    "PTTEP.BK": 145.0,
+    "SCB.BK": 151.5
+  },
+  "shares": {
+    "BAFS.BK": 18200,
+    "PTTEP.BK": 1400,
+    "SCB.BK": 1400
+  },
+  "position_values_thb": {
+    "BAFS.BK": 178360.0,
+    "PTTEP.BK": 203000.0,
+    "SCB.BK": 212100.0
+  },
+  "total_ex_gold_thb": 593460.0,
+  "prior_total_ex_gold_thb": 606760.0,
+  "delta_vs_prior_thb": -13300.0,
+  "delta_vs_prior_pct": -2.19,
+  "weights_pct": {
+    "BAFS.BK": 30.1,
+    "PTTEP.BK": 34.2,
+    "SCB.BK": 35.7
+  },
+  "concentration_note": "SCB 35.7%, PTTEP 34.2%, BAFS 30.1% of the ex-gold book — ALL THREE are now at or over the 30% single-position flag, and all three are single-country Thai equity. This is the standing structural issue in the portfolio: the oil regime change moved the names in opposite directions (BAFS up, PTTEP down) which is genuine internal hedging, but it does nothing about the country and asset-class concentration. The gold sleeve is the only non-Thai-equity exposure and its size is not recorded.",
+  "delta_attribution": "-THB 8,400 vs 2026-08-04, entirely PTTEP: 1,400 x (145.00-151.00) = -8,400. BAFS held at 9.80 (no fresh close). SCB re-marked 155.00 -> 151.50 on a fresh Aug-04 print, but the 155.00 was a STALE Jul-24 carry, so that -THB 4,900 is a MARK CORRECTION and is excluded from the day's move; the prior_total is restated below on the same basis.",
+  "prior_total_restated_thb": 601860.0,
+  "gold_sleeve": {
+    "fund": "SCBGOLDE",
+    "gold_usd_oz": 4110.0,
+    "usd_thb": 33.28,
+    "est_nav_thb_per_unit": 4.18,
+    "note": "Units held not recorded in the seed, so the gold sleeve is tracked by NAV estimate only and is EXCLUDED from total_ex_gold_thb."
+  },
+  "macro_marks": {
+    "brent_usd": 79.47,
+    "brent_date": "2026-08-04",
+    "weighted_scenario_brent_usd": 87.49,
+    "usd_thb": 33.28,
+    "gold_usd_oz": 4110.0,
+    "set_index_last_logged": 1623.64,
+    "set_index_date": "2026-07-31",
+    "bot_policy_rate_pct": 1.0,
+    "us_10y_note": "not retrieved this run"
+  },
+  "risk_score": null,
+  "price_caveats": [
+    "PTTEP 145.00 is an Aug-04 INTRADAY read (open 145.00 / high 146.00 / low 143.00), not a confirmed official SET close.",
+    "SCB 151.50 from a TradingView Aug-04 quote. A 137.50 figure surfaced from a Google Finance/MSN snippet and was NOT adopted — it matches a stale 2026-06-11 quote.",
+    "BAFS 9.80 carried from 2026-08-04; no fresh clean close retrievable this run.",
+    "SET index close for Aug-04/05 not retrievable; carrying the Jul-31 close of 1,623.64."
+  ],
+  "next_catalysts": [
+    "2026-08-07 US July NFP (cons. +80k, u-rate 4.2%)",
+    "2026-08-13 last cum-dividend day for the PTTEP THB 4.50 interim",
+    "2026-08-14 PTTEP XD; BAFS H1-2026 results (estimated)",
+    "2026-08-21 FTSE Vietnam constituent list + cap thresholds",
+    "2026-08-26 Bank of Thailand MPC decision (rate 1.00%)",
+    "2026-08-28 PTTEP dividend pay date; BAFS investor meeting (confirmed)",
+    "Aug-Sep SCB 2026 interim dividend declaration (still undeclared)",
+    "2026-09-21 FTSE Vietnam EM upgrade effective"
+  ]
+}

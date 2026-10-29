@@ -1,0 +1,25 @@
+{
+  "snapshot_date": "2026-08-01",
+  "_note": "Written by the nightly agent 2026-08-01 to resolve the long-open snapshots-archive flag (the archive held only 2026-06-21 because the live macOS archive cron can't run in the sandbox). Share counts carried from the 2026-06-21 seed (BAFS 18,200; PTTEP 1,400; SCB 1,400). Prices are the last logged SET closes (BAFS 9.25 Jul-28; PTTEP 141.00 Jul-24; SCB 155.00 Jul-24) — a clean fresh SET close is still not retrievable, and one outlet quoted SCB at 152.00 (Jul-24), so SCB market value carries a reconciliation caveat. Gold fund has no live unit price (tracked via fund_nav_tracker NAV estimate). risk_score left null because the blended score requires the Postgres risk path (python -m ai_engine.risk_scorer on the live host).",
+  "base_currency": "THB",
+  "usdthb_rate": 33.39,
+  "holdings": {
+    "BAFS.BK": {"shares": 18200, "current_price": 9.25, "price_date": "2026-07-28", "market_value_thb": 168350.0},
+    "PTTEP.BK": {"shares": 1400, "current_price": 141.0, "price_date": "2026-07-24", "market_value_thb": 197400.0},
+    "SCB.BK": {"shares": 1400, "current_price": 155.0, "price_date": "2026-07-24", "market_value_thb": 217000.0, "price_flag": "one outlet quoted 152.00 Jul-24; reconciliation open"},
+    "SCB_GOLD_FUND": {"note": "no live unit price; est NAV ~4.15 THB/unit (gold $4,068 x USD/THB 33.39, down ~1% as gold dipped and baht firmed)"}
+  },
+  "total_market_value_thb_ex_gold": 582750.0,
+  "risk_score": null,
+  "risk_level": "pending_live_run",
+  "usd_thb_rate": 33.39,
+  "usd_thb_note": "baht STRENGTHENED to ~33.39 from ~33.65 (~+0.8% baht); thinner weak-baht cushion for the gold fund, lower FX cost on any future USD-ETF switch",
+  "brent_usd": 86.0,
+  "brent_note": "eased to ~$86 Jul-31 (from ~$88); strike threat not yet acted on; still +20% on the month",
+  "gold_usd": 4068.0,
+  "gold_house_band_usd": [4000, 4900],
+  "gold_est_nav_thb_per_unit": 4.15,
+  "fed_policy_risk_level": "elevated",
+  "gold_drawdown_signal": "hold",
+  "catalysts_next": ["PTTEP Q2 results Aug-02 after-close", "SCB interim-dividend declaration watch Aug-Sep", "US July jobs report (Fri)"]
+}

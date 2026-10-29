@@ -1,0 +1,384 @@
+{
+  "investment": {
+    "ticker": "BABA",
+    "name": "BABA",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 107.0999984741211,
+    "price_display": "107.10",
+    "change_pct": -1.27,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 16.45,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 9.22,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            7.4
+          ],
+          [
+            2024,
+            8.1
+          ],
+          [
+            2025,
+            12.9
+          ],
+          [
+            2026,
+            9.8
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 98.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.25,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 2.9,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2024,
+            8.3
+          ],
+          [
+            2025,
+            5.9
+          ],
+          [
+            2026,
+            2.7
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 256.95,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "$256.95B",
+        "history": null
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": -17.15,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BABA/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 195.32,
+        "unit": "USD",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "conservative 30× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 82.4,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      },
+      "Dividend WHT": {
+        "metric": "Dividend WHT",
+        "value": 15.0,
+        "unit": "%",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "treaty",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Repatriation drag": {
+        "metric": "Repatriation drag",
+        "value": 20.27,
+        "unit": "%/yr",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:18+00:00",
+        "confidence": 1.0,
+        "note": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT.; FX round-trip ~1.0% over ~1.5yr.",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated",
+      "High repatriation drag (~20.3%/yr) for a Thai investor",
+      "Dividend yield=98.0% implausibly high — verify source"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Caution",
+      "conviction": 60,
+      "confidence": 50,
+      "thesis": "BABA shows potential upside but lacks peer comparison; high dividend yield appears implausible.",
+      "key_risk": "High repatriation drag and negative FCF yield.",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Caution",
+      "conviction": 45,
+      "confidence": 50,
+      "thesis": "BABA's revenue growth is low; lacks peer comparison for stronger alternatives.",
+      "key_risk": "High repatriation drag impacts returns.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Caution",
+      "conviction": 40,
+      "confidence": 50,
+      "thesis": "High repatriation drag and FX risk diminish appeal; no peer comparison available.",
+      "key_risk": "Unsustainable dividend yield and high repatriation costs.",
+      "metrics_used": [
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "repatriation.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 50,
+      "confidence": 60,
+      "thesis": "High repatriation drag and FX risk raise concerns; no peer comparison available.",
+      "key_risk": "High FX risk and implausible dividend yield.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py",
+        "repatriation.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Caution",
+    "overall_label": "CAUTION — wait for a better setup",
+    "blended_conviction": 49,
+    "agreement": "Value Analyst, Macro & Tech-Trends, Cross-Asset Linkage, Risk & Control counsel caution; the rest stay neutral.",
+    "disagreement": "the debate is how defensive to be, not whether to chase.",
+    "net": "CAUTION — wait for a better setup. Blended conviction 49/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Unsustainable dividend yield and high repatriation costs.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 195.32,
+      "upside_pct": 82.4,
+      "fair_pe": 30.0
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    },
+    "repatriation": {
+      "origin": "US",
+      "is_etf": false,
+      "dividend_wht_pct": 15.0,
+      "effective_dividend_tax_pct": 20.0,
+      "dividend_drag_pct": 19.6,
+      "fx_drag_pct": 0.67,
+      "total_drag_pct": 20.27,
+      "remit_exempt_assumed": false,
+      "notes": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT. FX round-trip ~1.0% over ~1.5yr.",
+      "suggestion": "",
+      "disclaimer": "Estimate — confirm with a Thai tax professional."
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "BABA": {
+        "P/E": 16.45,
+        "ROE": 9.22,
+        "Dividend yield": 98.0,
+        "Debt/Equity": 0.25,
+        "Revenue growth": 2.9,
+        "Market cap": 256.95,
+        "FCF yield": -17.15
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/BABA",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/BABA/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 7 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=BABA",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=BABA",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T17:07:24+00:00",
+  "discovered_idea": true,
+  "idea_theme": "E-commerce rebound",
+  "idea_reason": "Alibaba's recovery could capitalize on China's market reopening.",
+  "candidates": []
+}

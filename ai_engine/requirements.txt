@@ -1,0 +1,9 @@
+anthropic>=0.40,<1
+APScheduler>=3.10,<4
+asyncpg>=0.29,<1
+fastapi>=0.115,<1
+httpx>=0.27,<1
+openai>=1.50,<3
+python-dotenv>=1.0,<2
+tzdata>=2024.1
+uvicorn>=0.30,<1

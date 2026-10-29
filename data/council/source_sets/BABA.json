@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Yahoo Finance — quote",
+    "url": "https://finance.yahoo.com/quote/BABA",
+    "method": "yahoo_quote",
+    "data_type": "price",
+    "enabled": true
+  },
+  {
+    "name": "Fundamentals (Macrotrends / Yahoo)",
+    "url": "https://www.macrotrends.net/stocks/charts/BABA/",
+    "method": "fundamentals",
+    "data_type": "ratios",
+    "enabled": true
+  },
+  {
+    "name": "SEC / filings (fundamentals detail)",
+    "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=BABA",
+    "method": "fundamentals",
+    "data_type": "ratios",
+    "enabled": false
+  },
+  {
+    "name": "News headlines (RSS)",
+    "url": "https://news.google.com/rss/search?q=BABA",
+    "method": "news_rss",
+    "data_type": "news",
+    "enabled": true
+  }
+]

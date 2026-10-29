@@ -1,0 +1,101 @@
+{
+  "_meta": {
+    "ticker": "PTTEP.BK",
+    "company_name": "PTT Exploration and Production PCL",
+    "period": "Q2-2026 / H1-2026",
+    "reported_date": "2026-08-02",
+    "analyst_meeting_date": "2026-08-03",
+    "captured_by": "nightly-agent",
+    "captured_date": "2026-08-02",
+    "note": "REPORTED actuals + reconciliation vs the pre-earnings preview (CLSA ~THB 27.3bn / DBS ~THB 25.6bn, ASP ~$52.8/boe). Figures as reported by Kaohoon International and Bitget/company disclosure. Resolves the open PTTEP-Q2 capture flag. Loaded by earnings_tracker.load_earnings_actual('PTTEP.BK'); the brief auto-switches PTTEP from preview to reported+reconciled.",
+    "sources": [
+      "https://www.kaohooninternational.com/markets/587753",
+      "https://www.bitget.com/asia/news/detail/12560605586382",
+      "https://www.pttep.com/en/investor-relations/shareholder-information/dividend-policy-and-payments"
+    ],
+    "last_updated": "2026-08-04",
+    "update_log_2026_08_04": "Resolved the interim-dividend EX-DATE (XD 2026-08-14, board approval 2026-07-31) — the top open sub-watch. 2026 capex figure remains unretrievable; sub-watch held open."
+  },
+  "reported_results": {
+    "net_profit_q2_2026_m_usd": 833,
+    "net_profit_q2_yoy_pct": 104.0,
+    "net_profit_q2_qoq_pct": 122.0,
+    "net_profit_q2_2025_m_usd": 408,
+    "net_profit_q2_2026_est_bn_thb": 27.2,
+    "net_profit_q2_thb_note": "USD 833m at an approx Q2 avg USD/THB ~32.7 -> ~THB 27.2bn (company reports headline profit in USD; THB figure is an estimate for preview comparison).",
+    "eps_q2_2026_usd": 0.21,
+    "net_profit_h1_2026_bn_thb": 39.03,
+    "net_profit_h1_2026_yoy_pct": 14.0,
+    "revenue_h1_2026_bn_thb": 176.76,
+    "avg_sales_volume_q2_boed": 572882,
+    "avg_sales_volume_note": "Record-high quarterly average sales volume; above the ~560kboe/d 2026 full-year target.",
+    "avg_selling_price_q2_usd_boe": 52.89,
+    "asp_yoy_pct": 20.0,
+    "fy2026_sales_volume_target_boed": 560000,
+    "fy2026_volume_growth_pct": 10.0,
+    "performance_drivers": "Record average sales volume + a 20% YoY jump in average selling price (global supply tightness / Middle East risk premium in the Apr-Jun quarter) drove the +104% YoY / +122% QoQ profit surge."
+  },
+  "dividend_outcome": {
+    "declared_with_q2_results": true,
+    "interim_2026_dps_thb": 4.5,
+    "pay_date": "2026-08-28",
+    "ex_date": "2026-08-14",
+    "fy2025_final_reference": {
+      "amount_per_share_thb": 4.65,
+      "ex_date": "2026-02-23",
+      "pay_date": "2026-04-22"
+    },
+    "note": "H1-2026 interim dividend of THB 4.50/share declared alongside the Q2 results, payable 2026-08-28. Broadly in line with the THB 4.65 FY2025 FINAL and consistent with PTTEP's ~semi-annual payout; supports the ~4.85% trailing-yield / ~8% 2026e-yield thesis. A POSITIVE, near-term cash catalyst for a yield holder.",
+    "ex_date_status_2026_08_04": "RESOLVED (2026-08-04) — XD date confirmed 14 August 2026; payment 28 August 2026. Board approved the interim on 31 July 2026. Closes the sub-watch opened on 2026-08-02.",
+    "last_cum_dividend_trading_day": "2026-08-13",
+    "board_approval_date": "2026-07-31",
+    "ex_date_sources": [
+      "https://www.thaipr.net/en/energy_en/3746211",
+      "https://www.energy-pedia.com/news/thailand/pttep-announces-first-half-performance-of-2026-and-interim-dividend-payment-at-thb-4-50-per-share-204809",
+      "https://www.pttep.com/en/investor-relations/shareholder-information/dividend-policy-and-payments"
+    ],
+    "action_for_tho": "Tho ALREADY holds 1,400 PTTEP shares, so no action is required to capture the dividend — simply do NOT sell before the XD date. Entitlement: 1,400 x THB 4.50 = THB 6,300 gross, paid 2026-08-28. Thai withholding tax on dividends is 10% unless he elects the tax-credit route, so expect ~THB 5,670 net. Last cum-dividend trading day is 2026-08-13; the share price typically drops by roughly the dividend (~THB 4.50, ~3% of a ~151 price) on 2026-08-14 — that drop is NOT a loss, it is the cash moving to him. This ALSO means the post-Q2 rally to ~147-151 is a poor entry to ADD into: buying before XD just buys back his own dividend at a 10% tax cost, and the Aug-04 oil de-escalation is eroding the forward earnings driver."
+  },
+  "analyst_meeting_2026_08_03": {
+    "_added_by_nightly_agent": "2026-08-03",
+    "held": "2026-08-03, 10:30-12:00 ICT, Auditorium 6/F Energy Complex (per PTTEP IR calendar).",
+    "fy2026_sales_volume_target_reaffirmed_boed": 560000,
+    "fy2026_volume_growth_pct": 10.0,
+    "q3_2026_volume_guidance": "Management flagged a SLIGHT Q3 volume DIP vs the record Q2 ~573kboe/d, on PLANNED MAINTENANCE / turnarounds in Thailand and Malaysia — a normal seasonal shutdown, not a demand or reserves issue. Full-year target held at ~560kboe/d.",
+    "capex_guidance_note": "A specific 2026 capex figure was not cleanly retrievable from public coverage of the meeting at run time; the ~560kboe/d full-year volume target and the +10% growth plan were reaffirmed. Re-confirm the capex number if an outlet/IR deck refreshes it.",
+    "interim_div_ex_date_status": "Still TBC on the SET filing at run time (pay date 2026-08-28 confirmed). Sub-watch remains open until the ex-date is posted.",
+    "read_for_tho": "The meeting REINFORCED the Q2 read: record volumes, ~560kboe/d full-year target intact, a normal Q3 maintenance dip ahead. Nothing changes the HOLD-with-income stance — the forward driver is still the oil tape, not this backward-looking quarter.",
+    "sources": [
+      "https://www.pttep.com/en/investor-relations/calendar",
+      "https://www.kaohooninternational.com/markets/587753"
+    ]
+  },
+  "reconciliation_vs_preview": {
+    "verdict": "in_line_to_beat",
+    "net_profit": "Q2 ~THB 27.2bn (USD 833m) landed essentially IN LINE with the CLSA ~THB 27.3bn preview and ABOVE the DBS ~THB 25.6bn estimate. The +122% QoQ / +104% YoY prints matched the bullish broker framing.",
+    "asp": "ASP $52.89/boe was IN LINE with the ~$52.8/boe preview.",
+    "volume": "572,882 BOED was a POSITIVE surprise — a record high and above the ~560kboe/d full-year target, the main beat vs preview.",
+    "dividend": "The THB 4.50 interim (pay 2026-08-28) is a concrete POSITIVE vs an uncertain preview (any interim div was flagged as a watch item, not assumed).",
+    "vs_scenario_reaction": "Maps to the preview's bullish/'beat' branch on volume + dividend, in-line on profit/ASP. But note the Q2 (Apr-Jun) realised price is a LOOK-BACK: the print reflects the Middle East premium quarter, not the forward tape where Brent has since consolidated to ~$86. Not itself an add signal."
+  },
+  "thesis_assessment": {
+    "holds": true,
+    "confidence": "high",
+    "read": "The medium-term thesis HOLDS and is reinforced on fundamentals: PTTEP is a low-cost producer with record volumes, a 20% YoY ASP lift, strong FCF, and a fresh THB 4.50 interim dividend. BUT the forward driver (oil price) has softened from the late-July ~$100 peak to ~$86 as the US-Iran risk premium partly drained, so the Q2 earnings strength is backward-looking. For a 3-month-2-year holder this is a HOLD with an attractive income profile, not a chase into post-results strength. A pullback with oil toward the Goldman ~$80 base case would be the more attractive add zone; a re-escalation snapping Brent toward $105-120 is the upside/operational-risk two-sider tracked in oil_scenario.py.",
+    "watch_next": [
+      "Confirm the interim-dividend EX-DATE from the SET filing (pay date 2026-08-28 known; ex-date TBC).",
+      "The oil two-sider: forward Brent regime (consolidation ~$86 vs re-escalation tails) drives the Q3 realised price far more than this Q2 look-back.",
+      "Aug-03 analyst meeting HELD (see analyst_meeting_2026_08_03): FY26 ~560kboe/d target reaffirmed, slight Q3 volume dip flagged on Thailand+Malaysia planned maintenance; a specific 2026 capex figure was not cleanly retrievable — re-confirm if an outlet refreshes it.",
+      "Whether the record ~573kboe/d Q2 volume is sustained toward the 560kboe/d full-year target."
+    ]
+  },
+  "advisory_note_for_tho": "PTTEP delivered a strong, clean Q2: net profit USD 833m (+104% YoY, +122% QoQ) on record ~573kboe/d volume and a $52.89/boe realised price, with H1 net income up 14% to THB 39.03bn — essentially in line with the bullish CLSA preview and beating DBS. The board declared a THB 4.50/share interim dividend payable 28 Aug 2026, a real near-term cash catalyst. Important caveat: this quarter captured the Apr-Jun Middle East risk premium, and oil has since eased to ~$86, so the result is backward-looking. This is a HOLD with good income, not a reason to add into strength; the better add zone is an oil-driven pullback. Informational, not a recommendation to trade.",
+  "oil_regime_read_2026_08_04": {
+    "_added_by_nightly_agent": "2026-08-04",
+    "event": "Trump CALLED OFF a planned massive strike on Iran (Aug-03) at the request of Saudi Arabia, the UAE, Qatar and Iran; peace talks restart; Brent -4.2% to ~$84, then ~$81 on Aug-04 — the lowest print of the conflict series.",
+    "impact_on_q3_2026": "DOUBLE headwind for Q3: (a) realised price falls from the Q2 $52.89/boe ASP as the geopolitical premium drains, and (b) management already flagged a SLIGHT Q3 volume dip on planned Thailand+Malaysia maintenance. Q2 was the peak look-back quarter.",
+    "thesis_change": "NO change to HOLD — but the case is now INCOME-led, not price-led. The THB 4.50 interim (XD Aug-14) is the reason to hold through August; the forward oil tape is working against the earnings line.",
+    "do_not": "Do NOT chase the post-Q2 rally to ~147-151 THB, and do NOT add before XD Aug-14 (buying back his own dividend at 10% withholding into an eroding oil tape).",
+    "reassess_if": "Brent breaks decisively below ~$76 (Goldman full-reopen case) -> reassess the PTTEP weight; or Iran-US talks break down and Brent snaps back above ~$95 -> the premium thesis re-firms."
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "_meta": {
+    "date": "2026-08-09",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-09",
+    "base_currency": "THB",
+    "run_type": "SUNDAY — NO INTERVENING TRADING SESSION",
+    "run_type_note": "The last session was Friday 2026-08-07, which the Aug-08 run already covered. Nothing has traded since. Unlike the previous four runs, tonight's zero delta has TWO independent causes: the feed is dead AND there was genuinely no session. Do not read this as confirmation that the marks are current — they are not.",
+    "marks_are_carried": true,
+    "carried_from": "2026-08-04",
+    "carried_run_count": 5,
+    "carried_marks_source": "data/snapshots/*.json — NOT data_collector/portfolio_snapshot.json, which holds the dead collector's 2026-07-15 figures (144.00 / 155.50 / 10.40) and will mislead anyone who reaches for it by reflex.",
+    "feed_health_severity": "DEAD",
+    "feed_health_report": "data/feed_health.json",
+    "feed_health_note": "Fifth consecutive run. Unchanged since the Aug-08 diagnosis: clean SIGTERM at 2026-07-15 23:53 ICT, never restarted. Supervisor/launchd problem, not a fetch-code problem. No nightly run can fix this.",
+    "gold_sleeve_excluded": "Gold sleeve still excluded from these totals: the series carries NAV per unit with no unit count, and the module refuses to guess. Note this is no longer a bookkeeping nit — the largest position in the book (~35%) is the one the system cannot value, at a moment when gold is ~22% below its January peak."
+  },
+
+  "prices_thb": {
+    "BAFS.BK": 9.8,
+    "PTTEP.BK": 145.0,
+    "SCB.BK": 151.5
+  },
+  "shares": {
+    "BAFS.BK": 18200,
+    "PTTEP.BK": 1400,
+    "SCB.BK": 1400
+  },
+  "position_values_thb": {
+    "BAFS.BK": 178360.0,
+    "PTTEP.BK": 203000.0,
+    "SCB.BK": 212100.0
+  },
+  "total_ex_gold_thb": 593460.0,
+  "prior_total_ex_gold_thb": 593460.0,
+  "delta_vs_prior_thb": 0.0,
+  "delta_vs_prior_pct": 0.0,
+  "delta_interpretation": "ZERO BY CONSTRUCTION, NOT BY OBSERVATION. Identical inputs produce an identical total. Carries no information about market movement.",
+  "weights_pct": {
+    "BAFS.BK": 30.05,
+    "PTTEP.BK": 34.21,
+    "SCB.BK": 35.74
+  },
+  "weights_caveat": "Derived from 5-day-old carried marks; every weight inherits that staleness. Weights also EXCLUDE the gold sleeve, so they overstate each equity's share of Tho's true book.",
+
+  "pnl_status": {
+    "reliable": false,
+    "reason": "avg_cost_price is 0 for every row in the holdings table. P&L is SUPPRESSED, not zero.",
+    "detected_by": "portfolio_engine/cost_basis_guard.py (new this run)",
+    "audit_report": "data/cost_basis_audit.json",
+    "phantom_pnl_thb": 608579.99,
+    "phantom_pnl_note": "What the pre-guard arithmetic reports: the ENTIRE market value of the book as profit, i.e. an asserted infinite return. Any P&L figure of this shape in a brief or dashboard is an artefact.",
+    "remedy": "Tho must supply real average cost prices for BAFS.BK, PTTEP.BK, SCB.BK and the gold sleeve. Until then P&L is unavailable — which is correct, and better than the previous answer."
+  },
+
+  "confirmed_events": {
+    "SET_INDEX": {
+      "event": "Full-day close CONFIRMED — resolves a conflict carried for four runs",
+      "date": "2026-08-07",
+      "close": 1612.0,
+      "change_pts": -2.64,
+      "change_pct": -0.16,
+      "turnover_thb_bn": 63.39,
+      "source": "Kaohoon Market Roundup 07/08/2026",
+      "consistency_check": "Reconciles with the morning print of 1,613.67 on THB 38.67bn that the Aug-08 run could only partially source: the afternoon added THB 24.72bn turnover and 1.67 pts of decline.",
+      "caveat": "A confirmed INDEX close does NOT license marking individual positions. The SET is not a proxy for three specific stocks."
+    },
+    "PTTEP.BK": {
+      "event": "Q2-2026 results + interim dividend — XD in 5 days",
+      "net_profit_usd_m": 833,
+      "yoy_pct": 104,
+      "sales_volume_boed": 572882,
+      "asp_usd_per_boe": 52.89,
+      "dps_thb": 4.5,
+      "ex_date": "2026-08-14",
+      "last_cum_date": "2026-08-13",
+      "pay_date": "2026-08-28",
+      "board_approved": "2026-07-31",
+      "holder_impact_thb_gross": 6300.0,
+      "holder_impact_thb_net_10pct_wht": 5670.0,
+      "action": "Hold through 2026-08-13. No purchase before XD.",
+      "alert_status": "NOW FIRING — was silently broken until this run (see dividend_store_fix below)"
+    }
+  },
+
+  "dividend_store_fix": {
+    "severity": "HIGH",
+    "found": "data/dividends/dividend_history.json had never been written. seed_known_dividends() exists and holds the correct PTTEP record, but nothing calls it, and _load_history() returns {} when the file is absent. upcoming_ex_dates() therefore returned [] — indistinguishable from 'no dividends due'.",
+    "impact": "The confirmed PTTEP ex-date alert, due to fire tonight at exactly 5 days out on a position Tho holds, would not have fired.",
+    "root_cause_class": "Same shape as the dead price feed, one layer up: absence of data rendering identically to absence of events.",
+    "process_lesson": "The Aug-08 run wrote 'already seeded in dividend_tracker.py; the ex-date alert will fire'. That was checked against the SOURCE CODE, not the STORE, and the store is what the function reads. Confirming the right data exists in a seed function is not confirming it is retrievable.",
+    "fixed": true,
+    "verified": "Executed in an isolated copy with a stubbed utils.common. Before: store_exists false, record_count 0, alerts []. After: 11 records, PTTEP alert fires with days_until_ex_date 5."
+  },
+
+  "macro_marks": {
+    "usdthb": 33.082,
+    "usdthb_as_of": "2026-08-08",
+    "usdthb_intraday_range": [33.025, 33.134],
+    "usdthb_prior_mark": 33.118,
+    "usdthb_change_pct": -0.11,
+    "usdthb_cumulative_change_pct_vs_3339": -0.92,
+    "gold_spot_usd": 4341.78,
+    "gold_spot_as_of": "2026-08-08",
+    "gold_week_pct": 5.0,
+    "gold_ath_usd": 5589.38,
+    "gold_ath_date": "2026-01-28",
+    "gold_drawdown_from_ath_pct": -22.3,
+    "gold_2026_low_approx_usd": 4046,
+    "gold_max_drawdown_pct_approx": -28,
+    "brent_usd": 82.0,
+    "wti_usd": 77.0,
+    "bot_policy_rate_pct": 1.0,
+    "bot_next_mpc": "2026-08-26",
+    "corrected_mark": {
+      "field": "gold",
+      "previous_value": 4401,
+      "previous_value_was": "an 8:45am ET intraday print of DECEMBER COMEX FUTURES, adopted as if it were spot",
+      "corrected_to": 4341.78,
+      "magnitude_pct": -1.3,
+      "lesson": "The 'dispersion' the Aug-08 run averaged over was not noise between quotes of the same thing — it was three different instruments (futures open 4298.30, futures intraday 4411.70, spot ~4356) compared as one. Taking the midpoint of incommensurable prints is not conservatism."
+    },
+    "fx_read": "Baht strengthening is now a CONFIRMED MULTI-DAY TREND, not a single print: 33.39 -> 33.118 -> 33.082, cumulatively -0.92%. The 'weak baht cushions the unhedged SCBGOLDE sleeve' line that ran through this project's briefs for weeks has not merely faded — it has INVERTED. A strengthening baht SUBTRACTS from THB returns on the unhedged gold sleeve, compounding a gold price 22% below its January peak. The two largest return drivers on Tho's largest position now point the same way, and it is not the good way."
+  },
+
+  "global_closes_2026_08_07": {
+    "sp500": {"close": 7757.64, "day_pct": 0.62, "week_pct": 3.6, "note": "record close"},
+    "nasdaq_composite": {"close": 26690.62, "day_pct": 1.3, "week_pct": 5.2, "note": "record close"},
+    "dow": {"close": 54036.93, "day_pct": 0.28},
+    "soxx_week_pct": 7.0,
+    "dax": {"close": 26319.45, "day_pct": 0.69},
+    "euro_stoxx_50": {"close": 6523.86, "day_pct": 0.33},
+    "stoxx_600": "4th consecutive record close; best week since June 2026",
+    "nikkei_225": {"close": 65606.71, "day_pct": -0.12},
+    "hang_seng": {"close": 25668.03, "day_pct": 0.54},
+    "nifty_50": {"close": 24571, "day_pct": -0.27},
+    "vn_index": {"close": 1768, "day_pct": 0.19, "note": "RESOLVES the 1,768 vs 1,929 conflict — 1,929 was undated and uncorroborated, now discarded"},
+    "set": {"close": 1612.0, "day_pct": -0.16}
+  },
+
+  "resolved_this_run": [
+    "SET Aug-07 full-day close = 1,612.00 (carried 4 runs)",
+    "VN-Index = 1,768; the undated 1,929 discarded",
+    "Gold mark corrected 4,401 -> 4,341.78 (futures mistaken for spot)"
+  ],
+
+  "open_conflicts": [
+    "NEW: Thai foreign flows — Aug-07 file said OUTFLOWS; sources say net INFLOWS >THB 40bn/month, ~75-76bn YTD. Inflow adopted (better sourced, more recent); conflict logged not buried.",
+    "NEW: Fed path after the weak July NFP — one outlet reads HOLD in September, others read CUT. Cut adopted on corroborating evidence (falling yields, gold +5%, tech-led record).",
+    "NEW: BAFS H1-2026 was scheduled for 2026-08-06, NOT the ~Aug-14 the Aug-08 run assumed. Results are likely already out and were NOT captured.",
+    "US unemployment 4.1% (CNBC+RTE) vs 4.2% (Seeking Alpha)",
+    "Brent print dispersion — 4th consecutive night of loosely-sourced prints",
+    "BAFS/PTTEP/SCB individual closes — unobtainable while the feed is dead",
+    "SCB 137.50 legacy conflict",
+    "Gold sleeve unit count — largest position still unvalued",
+    "avg_cost_price = 0 — GUARDED this run, but not FIXED; needs real cost data from Tho"
+  ]
+}

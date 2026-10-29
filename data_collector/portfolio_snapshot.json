@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-10-29T11:30:16.320982+00:00",
+  "base_currency": "THB",
+  "usdthb_rate": 33.720001220703125,
+  "holdings": {
+    "PTTEP.BK": {
+      "current_price": 163.5,
+      "market_value_thb": 228900.0,
+      "pnl_thb": 23100.0,
+      "pnl_pct": 11.22,
+      "price_as_of": "2026-10-29",
+      "price_source": "yfinance",
+      "is_modelled": false
+    },
+    "SCB.BK": {
+      "current_price": 153.5,
+      "market_value_thb": 214900.0,
+      "pnl_thb": 10500.0,
+      "pnl_pct": 5.14,
+      "price_as_of": "2026-10-29",
+      "price_source": "yfinance",
+      "is_modelled": false
+    },
+    "SCBGOLDE": {
+      "error": "No NAV within tolerance for SCBGOLDE. This instrument has no exchange listing and is intentionally NOT routed to yfinance. Populate it by running portfolio_engine/fund_nav_tracker.run_nightly_nav_snapshot()."
+    }
+  },
+  "total_market_value_thb": 443800.0,
+  "total_pnl_thb": 33600.0,
+  "unpriced_holdings": [
+    "SCBGOLDE"
+  ],
+  "valuation_complete": false,
+  "total_value_caveat": "PARTIAL VALUATION — 1 holding(s) could not be priced (SCBGOLDE). total_market_value_thb EXCLUDES them and therefore understates the portfolio; any weight or concentration figure derived from this total is overstated for the priced sleeves. Do not use for rebalancing until complete."
+}

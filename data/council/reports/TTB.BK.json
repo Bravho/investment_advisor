@@ -1,0 +1,310 @@
+{
+  "investment": {
+    "ticker": "TTB.BK",
+    "name": "TTB.BK",
+    "asset_class": "SET Equity",
+    "currency": "THB",
+    "price": 2.380000114440918,
+    "price_display": "2.38",
+    "change_pct": -1.65,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 10.35,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 8.54,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2022,
+            6.5
+          ],
+          [
+            2023,
+            8.2
+          ],
+          [
+            2024,
+            8.8
+          ],
+          [
+            2025,
+            8.5
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 5.63,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 6.4,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            12.1
+          ],
+          [
+            2024,
+            -0.1
+          ],
+          [
+            2025,
+            -6.0
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 6.56,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "฿215.70B",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 2.76,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "conservative 12× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 15.9,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:58:42+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 5 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "Lacking same-industry peers for direct comparison, TTB.BK's valuation looks attractive but its fundamentals are not compelling enough to make a strong conviction buy decision.",
+      "key_risk": "Potential for further deterioration in fundamentals if economic conditions worsen",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "Dividend yield",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "TTB.BK faces headwinds in its sector, but no direct peers available for comparison.",
+      "key_risk": "Sector downturn could impact TTB.BK's growth prospects",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "TTB.BK's low FX risk and supportive commodity/rate linkages make it a solid choice, but peers offer better overall positioning.",
+      "key_risk": "Potential underperformance if sector-wide demand weakens",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "TTB.BK looks fairly valued compared to peers, but lacks clear advantages. More time to assess needed.",
+      "key_risk": "Leverage and valuation fragility are moderate.",
+      "metrics_used": [
+        "P/E",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 60,
+    "agreement": "all four analysts land on a neutral, wait-and-see stance.",
+    "disagreement": "no material disagreement — differences are of degree, not direction.",
+    "net": "WAIT. Blended conviction 60/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Potential for further deterioration in fundamentals if economic conditions worsen)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 2.76,
+      "upside_pct": 15.9,
+      "fair_pe": 12.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "TTB.BK": {
+        "P/E": 10.35,
+        "ROE": 8.54,
+        "Dividend yield": 5.63,
+        "Revenue growth": 6.4,
+        "Market cap": 6.56
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/TTB.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/TTB.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 5 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=TTB.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=TTB.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:59:01+00:00",
+  "discovered": true,
+  "candidates": []
+}

@@ -1,0 +1,58 @@
+{
+  "ok": true,
+  "snapshot": "/sessions/sleepy-nifty-keller/mnt/investment_advisor/data_collector/portfolio_snapshot.json",
+  "generated_at": "2026-07-15T11:30:14.467291+00:00",
+  "findings": [
+    {
+      "ticker": "BAFS.BK",
+      "fingerprint": "pnl_equals_market_value",
+      "market_value_thb": 189279.99,
+      "pnl_thb": 189279.99,
+      "meaning": "cost basis was 0; entire position reported as profit"
+    },
+    {
+      "ticker": "BAFS.BK",
+      "fingerprint": "nonzero_pnl_with_zero_pct",
+      "pnl_thb": 189279.99,
+      "pnl_pct": 0.0,
+      "meaning": "internally contradictory — at least one field is fabricated"
+    },
+    {
+      "ticker": "PTTEP.BK",
+      "fingerprint": "pnl_equals_market_value",
+      "market_value_thb": 201600.0,
+      "pnl_thb": 201600.0,
+      "meaning": "cost basis was 0; entire position reported as profit"
+    },
+    {
+      "ticker": "PTTEP.BK",
+      "fingerprint": "nonzero_pnl_with_zero_pct",
+      "pnl_thb": 201600.0,
+      "pnl_pct": 0.0,
+      "meaning": "internally contradictory — at least one field is fabricated"
+    },
+    {
+      "ticker": "SCB.BK",
+      "fingerprint": "pnl_equals_market_value",
+      "market_value_thb": 217700.0,
+      "pnl_thb": 217700.0,
+      "meaning": "cost basis was 0; entire position reported as profit"
+    },
+    {
+      "ticker": "SCB.BK",
+      "fingerprint": "nonzero_pnl_with_zero_pct",
+      "pnl_thb": 217700.0,
+      "pnl_pct": 0.0,
+      "meaning": "internally contradictory — at least one field is fabricated"
+    }
+  ],
+  "portfolio_level_fingerprint": true,
+  "total_market_value_thb": 608579.99,
+  "total_pnl_thb": 608579.99,
+  "affected_tickers": [
+    "BAFS.BK",
+    "PTTEP.BK",
+    "SCB.BK"
+  ],
+  "verdict": "DEFECT_CONFIRMED"
+}

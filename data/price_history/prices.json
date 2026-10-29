@@ -1,0 +1,119 @@
+{
+ "_meta": {
+  "schema_version": 2,
+  "created": "2026-08-13T19:40:57.303883+00:00",
+  "last_written": "2026-08-13T19:40:57.304198+00:00",
+  "written_by": "price_history.record_many"
+ },
+ "series": {
+  "PTTEP.BK": {
+   "2026-08-11": {
+    "ticker": "PTTEP.BK",
+    "session_date": "2026-08-11",
+    "close": 152.0,
+    "currency": "THB",
+    "open_": null,
+    "high": null,
+    "low": null,
+    "volume_shares": null,
+    "value_thousand": null,
+    "average_price": null,
+    "is_confirmed_close": true,
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+    "retrieved_at": "2026-08-13T19:40:00+00:00",
+    "superseded": [],
+    "notes": [
+     "from SET 'Prior' field on the 13 Aug quote page"
+    ]
+   },
+   "2026-08-13": {
+    "ticker": "PTTEP.BK",
+    "session_date": "2026-08-13",
+    "close": 150.5,
+    "currency": "THB",
+    "open_": 151.5,
+    "high": 151.5,
+    "low": 149.5,
+    "volume_shares": 20592787,
+    "value_thousand": 3104940.36,
+    "average_price": 150.78,
+    "is_confirmed_close": true,
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+    "retrieved_at": "2026-08-13T19:40:00+00:00",
+    "superseded": [],
+    "notes": [
+     "LAST CUM-DIVIDEND CLOSE before the 14 Aug XD (DPS 4.50)",
+     "value/volume 150.7781 reconciles with published average 150.78",
+     "SET floor/ceiling 106.50/197.50 confirm +/-30% of prior 152.00 with tick rounding"
+    ]
+   }
+  },
+  "BAFS.BK": {
+   "2026-08-11": {
+    "ticker": "BAFS.BK",
+    "session_date": "2026-08-11",
+    "close": 11.3,
+    "currency": "THB",
+    "open_": null,
+    "high": null,
+    "low": null,
+    "volume_shares": null,
+    "value_thousand": null,
+    "average_price": null,
+    "is_confirmed_close": true,
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/BAFS/price",
+    "retrieved_at": "2026-08-13T19:40:00+00:00",
+    "superseded": [],
+    "notes": [
+     "from SET 'Prior' field on the 13 Aug quote page"
+    ]
+   },
+   "2026-08-13": {
+    "ticker": "BAFS.BK",
+    "session_date": "2026-08-13",
+    "close": 11.4,
+    "currency": "THB",
+    "open_": null,
+    "high": 11.4,
+    "low": 11.2,
+    "volume_shares": 319014,
+    "value_thousand": 3596.28,
+    "average_price": null,
+    "is_confirmed_close": true,
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/BAFS/price",
+    "retrieved_at": "2026-08-13T19:40:00+00:00",
+    "superseded": [],
+    "notes": [
+     "value/volume implies 11.2731, inside the 11.20-11.40 day range"
+    ]
+   }
+  },
+  "SCB.BK": {
+   "2026-08-11": {
+    "ticker": "SCB.BK",
+    "session_date": "2026-08-11",
+    "close": 152.0,
+    "currency": "THB",
+    "open_": null,
+    "high": null,
+    "low": null,
+    "volume_shares": null,
+    "value_thousand": null,
+    "average_price": null,
+    "is_confirmed_close": true,
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+    "retrieved_at": "2026-08-13T19:40:00+00:00",
+    "superseded": [],
+    "notes": [
+     "from SET 'Prior' field on a 13 Aug 09:59 intraday snapshot"
+    ]
+   }
+  }
+ },
+ "conflicts": []
+}

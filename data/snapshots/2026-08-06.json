@@ -1,0 +1,107 @@
+{
+  "_meta": {
+    "date": "2026-08-06",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-06",
+    "base_currency": "THB",
+    "marks_are_carried": true,
+    "note": "NO fresh clean SET closes were retrievable this run. All three equity marks are CARRIED from the 2026-08-04 tape, so total_ex_gold_thb is unchanged by construction and the zero delta below is an ABSENCE OF DATA, not a flat market. The genuinely new content in this snapshot is the gold sleeve re-mark and the first formal concentration_review."
+  },
+  "prices_thb": {
+    "BAFS.BK": 9.8,
+    "PTTEP.BK": 145.0,
+    "SCB.BK": 151.5
+  },
+  "shares": {
+    "BAFS.BK": 18200,
+    "PTTEP.BK": 1400,
+    "SCB.BK": 1400
+  },
+  "position_values_thb": {
+    "BAFS.BK": 178360.0,
+    "PTTEP.BK": 203000.0,
+    "SCB.BK": 212100.0
+  },
+  "total_ex_gold_thb": 593460.0,
+  "prior_total_ex_gold_thb": 593460.0,
+  "delta_vs_prior_thb": 0.0,
+  "delta_vs_prior_pct": 0.0,
+  "delta_attribution": "Zero by construction — every equity mark is carried from 2026-08-04. Do not read this as a flat session.",
+  "weights_pct": {
+    "BAFS.BK": 30.05,
+    "PTTEP.BK": 34.21,
+    "SCB.BK": 35.74
+  },
+
+  "concentration_review": {
+    "source": "portfolio_engine/rebalancer.py :: single_name_concentration_review()",
+    "first_run": "2026-08-06 — first time the standing concentration note has been expressed as a costed proposal rather than prose",
+    "name_flag_pct": 30.0,
+    "country_flag_pct": 70.0,
+    "name_breaches": ["SCB.BK", "PTTEP.BK", "BAFS.BK"],
+    "country_weights_pct": {"TH": 100.0},
+    "country_breaches_pct": {"TH": 100.0},
+    "trim_to_clear_flags": {
+      "SCB.BK": {"thb": 34062.0, "shares": 224, "excess_pct": 5.74},
+      "PTTEP.BK": {"thb": 24962.0, "shares": 172, "excess_pct": 4.21},
+      "BAFS.BK": {"thb": 322.0, "shares": 32, "excess_pct": 0.05}
+    },
+    "total_trim_to_clear_name_flags_thb": 59346.0,
+    "status": "action_suggested",
+    "read": [
+      "The BAFS breach is 0.05% — THB 322 on a THB 178k position. That is far inside the uncertainty of a carried mark and should NOT be acted on. It is a good illustration of why a mechanical weight rule needs a materiality filter.",
+      "Trimming PTTEP before 2026-08-13 would forfeit ~THB 6,300 gross of entitled dividend to correct a 4.2-point weight breach. The dated income is worth more than the tidier weight; the sequencing constraint dominates.",
+      "The country line is the one that matters: TH = 100.0% against a 70% flag. Clearing all three NAME flags redistributes weight inside a book that is still entirely single-country Thai equity, and would not move the country number at all.",
+      "The cheapest available correction is the existing SCBGOLDE sleeve — ~0.50% TER, settles in THB, no new account, and the only non-Thai-equity exposure on the book. See data/research/vietnam_ftse_2026.json for why a new foreign equity position costs roughly ten times more to establish at this book size."
+    ]
+  },
+
+  "gold_sleeve": {
+    "fund": "SCBGOLDE",
+    "gold_usd_oz": 4184.0,
+    "gold_usd_oz_prior": 4110.0,
+    "usd_thb": 33.09,
+    "usd_thb_prior": 33.28,
+    "est_nav_thb_per_unit": 4.23,
+    "est_nav_thb_per_unit_prior": 4.18,
+    "fx_offset_note": "Gold +1.80% in USD but the baht STRENGTHENED 33.28 -> 33.09 (-0.57%), so the THB-measured gain is ~1.22%, not 1.80%. The unhedged FX leg gave back about a third of the move — a small live example of the currency cost this project is meant to track.",
+    "driver": "NOT Iran fear. The Hormuz de-escalation LOWERS expected energy inflation, which removes the case for further Fed tightening and pulls forward rate-cut expectations; add a weaker dollar and continued central-bank buying. Gold rising ON de-escalation inverts the pattern that held through July.",
+    "note": "Units held are still not recorded in the seed, so this sleeve is tracked by NAV estimate only and is EXCLUDED from total_ex_gold_thb."
+  },
+
+  "macro_marks": {
+    "brent_usd": 80.5,
+    "brent_date": "2026-08-05",
+    "brent_note": "Rose back above $80 while holding most of the prior two sessions' losses. Prior print $79.47 (Aug-04).",
+    "weighted_scenario_brent_usd": 87.11,
+    "weighted_scenario_brent_usd_prior": 87.49,
+    "usd_thb": 33.09,
+    "gold_usd_oz": 4184.0,
+    "set_index_last_logged": 1623.64,
+    "set_index_date": "2026-07-31",
+    "bot_policy_rate_pct": 1.0,
+    "us_indices_2026_08_04_close": {"dow": 54085.88, "sp500": 7736.52, "nasdaq": 26584.99, "note": "all three at record closes"},
+    "us_10y_note": "not retrieved this run"
+  },
+
+  "risk_score": null,
+
+  "price_caveats": [
+    "ALL THREE equity marks are CARRIED from 2026-08-04. No fresh clean SET close was retrievable this run.",
+    "PTTEP: a 162.50 quote surfaced in search and was NOT ADOPTED — it cannot be reconciled with the Aug-04 range (open 145.00 / high 146.00 / low 143.00) and is most likely a different board or a stale listing.",
+    "SCB: the previously rejected 137.50 stale-quote conflict remains unre-verified; carrying 151.50.",
+    "Gold feed dispersion is unusually wide: $4,183.85 (Yahoo, 09:00 ET), $4,245.80 (CNBC), $4,250.18 (Trading Economics, +4.23%), $4,304.30 (Convex). $4,184 taken as the conservative mark; the range is logged rather than averaged.",
+    "SET index close for Aug-04/05 still not retrievable; carrying the Jul-31 close of 1,623.64."
+  ],
+
+  "catalysts": [
+    "2026-08-07 — US July non-farm payrolls (cons. ~80-120k, unemployment 4.3%, AHE +0.3%)",
+    "2026-08-13 — LAST CUM-DIVIDEND DAY, PTTEP THB 4.50 interim",
+    "2026-08-14 — PTTEP XD; BAFS H1-2026 results (estimated)",
+    "2026-08-21 — FTSE Russell final Vietnam eligible list + capping thresholds",
+    "2026-08-26 — Bank of Thailand MPC (policy 1.00%)",
+    "2026-08-28 — PTTEP interim dividend paid; BAFS investor meeting (confirmed)",
+    "2026-09-21 — FTSE Vietnam reclassification effective",
+    "~2026-10-04 — approximate expiry of the 60-day Hormuz interim window if signed around Aug-05"
+  ]
+}

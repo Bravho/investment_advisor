@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-10-07T02:49:46.729833+00:00",
+  "worst_severity": "DEAD",
+  "healthy": false,
+  "thresholds_days": {
+    "fresh_max": 2,
+    "aging_max": 4,
+    "stale_max": 10,
+    "note": "calendar days, not trading days — see module docstring"
+  },
+  "checks": [
+    {
+      "name": "portfolio_snapshot",
+      "description": "data_collector/portfolio_snapshot.json — live holdings valuation",
+      "as_of": "2026-10-07T02:49:36.682986+00:00",
+      "age_days": 0.0,
+      "severity": "FRESH",
+      "detail": "4 holding(s) priced",
+      "error": null
+    },
+    {
+      "name": "collector_process",
+      "description": "data_collector/logs/market_data_process.log — collector daemon liveness",
+      "as_of": "2026-10-07T02:49:45.800223+00:00",
+      "age_days": 0.0,
+      "severity": "FRESH",
+      "detail": "market_data.log: last entry is a CLEAN SHUTDOWN — the daemon was stopped deliberately and never restarted. Remedy is the supervisor/launchd job, NOT the fetch code.",
+      "error": null
+    },
+    {
+      "name": "orchestrator_heartbeat",
+      "description": "data_collector/heartbeat.json — news/market/ai worker heartbeat",
+      "as_of": "2026-10-07T02:49:43.648545+00:00",
+      "age_days": 0.0,
+      "severity": "FRESH",
+      "detail": "3/3 workers last reported running (news_scraper, market_data, ai_engine); NOTE a stale heartbeat means these statuses are historical, not current",
+      "error": null
+    },
+    {
+      "name": "nightly_artifacts",
+      "description": "data/snapshots + data/watchlist.json — nightly agent outputs",
+      "as_of": null,
+      "age_days": 57.12,
+      "severity": "DEAD",
+      "detail": "latest snapshot fund_nav_history; watchlist 2026-08-11",
+      "error": null
+    }
+  ],
+  "interpretation": "One or more data feeds are stale or of unknown age. Treat every downstream price, weight and delta as UNVERIFIED until the flagged checks are green."
+}

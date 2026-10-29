@@ -1,0 +1,281 @@
+{
+  "investment": {
+    "ticker": "GDX",
+    "name": "GDX",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 82.51000213623047,
+    "price_display": "82.51",
+    "change_pct": -2.77,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 15.77,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/GDX/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 71.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/GDX/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 156.96,
+        "unit": "USD",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "conservative 30× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 90.2,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      },
+      "Dividend WHT": {
+        "metric": "Dividend WHT",
+        "value": 15.0,
+        "unit": "%",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "treaty",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Repatriation drag": {
+        "metric": "Repatriation drag",
+        "value": 14.87,
+        "unit": "%/yr",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:06:57+00:00",
+        "confidence": 1.0,
+        "note": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT.; FX round-trip ~1.0% over ~1.5yr.; US-domiciled ETF: 15% treaty WHT on distributions; Irish UCITS often more efficient.",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 2 live (Yahoo), remainder curated",
+      "High repatriation drag (~14.9%/yr) for a Thai investor",
+      "ROE unavailable — analysis treats it as unconfirmed",
+      "Dividend yield=71.0% implausibly high — verify source"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Caution",
+      "conviction": 60,
+      "confidence": 50,
+      "thesis": "High dividend yield is attractive, but P/E and repatriation drag raise concerns; no peer comparison available.",
+      "key_risk": "Unconfirmed ROE and implausibly high dividend yield.",
+      "metrics_used": [
+        "P/E",
+        "Dividend yield",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Caution",
+      "conviction": 50,
+      "confidence": 60,
+      "thesis": "Lacks peer comparison; high repatriation drag and implausible dividend yield raise concerns.",
+      "key_risk": "High repatriation drag impacts returns.",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Caution",
+      "conviction": 45,
+      "confidence": 50,
+      "thesis": "High repatriation drag and FX risk diminish appeal; no peer comparison available.",
+      "key_risk": "Unsustainable dividend yield and high costs for Thai investors.",
+      "metrics_used": [
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "repatriation.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 45,
+      "confidence": 50,
+      "thesis": "High repatriation drag and implausibly high dividend yield raise concerns; no peer comparison available.",
+      "key_risk": "High FX risk and dividend sustainability issues.",
+      "metrics_used": [
+        "P/E",
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py",
+        "repatriation.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 50,
+    "agreement": "Value Analyst, Macro & Tech-Trends, Cross-Asset Linkage, Risk & Control counsel caution; the rest stay neutral.",
+    "disagreement": "the debate is how defensive to be, not whether to chase.",
+    "net": "WAIT. Blended conviction 50/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Unsustainable dividend yield and high costs for Thai investors.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 156.96,
+      "upside_pct": 90.2,
+      "fair_pe": 30.0
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    },
+    "repatriation": {
+      "origin": "US",
+      "is_etf": true,
+      "dividend_wht_pct": 15.0,
+      "effective_dividend_tax_pct": 20.0,
+      "dividend_drag_pct": 14.2,
+      "fx_drag_pct": 0.67,
+      "total_drag_pct": 14.87,
+      "remit_exempt_assumed": false,
+      "notes": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT. FX round-trip ~1.0% over ~1.5yr. US-domiciled ETF: 15% treaty WHT on distributions; Irish UCITS often more efficient.",
+      "suggestion": "An Irish-domiciled accumulating UCITS equivalent would cut withholding for a Thai investor.",
+      "disclaimer": "Estimate — confirm with a Thai tax professional."
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "GDX": {
+        "P/E": 15.77,
+        "Dividend yield": 71.0
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/GDX",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/GDX/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 2 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=GDX",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=GDX",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T17:07:04+00:00",
+  "discovered_idea": true,
+  "idea_theme": "Gold mining",
+  "idea_reason": "Gold prices may rise with economic uncertainty, benefiting miners.",
+  "candidates": []
+}

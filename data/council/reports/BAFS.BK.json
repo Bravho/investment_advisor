@@ -1,0 +1,567 @@
+{
+  "investment": {
+    "ticker": "BAFS.BK",
+    "name": "Bangkok Aviation Fuel",
+    "asset_class": "SET Aviation",
+    "currency": "THB",
+    "price": 9.600000381469727,
+    "price_display": "9.60",
+    "change_pct": -0.52,
+    "as_of": "2026-06-21",
+    "facts": {
+      "Jet fuel": {
+        "metric": "Jet fuel",
+        "value": 80.0,
+        "unit": "$/bbl",
+        "source_name": "Yahoo Finance — quote",
+        "source_url": "https://finance.yahoo.com/quote/BAFS.BK",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "P/E": {
+        "metric": "P/E",
+        "value": 35.56,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            24.0
+          ],
+          [
+            2021,
+            28.0
+          ],
+          [
+            2022,
+            26.0
+          ],
+          [
+            2023,
+            22.0
+          ],
+          [
+            2024,
+            19.0
+          ],
+          [
+            2025,
+            18.0
+          ],
+          [
+            2026,
+            18.0
+          ]
+        ]
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 2.5,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            -6.2
+          ],
+          [
+            2023,
+            -2.5
+          ],
+          [
+            2024,
+            1.9
+          ],
+          [
+            2025,
+            4.0
+          ]
+        ]
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 1.99,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 3.44,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            2.5
+          ],
+          [
+            2021,
+            2.0
+          ],
+          [
+            2022,
+            2.5
+          ],
+          [
+            2023,
+            3.0
+          ],
+          [
+            2024,
+            3.0
+          ],
+          [
+            2025,
+            3.0
+          ],
+          [
+            2026,
+            3.0
+          ]
+        ]
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 5.85,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": -0.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            35.6
+          ],
+          [
+            2024,
+            15.9
+          ],
+          [
+            2025,
+            4.9
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 0.19,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "฿6.12B",
+        "history": null
+      },
+      "News sentiment": {
+        "metric": "News sentiment",
+        "value": 0.1,
+        "unit": "score",
+        "source_name": "News headlines (RSS)",
+        "source_url": "https://news.google.com/rss/search?q=BAFS.BK",
+        "period": "24h",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "Stable tourism demand",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 4.05,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "conservative 15× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": -57.8,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:17+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Wait",
+      "conviction": 50,
+      "confidence": 60,
+      "thesis": "Bangkok Aviation Fuel ranks poorly vs peers on key metrics like P/E and ROE, but has a higher FCF yield. More research needed to determine if it's undervalued relative to its margin of safety.",
+      "key_risk": "Reliance on a single industry could lead to concentration risk",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "Despite a higher revenue growth rate compared to peers, BAFS faces challenges in the aviation sector. The company's revenue has remained flat over the past year.",
+      "key_risk": "Continued weakness in the aviation industry could further impact BAFS' financial performance and overall stock price.",
+      "metrics_used": [
+        "Revenue growth",
+        "News sentiment"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "News headlines (RSS)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "While BAFS offers a decent dividend yield compared to its peers, it ranks lowest in terms of this metric. The company's low FX risk is favorable, but the jet fuel price at $80/bbl is near the top end of the historical range, which could be a headwind.",
+      "key_risk": "Dependence on volatile jet fuel prices",
+      "metrics_used": [
+        "FX risk",
+        "Jet fuel",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Yahoo Finance — quote",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 75,
+      "thesis": "Higher debt and valuation relative to peers make BAFS a less attractive play on Thai aviation, despite decent dividend yield.",
+      "key_risk": "Increased leverage and valuations could amplify potential downside if sector faces headwinds.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 58,
+    "agreement": "all four analysts land on a neutral, wait-and-see stance.",
+    "disagreement": "no material disagreement — differences are of degree, not direction.",
+    "net": "WAIT. Blended conviction 58/100 across four lenses.",
+    "flip": "a pullback toward fair value (~-57.8% from here); avoiding the key risk (Reliance on a single industry could lead to concentration risk)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 4.05,
+      "upside_pct": -57.8,
+      "fair_pe": 15.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [
+      "AOT.BK",
+      "PSL.BK",
+      "BA.BK"
+    ],
+    "table": {
+      "BAFS.BK": {
+        "Jet fuel": 80.0,
+        "P/E": 35.56,
+        "ROE": 2.5,
+        "Debt/Equity": 1.99,
+        "Dividend yield": 3.44,
+        "FCF yield": 5.85,
+        "Revenue growth": -0.0,
+        "Market cap": 0.19
+      },
+      "AOT.BK": {
+        "P/E": 47.05,
+        "ROE": 14.35,
+        "Dividend yield": 1.36,
+        "Debt/Equity": 0.35,
+        "Revenue growth": 3.0,
+        "Market cap": 25.94,
+        "FCF yield": 1.51
+      },
+      "PSL.BK": {
+        "P/E": 16.51,
+        "ROE": 4.11,
+        "Dividend yield": 5.63,
+        "Debt/Equity": 0.82,
+        "Revenue growth": 28.3,
+        "Market cap": 0.32,
+        "FCF yield": -53.32
+      },
+      "BA.BK": {
+        "P/E": 9.11,
+        "ROE": 25.75,
+        "Dividend yield": 8.09,
+        "Debt/Equity": 1.67,
+        "Revenue growth": -1.2,
+        "Market cap": 1.09,
+        "FCF yield": 6.8
+      }
+    }
+  },
+  "peer_advice": {
+    "available": true,
+    "scores": {
+      "BAFS.BK": 27,
+      "AOT.BK": 43,
+      "PSL.BK": 54,
+      "BA.BK": 70
+    },
+    "ranked": [
+      [
+        "BA.BK",
+        70
+      ],
+      [
+        "PSL.BK",
+        54
+      ],
+      [
+        "AOT.BK",
+        43
+      ],
+      [
+        "BAFS.BK",
+        27
+      ]
+    ],
+    "target": "BAFS.BK",
+    "target_rank": 4,
+    "total": 4,
+    "better_overall": [
+      {
+        "ticker": "BA.BK",
+        "score": 70
+      },
+      {
+        "ticker": "PSL.BK",
+        "score": 54
+      },
+      {
+        "ticker": "AOT.BK",
+        "score": 43
+      }
+    ],
+    "candidates": [
+      {
+        "ticker": "BA.BK",
+        "score": 70
+      },
+      {
+        "ticker": "PSL.BK",
+        "score": 54
+      },
+      {
+        "ticker": "AOT.BK",
+        "score": 43
+      }
+    ],
+    "field_beats": [
+      {
+        "metric": "P/E",
+        "winner": "BA.BK",
+        "winner_value": 9.11,
+        "target_value": 35.56
+      },
+      {
+        "metric": "FCF yield",
+        "winner": "BA.BK",
+        "winner_value": 6.8,
+        "target_value": 5.85
+      },
+      {
+        "metric": "ROE",
+        "winner": "BA.BK",
+        "winner_value": 25.75,
+        "target_value": 2.5
+      },
+      {
+        "metric": "Dividend yield",
+        "winner": "BA.BK",
+        "winner_value": 8.09,
+        "target_value": 3.44
+      },
+      {
+        "metric": "Revenue growth",
+        "winner": "PSL.BK",
+        "winner_value": 28.3,
+        "target_value": -0.0
+      },
+      {
+        "metric": "Debt/Equity",
+        "winner": "AOT.BK",
+        "winner_value": 0.35,
+        "target_value": 1.99
+      }
+    ],
+    "metrics_used": [
+      "P/E",
+      "FCF yield",
+      "ROE",
+      "Dividend yield",
+      "Revenue growth",
+      "Debt/Equity"
+    ]
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/BAFS.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 1 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/BAFS.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 7 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=BAFS.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=BAFS.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 1 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:57:43+00:00",
+  "candidates": [
+    {
+      "ticker": "BA.BK",
+      "name": "BA.BK",
+      "conviction": 65
+    }
+  ]
+}

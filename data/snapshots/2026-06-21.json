@@ -1,0 +1,22 @@
+{
+  "snapshot_date": "2026-06-21",
+  "_note": "First entry seeding the snapshot archive. Written by the nightly agent on 2026-06-22 while verifying the new standalone archive_daily_snapshot() writer. Market values are real (from data_collector/portfolio_snapshot.json + tonight's news search); portfolio_risk_score is left null because the live blended score requires the Postgres risk path. Subsequent nightly runs (python -m ai_engine.risk_scorer) will populate full risk fields.",
+  "base_currency": "THB",
+  "usdthb_rate": 32.82,
+  "holdings": {
+    "BAFS.BK": {"current_price": 9.6, "market_value_thb": 174720.01},
+    "PTTEP.BK": {"current_price": 134.0, "market_value_thb": 187600.0},
+    "SCB.BK": {"current_price": 141.0, "market_value_thb": 197400.0},
+    "SCB_GOLD_FUND": {"note": "no live unit price; tracked via fund_nav_tracker NAV estimate"}
+  },
+  "total_market_value_thb": 559720.01,
+  "risk_score": null,
+  "risk_level": "pending_live_run",
+  "usd_thb_rate": 32.82,
+  "fed_policy_risk_level": "elevated",
+  "fed_policy_risk_score": 0.5875,
+  "gold_drawdown_classification": "fed_driven_dip",
+  "gold_drawdown_pct": -7.7,
+  "gold_drawdown_signal": "hold_or_add",
+  "gold_drawdown_current_level": 4155.0
+}

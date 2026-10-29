@@ -1,0 +1,285 @@
+{
+  "_meta": {
+    "date": "2026-08-13",
+    "generated_by": "nightly agent (investment-advisor-self-develop)",
+    "run_time_ict": "2026-08-13T02:30:00+07:00",
+    "base_currency": "THB",
+    "mark_policy": "Every mark carries the SESSION DATE it was observed for, never the date it was copied. Source URL recorded. See data/observed_marks.json.",
+    "session_covered": "2026-08-11",
+    "session_note": "2026-08-12 WAS NOT A TRADING SESSION. The SET was closed for HM Queen Sirikit the Queen Mother's Birthday (Mother's Day). The exchange's EOD publish stamp on all three holdings still read '12 Aug 2026 03:20:09' at 02:30 ICT on 13 Aug, i.e. it never advanced, because there was nothing to publish. The 2026-08-12 gap the 12 Aug run flagged as 'very likely a holiday' is now confirmed and encoded in data_collector/set_holidays.py.",
+    "price_feed_status": "Primary collector DEAD 29 days (clean SIGTERM 2026-07-15 23:53 ICT). All three equity legs marked FIRST-PARTY from www.set.or.th. Parsing by data_collector/set_official.py; fetching still impossible from Python in this sandbox.",
+    "pnl_status": "SUPPRESSED - avg_cost_price is 0 for every holdings row. See data/cost_basis_audit.json. Only Tho can clear this."
+  },
+
+  "equity_book": {
+    "basis": "FULLY SAME-SESSION on 2026-08-11 - and unlike the 10 Aug clean book produced on 12 Aug, this one is same-session at the CURRENT session. There is no staler leg because there is no later session to be stale against.",
+    "positions": {
+      "BAFS.BK": {
+        "quantity": 18200,
+        "close": 11.3,
+        "value": 205660.0,
+        "session_change": 0.1,
+        "session_change_pct": 0.89,
+        "observed_as_of": "2026-08-11",
+        "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+        "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+        "corroboration": 1,
+        "is_corroborated": false
+      },
+      "PTTEP.BK": {
+        "quantity": 1400,
+        "close": 152.0,
+        "value": 212800.0,
+        "session_change": 2.5,
+        "session_change_pct": 1.67,
+        "observed_as_of": "2026-08-11",
+        "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+        "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+        "corroboration": 1,
+        "is_corroborated": false
+      },
+      "SCB.BK": {
+        "quantity": 1400,
+        "close": 152.0,
+        "value": 212800.0,
+        "session_change": 0.0,
+        "session_change_pct": 0.0,
+        "observed_as_of": "2026-08-11",
+        "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+        "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+        "corroboration": 1,
+        "is_corroborated": false
+      }
+    },
+    "unpriced": [],
+    "valuation_complete": true,
+    "total_value": 631260.0,
+    "mark_dates": ["2026-08-11"],
+    "mark_date_mixed": false,
+    "weights_pct": {
+      "BAFS.BK": 32.5793,
+      "PTTEP.BK": 33.7104,
+      "SCB.BK": 33.7104
+    },
+    "book_vs_index": {
+      "set_index_close": 1612.62,
+      "set_index_change_pct": -0.72,
+      "book_change_pct_est": 0.85,
+      "note": "The SET fell 0.72% on 11 Aug on profit-taking in banks and retail, while this book rose roughly 0.85% - PTTEP +1.67% and BAFS +0.89% on the oil spike, SCB flat. Concentration cut the right way this session. It is the same concentration that will cut the other way when oil reverses; a good day is not diversification."
+    }
+  },
+
+  "resolved_open_item": {
+    "item": "SCB mark stale since 2026-08-10 (pre-open cache served on 11 Aug)",
+    "status": "RESOLVED",
+    "resolution": "SET page re-read at 02:30 ICT on 13 Aug in overnight-FINAL state. SCB closed 152.00 on 11 Aug, UNCHANGED (Prior 152.00, Change 0.00).",
+    "consequence_for_prior_run": "Last night's mixed-date total of THB 631,260 turns out to equal tonight's fully same-session total of THB 631,260 - because the stale leg did not move. The number was right; the method that produced it was not. A mixed-date total that happens to be correct is still a mixed-date total, and this coincidence should not be read as evidence the practice is safe."
+  },
+
+  "gold_sleeve": {
+    "status": "UNVALUED",
+    "consecutive_runs_unvalued": 10,
+    "reason": "NAV per unit now known to 4dp AND the fund's total NAV is known; UNIT COUNT FOR THO'S POSITION IS STILL UNKNOWN. Largest position in the book, excluded from every total.",
+    "nav_per_unit": 23.7123,
+    "nav_change": 0.4561,
+    "nav_change_pct": 1.9612,
+    "fund_total_nav_thb": 8046458101.5,
+    "offer_price": 23.8749,
+    "bid_price": 23.6767,
+    "bid_offer_spread_pct": 0.8371,
+    "nav_observed_as_of": "2026-08-11",
+    "nav_source_url": "https://www.scbam.com/en/fund/default/fund-information/scbgold",
+    "gold_spot_usd": 4432.09,
+    "gold_spot_observed": "2026-08-12T09:00:00-04:00",
+    "gold_spot_prior": 4396.53,
+    "gold_spot_change_pct": 0.809,
+    "gold_instrument": "SPOT (not futures) - standing rule after the 4,401 error. Dec futures quoted at 4,430 and 4,470.40 on the same page were NOT used.",
+    "nav_lag_note": "SCBGOLD is a feeder into SPDR Gold Trust, so its THB NAV is struck off the master's PRIOR US session. The 11 Aug NAV does not contain the 12 Aug spot move. Do not compare same-day NAV to same-day spot and read the gap as tracking error.",
+    "hedging": "UNHEDGED. SCBAM runs a separate THB-hedged class (SCBGOLDH) which Tho does not hold. The sleeve is a joint bet on USD gold AND USD/THB."
+  },
+
+  "fee_intelligence_NEW": {
+    "note": "First hard fee schedule the project has ever held for a fund Tho actually owns. Source: SCBAM fund page, read 2026-08-13. Implemented in portfolio_engine/gold_fee_drag.py.",
+    "fund": "SCBGOLD",
+    "charged_to_fund_pct_pa": {
+      "management_fee": 0.436025,
+      "management_fee_max": 1.07,
+      "trustee_fee": 0.0321,
+      "trustee_fee_max": 0.107,
+      "registrar_fee": "as announced (cap 0.11)",
+      "other": "actual expenses"
+    },
+    "charged_to_unitholder_pct": {
+      "front_end": 0.535,
+      "back_end": "0 (waived; permitted 0.535)",
+      "switching_in": 0.535,
+      "switching_out": "0 (waived; permitted 0.535)",
+      "brokerage": 0.15
+    },
+    "annual_known_recurring_pct": 0.468125,
+    "annual_max_permitted_pct": 1.287,
+    "headroom_multiple": 2.749,
+    "is_lower_bound": true,
+    "lower_bound_reason": "Registrar fee is 'as announced', other fees are actual expenses, and the SPDR Gold Trust sponsor fee (~0.40% pa) sits inside the master fund and is not in this schedule.",
+    "HEADLINE": "The 0.535% front-end fee equals 1.227 YEARS of the 0.436025% management fee. For a 3-month-to-2-year holder the entry charge, not the TER, is the dominant fee.",
+    "holding_period_cost_per_100k_thb": {
+      "3_months": { "total_thb": 802.03, "total_pct": 0.802, "annualised_pct": 3.2081 },
+      "24_months": { "total_thb": 1621.25, "total_pct": 1.6213, "annualised_pct": 0.8106 }
+    },
+    "actionable": "Holding period alone swings the annualised fee by 4x. This is a direct argument for the LONG end of Tho's 3mo-2yr mandate on this position, and against incremental top-ups - each new purchase pays the full 0.535% again."
+  },
+
+  "fx": {
+    "usdthb": 33.082,
+    "prior_close": 33.11,
+    "observed_as_of": "2026-08-12",
+    "session_change_pct": -0.085,
+    "direction": "baht STRONGER - reverses the one-session weakening seen on 11 Aug",
+    "portfolio_note": "A stronger baht is a HEADWIND for the unhedged gold sleeve in THB terms. This sign has now flipped in three consecutive runs (11 Aug strengthening, 12 Aug weakening, 13 Aug strengthening). THAT PATTERN IS THE FINDING: a signal that reverses every session is noise, and no position should be changed on it - particularly not at a 0.535% switching toll.",
+    "vendor_caveat": "33.082 and prior close 33.110 are from investing.com; the 12 Aug run recorded 33.1160 from a different vendor for the same session. The ~0.006 discrepancy is vendor noise, not a market move, and is well inside the range that would justify any action."
+  },
+
+  "dated_items": {
+    "PTTEP_last_cum_day": {
+      "date": "2026-08-13",
+      "status": "TODAY",
+      "dps": 4.5,
+      "shares": 1400,
+      "gross_thb": 6300.0,
+      "net_after_10pct_wht_thb": 5670.0,
+      "xd": "2026-08-14",
+      "pay": "2026-08-28",
+      "theoretical_drop_pct_on_152": 2.9605,
+      "theoretical_ex_price": 147.5,
+      "action": "HOLD through Thursday's close. Do nothing.",
+      "measurement_tomorrow": "Log the 14 Aug OPEN against the 147.50 theoretical ex-price. A materially smaller drop is evidence of demand absorbing the dividend; a larger one is evidence of dividend-capture selling. Either is information; the theoretical drop itself is not."
+    },
+    "BAFS_H1_2026": {
+      "status": "UNRESOLVED CONFLICT - do not treat either date as settled",
+      "conflict": "The 12 Aug run carried an estimate of ~2026-08-14. Investing.com states the next earnings report is 2026-08-06, which would mean it has already been released. The SET news page for BAFS renders its news list client-side and returned empty to the agent's tooling, so the exchange could not adjudicate.",
+      "unverified_figure": "A quarterly line of sales 914.80 / net income 43.62 / EPS 0.05 was returned by an aggregator with NO stated period label. It is NOT recorded as an actual for that reason - an unlabelled figure is not a figure. See the 2026-08-12 standing rule.",
+      "next_step": "Read set.or.th/en/market/product/stock/quote/bafs/financial-statement/latest/income, which is server-rendered, rather than the news list."
+    },
+    "US_CPI_July": "2026-08-12 RELEASED - see macro block",
+    "FTSE_Vietnam_constituents": "2026-08-21",
+    "BOT_MPC": "2026-08-26",
+    "FOMC": "2026-09-15/16"
+  },
+
+  "macro": {
+    "us_cpi_july_2026": {
+      "released": "2026-08-12 08:30 ET",
+      "headline_mom_pct": 0.1,
+      "headline_yoy_pct": 3.4,
+      "prior_yoy_pct": 3.5,
+      "core_mom_pct": 0.2,
+      "core_yoy_pct": 2.5,
+      "prior_core_yoy_pct": 2.6,
+      "detail": "Shelter accounted for about two-thirds of the headline increase; food and shelter each +0.1%. Energy index -1.5% m/m but +14.7% y/y, with gasoline +24.6% y/y.",
+      "source_url": "https://www.cnbc.com/2026/08/12/cpi-inflation-report-july-2026.html"
+    },
+    "fed_frame": {
+      "current_base_case": "HOLD in September, with a hike tail of roughly one-third.",
+      "revision_history": [
+        "2026-08-09 run: base case CUT",
+        "2026-08-11 run: corrected to HOLD with hike tail",
+        "2026-08-12 run: moved to HIKE as base case (~55% on CME FedWatch as of 6 Aug)",
+        "2026-08-13 run: back to HOLD, ~1/3 hike"
+      ],
+      "why_it_moved": "Two data points landed between the 6 Aug FedWatch reading and tonight: a large July jobs MISS on 7 Aug, and July CPI cooling on 12 Aug. Both cut the same way.",
+      "honest_caveat": "This frame has now been restated in four consecutive runs, twice reversing direction. The 12 Aug run adopted a 55% hike probability that was already six days stale when it was used. The lesson is not that the current read is better - it is that a policy frame rebuilt nightly from whatever headline is freshest will oscillate. It should be revised on data releases, not on runs.",
+      "next_inputs": ["July PCE", "August jobs", "August CPI"],
+      "fomc": "2026-09-15/16",
+      "chair": "Kevin Warsh"
+    },
+    "bot": {
+      "policy_rate_pct": 1.0,
+      "last_action": "cut 25bp to 1.00% at the February 2026 meeting; held since, most recently unanimously",
+      "next_mpc": "2026-08-26",
+      "note": "The committee has said it is escalating monitoring of baht movements. A 1.00% policy rate against a much higher US rate is why hedging THB/USD costs carry - directly relevant to the SCBGOLD vs SCBGOLDH question."
+    },
+    "oil": {
+      "brent_usd": 87.72,
+      "wti_usd": 82.13,
+      "observed_as_of": "2026-08-10",
+      "session_change_pct": 5.0,
+      "driver": "Strait of Hormuz remains closed. The 17 June US-Iran MOU to reopen it to commercial shipping collapsed over routing. Iran's position is that the US naval blockade must lift first.",
+      "staleness_warning": "This is a 10 Aug print, three calendar days old, carried because no cleaner same-vendor 12 Aug figure was obtained. Reports on 12 Aug describe crude 'nearing $90'. Treat 87.72 as a floor-ish reference, not a current mark.",
+      "source_url": "https://www.aljazeera.com/economy/2026/8/10/oil-prices-stocks-surge-as-hormuz-closure-drags-on"
+    }
+  },
+
+  "world_markets_2026_08_12": {
+    "us": {
+      "note": "The S&P 7,728.20 / Nasdaq 26,445.45 / Dow 53,791.85 figures circulating under an 'Aug 12' headline are the ELEVEN August close - a 'Stock Market News for Aug 12' piece reports the prior session. Recorded as 11 Aug accordingly. On 12 Aug itself the three indices ROSE after the CPI print; a precise 12 Aug close was not obtained and is deliberately left blank rather than guessed.",
+      "sp500_2026_08_11": 7728.2,
+      "nasdaq_2026_08_11": 26445.45,
+      "dow_2026_08_11": 53791.85,
+      "sp500_2026_08_12": null,
+      "direction_2026_08_12": "up"
+    },
+    "japan": {
+      "nikkei": 67524,
+      "change_pts": 553,
+      "change_pct": 0.83,
+      "reconciliation": "Compared 'from Monday' because Tuesday 11 Aug was Mountain Day and Japan was closed. 66,970.22 (the 10 Aug close on file) + 553 = 67,523.22 vs reported 67,524. Reconciles."
+    },
+    "hong_kong": {
+      "hang_seng": 25440,
+      "change_pct": -0.83,
+      "reconciliation": "25,652.82 x (1 - 0.0083) = 25,439.9 vs reported 25,440. Reconciles."
+    },
+    "china": {
+      "shanghai_composite": 3946,
+      "change_pct": 0.32,
+      "reconciliation": "3,934.09 x 1.0032 = 3,946.68 vs reported 3,946. Reconciles."
+    },
+    "india": {
+      "sensex": 77966.35,
+      "sensex_change_pts": -187.9,
+      "sensex_change_pct": -0.24,
+      "nifty50": 24435.95,
+      "nifty_change_pct": -0.15,
+      "note": "REFRESHED. India had gone unretrieved since the stale Sensex figure was retired on 11 Aug. Second consecutive down session, on crude nearing $90 and caution ahead of Indian and US inflation prints."
+    },
+    "europe": {
+      "dax": 26357.07,
+      "dax_change_pct": 0.13,
+      "euro_stoxx_50": 6553,
+      "euro_stoxx_50_change_pct": 0.5,
+      "stoxx_600": 660.8,
+      "note": "REFRESHED after four sessions stale. Euro Stoxx 50 and Stoxx Europe 600 both closed at RECORD levels."
+    },
+    "thailand": {
+      "set_index": 1612.62,
+      "change_pts": -11.74,
+      "change_pct": -0.72,
+      "session": "2026-08-11",
+      "turnover_thb_bn": 69.95,
+      "reconciliation": "1,624.36 - 11.74 = 1,612.62. Reconciles.",
+      "driver": "Profit-taking in DELTA, banks and retail."
+    },
+    "vietnam": {
+      "status": "NOT RETRIEVED - seventh consecutive deferral",
+      "dated_item": "FTSE Russell publishes the final constituent list on 2026-08-21; upgrade from Frontier to Secondary Emerging effective 2026-09-21. 28 stocks expected. Projected weight 0.22% of the FTSE Emerging Index.",
+      "decision_needed": "Tho has no Vietnam exposure and no instrument selected. Deferring past 21 Aug means deciding after the list is public and partly priced."
+    }
+  },
+
+  "concentration": {
+    "flag": "ALL THREE LEGS ABOVE 32%",
+    "weights_pct": { "BAFS.BK": 32.5793, "PTTEP.BK": 33.7104, "SCB.BK": 33.7104 },
+    "hedge_status": "STILL UNMEASURED, and the assumption is still not supported. The 11 Aug 'accidental hedge' thesis (PTTEP sells oil, BAFS buys jet fuel) failed on 11 Aug: Brent +5% and BOTH legs rose (+1.67%, +0.89%). No new session was available on 12 Aug to test it again, so the count of contrary observations stands at one and the count of confirming observations stands at zero.",
+    "why_it_matters": "Treating the book as internally hedged suppresses the concentration alarm that three ~33% legs should be ringing. Until betas are measured against Brent over a real sample, the book should be described as concentrated and unhedged."
+  },
+
+  "open_items": [
+    "GOLD SLEEVE UNIT COUNT - 10th run unvalued. The single largest position in the book cannot be valued. Only Tho can supply this.",
+    "avg_cost_price = 0 on every row - P&L suppressed. Only Tho can supply this.",
+    "Primary collector dead 29 days - needs Tho's supervisor/launchd; unfixable from the agent sandbox.",
+    "BAFS H1-2026 release date unresolved (06 Aug vs 14 Aug conflict).",
+    "PTTEP/BAFS oil betas unmeasured - no price history store exists to measure them from.",
+    "Vietnam decision outstanding before 2026-08-21.",
+    "No mark is corroborated by a SECOND SOURCE for its session; repeat first-party retrievals raise confidence but are not independent corroboration."
+  ]
+}

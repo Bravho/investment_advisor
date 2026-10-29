@@ -1,0 +1,17 @@
+# Core pipeline runs on the Python standard library alone (offline + heuristic).
+# The packages below are OPTIONAL and only enable extra capabilities:
+
+# Live market data (quote extractor)
+yfinance>=0.2.40
+
+# Web app (interactive source review + re-run)
+fastapi>=0.110
+uvicorn>=0.29
+
+# LLM scoring needs NO package — all providers are called over plain HTTP.
+# Just set one of these in your environment / .env:
+#   ANTHROPIC_API_KEY=...   (or)  OPENAI_API_KEY=...   (or)  OLLAMA_URL=http://localhost:11434
+# Optionally force one with GURU_LLM_PROVIDER=openai|anthropic|ollama
+
+# .env loading (optional)
+python-dotenv>=1.0

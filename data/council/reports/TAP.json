@@ -1,0 +1,336 @@
+{
+  "investment": {
+    "ticker": "TAP",
+    "name": "TAP",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 39.400001525878906,
+    "price_display": "39.40",
+    "change_pct": 0.13,
+    "as_of": "2026-06-21",
+    "facts": {
+      "ROE": {
+        "metric": "ROE",
+        "value": -18.08,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            -1.4
+          ],
+          [
+            2023,
+            7.2
+          ],
+          [
+            2024,
+            8.6
+          ],
+          [
+            2025,
+            -20.9
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 4.87,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.63,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 2.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            9.4
+          ],
+          [
+            2024,
+            -0.6
+          ],
+          [
+            2025,
+            -4.2
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 7.39,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "$7.39B",
+        "history": null
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 10.48,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TAP/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      },
+      "Dividend WHT": {
+        "metric": "Dividend WHT",
+        "value": 15.0,
+        "unit": "%",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "treaty",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Repatriation drag": {
+        "metric": "Repatriation drag",
+        "value": 1.64,
+        "unit": "%/yr",
+        "source_name": "repatriation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T17:07:05+00:00",
+        "confidence": 1.0,
+        "note": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT.; FX round-trip ~1.0% over ~1.5yr.",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 6 live (Yahoo), remainder curated",
+      "P/E unavailable — analysis treats it as unconfirmed"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "n/a",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Outside this lens for this asset type.",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "na"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Caution",
+      "conviction": 40,
+      "confidence": 50,
+      "thesis": "TAP's revenue growth is low; without peer data, caution is warranted.",
+      "key_risk": "Limited growth potential in a competitive market.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Caution",
+      "conviction": 55,
+      "confidence": 60,
+      "thesis": "High FX risk and repatriation drag diminish appeal; no peer comparison available.",
+      "key_risk": "High FX exposure may impact returns.",
+      "metrics_used": [
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "repatriation.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 55,
+      "confidence": 60,
+      "thesis": "TAP shows moderate leverage and a decent dividend yield, but high FX risk and lack of peer comparison limit attractiveness.",
+      "key_risk": "High FX risk and repatriation drag.",
+      "metrics_used": [
+        "Debt/Equity",
+        "FX risk",
+        "Repatriation drag",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py",
+        "repatriation.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 50,
+    "agreement": "Macro & Tech-Trends, Cross-Asset Linkage, Risk & Control counsel caution; the rest stay neutral.",
+    "disagreement": "the debate is how defensive to be, not whether to chase.",
+    "net": "WAIT. Blended conviction 50/100 across four lenses.",
+    "flip": "avoiding the key risk (Limited growth potential in a competitive market.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": false
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    },
+    "repatriation": {
+      "origin": "US",
+      "is_etf": false,
+      "dividend_wht_pct": 15.0,
+      "effective_dividend_tax_pct": 20.0,
+      "dividend_drag_pct": 0.97,
+      "fx_drag_pct": 0.67,
+      "total_drag_pct": 1.64,
+      "remit_exempt_assumed": false,
+      "notes": "Foreign income remitted to Thailand is taxable at your PIT (~20% assumed), crediting 15% WHT. FX round-trip ~1.0% over ~1.5yr.",
+      "suggestion": "",
+      "disclaimer": "Estimate — confirm with a Thai tax professional."
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "TAP": {
+        "ROE": -18.08,
+        "Dividend yield": 4.87,
+        "Debt/Equity": 0.63,
+        "Revenue growth": 2.0,
+        "Market cap": 7.39,
+        "FCF yield": 10.48
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/TAP",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/TAP/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 6 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=TAP",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=TAP",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T17:07:09+00:00",
+  "discovered_idea": true,
+  "idea_theme": "Consumer staples",
+  "idea_reason": "Increased demand for beverages can drive revenue growth.",
+  "candidates": []
+}

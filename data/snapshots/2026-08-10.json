@@ -1,0 +1,213 @@
+{
+  "_meta": {
+    "date": "2026-08-10",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-10",
+    "base_currency": "THB",
+    "run_type": "BREAK-THE-CARRY RUN — first refreshed SET marks in six runs",
+    "run_type_note": "The collector is still dead (26 days), but this run stopped waiting for it. All three SET equity marks below were retrieved from an INDEPENDENT public source and are real 2026-08-07 official closes, not carried forward. The five preceding snapshots (Aug-05 through Aug-09) are now known to have been wrong, not merely stale — see marks_correction.",
+    "marks_are_carried": false,
+    "marks_as_of": "2026-08-07",
+    "marks_source": "aio.panphol.com daily OHLCV tables, one page per ticker, read via the new data_collector/th_price_fallback.py path",
+    "marks_source_class": "FALLBACK — third-party retail data site, not the primary collector and not an exchange feed. Good enough to correct a 6-run error; not a substitute for restarting the daemon."
+  },
+
+  "prices_thb": {
+    "BAFS.BK": 11.60,
+    "PTTEP.BK": 149.00,
+    "SCB.BK": 153.50
+  },
+  "prices_detail": {
+    "BAFS.BK": {
+      "as_of": "2026-08-07",
+      "open": 11.20,
+      "close": 11.60,
+      "high": 11.80,
+      "low": 11.00,
+      "change": 0.50,
+      "change_pct": 4.50,
+      "volume": 1452100,
+      "pe": 33.55,
+      "yield_pct": 2.84,
+      "range_52w": [7.90, 11.80],
+      "position_in_52w_range_pct": 95,
+      "note": "Closed at 11.60 on volume of 1.45m shares, ~3.5x the prior session's 389,700 — a genuine move, not a thin print. The session high of 11.80 IS the 52-week high."
+    },
+    "PTTEP.BK": {
+      "as_of": "2026-08-07",
+      "open": 149.00,
+      "close": 149.00,
+      "prev_close": 149.00,
+      "change": 0.00,
+      "change_pct": 0.00,
+      "pe": 8.54,
+      "pbv": 1.04,
+      "book_value_per_share": 142.97,
+      "yield_pct": 5.87,
+      "market_cap_thb_bn": 591.5,
+      "range_52w": [105.00, 161.50],
+      "iaa_consensus_target_thb": 160.96,
+      "note": "Genuinely unchanged on the day — this is an OBSERVED zero, unlike the five preceding snapshots where zero was an artefact of construction."
+    },
+    "SCB.BK": {
+      "as_of": "2026-08-07",
+      "open": 154.00,
+      "close": 153.50,
+      "prev_close": 154.00,
+      "change": -0.50,
+      "change_pct": -0.32,
+      "pe": 11.44,
+      "pbv": 1.03,
+      "book_value_per_share": 148.92,
+      "yield_pct": 7.35,
+      "market_cap_thb_bn": 516.9,
+      "range_52w": [125.00, 158.50],
+      "iaa_consensus_target_thb": 152.47,
+      "note": "IAA consensus target 152.47 sits BELOW the 153.50 close. On the street's own numbers SCB is now slightly through fair value — the first time this has been true in the tracked period."
+    }
+  },
+
+  "marks_correction": {
+    "severity": "HIGH",
+    "headline": "The carried marks were not merely stale — one was wrong by 18.4%.",
+    "prior_marks_thb": { "BAFS.BK": 9.80, "PTTEP.BK": 145.00, "SCB.BK": 151.50 },
+    "prior_marks_labelled_as_of": "2026-08-04",
+    "actual_2026_08_07_closes_thb": { "BAFS.BK": 11.60, "PTTEP.BK": 149.00, "SCB.BK": 153.50 },
+    "error_pct": { "BAFS.BK": 18.37, "PTTEP.BK": 2.76, "SCB.BK": 1.32 },
+    "understatement_thb": 41160.00,
+    "understatement_pct": 6.94,
+    "bafs_finding": "The 9.80 BAFS mark did not correspond to 2026-08-04 at all. The real 2026-08-04 close was 10.80. BAFS last traded at 9.80 around 2026-02-23/26 and again near 9.75 on 2026-06-17 — so the carried mark was months out of date while being labelled four days old. BAFS then rose steadily through June and July (8.75 on 2026-05-29 to 11.60 on 2026-08-07, +32.6%) and the entire move was invisible to this system.",
+    "root_cause_class": "Same family as avg_cost_price = 0 and the unwritten dividend store: a value that is absent or unverified renders downstream as a normal number. Here a mark of unknown vintage was given a specific recent date, which made it unfalsifiable.",
+    "process_rule_added": "A carried mark must carry the date it was OBSERVED, never the date it was copied. If the observation date is unknown, the mark is unknown.",
+    "what_this_invalidates": [
+      "Every position value and portfolio total in snapshots 2026-08-05 through 2026-08-09",
+      "Every weight and concentration percentage in those five runs",
+      "The repeated finding that BAFS sat at ~30.05% of the book (it was ~33%)",
+      "Any brief text describing the Thai tape as flat for Tho's names"
+    ]
+  },
+
+  "shares": { "BAFS.BK": 18200, "PTTEP.BK": 1400, "SCB.BK": 1400 },
+  "position_values_thb": {
+    "BAFS.BK": 211120.00,
+    "PTTEP.BK": 208600.00,
+    "SCB.BK": 214900.00
+  },
+  "total_ex_gold_thb": 634620.00,
+  "prior_total_ex_gold_thb": 593460.00,
+  "delta_vs_prior_thb": 41160.00,
+  "delta_vs_prior_pct": 6.94,
+  "delta_interpretation": "This delta is a CORRECTION, not a return. It measures the gap between what the book was worth and what this system said it was worth. Tho did not make THB 41,160 on 2026-08-07; he had already made most of it over June and July and was not told.",
+
+  "weights_pct": { "BAFS.BK": 33.27, "PTTEP.BK": 32.87, "SCB.BK": 33.86 },
+  "weights_caveat": "Now derived from real 2026-08-07 closes rather than carried marks. Still EXCLUDES the gold sleeve, which remains unvalued for want of a unit count, so these overstate each equity's share of Tho's true book.",
+  "concentration_note": "All three positions breach the 30% single-name threshold, and the book is now almost exactly equal thirds (33.27 / 32.87 / 33.86). 100% Thailand, 100% SET, and within it two energy-complex names. The rebalancer has flagged this for several runs; the corrected weights make the flag more accurate, not less severe.",
+
+  "pnl_status": {
+    "reliable": false,
+    "reason": "avg_cost_price is still 0 for every row in the holdings table. P&L remains SUPPRESSED, not zero.",
+    "guarded_by": "portfolio_engine/cost_basis_guard.py",
+    "audit_report": "data/cost_basis_audit.json",
+    "remedy": "Only Tho can supply real average cost prices for BAFS.BK, PTTEP.BK, SCB.BK and the gold sleeve.",
+    "note_this_run": "Tonight's correction makes the missing cost basis MORE costly, not less: the system can now see that BAFS has run ~33% off its May lows but still cannot say whether Tho is up or down on it."
+  },
+
+  "confirmed_events": {
+    "PTTEP_XD": {
+      "event": "PTTEP interim dividend ex-date — CONFIRMED and imminent",
+      "dps_thb": 4.50,
+      "last_cum_day": "2026-08-13",
+      "ex_date": "2026-08-14",
+      "pay_date": "2026-08-28",
+      "shares_held": 1400,
+      "gross_thb": 6300.00,
+      "net_after_10pct_wht_thb": 5670.00,
+      "theoretical_ex_drop_thb": 4.50,
+      "action": "DO NOTHING — simply hold through Thursday 2026-08-13's close.",
+      "corroboration": "Thai market calendar coverage for the week of 10-14 Aug lists PTTEP among the names going XD; the ticker's own data page carries 'XD 14 ส.ค. 69' against DPS 4.50.",
+      "what_to_log_next": "The 2026-08-14 open against the THB 4.50 theoretical drop. A materially smaller drop is information about demand, not noise."
+    },
+    "BAFS_H1_2026": {
+      "event": "NOT YET REPORTED — the Aug-09 'missed earnings' alarm is RETRACTED",
+      "status": "pending",
+      "estimated_date": "2026-08-14",
+      "confirmed": false,
+      "detail": "The Aug-09 run recorded that BAFS reported H1-2026 around 2026-08-06 and that the print had been missed, making its retrieval the top data priority. That was wrong. The source was a Thai article reporting THB 56m net profit (+29% YoY) and a THB 0.11 interim dividend — Q2/2568 figures, i.e. 2025, XD 2025-08-28.",
+      "verification": [
+        "BAFS IR Financial Highlights still headlines Q1/2026 as the latest published period (revenue THB 991.01m, assets 21,936.84m, liabilities 15,466.91m)",
+        "The Q2 column for FY2569 in the quarterly financial grid is empty"
+      ],
+      "trap_identified": "Buddhist-era year labelling. 2568 = 2025, 2569 = 2026. Thai-language financial sources use BE by default and a one-year slip reads as a plausible current result.",
+      "last_published_period": {
+        "period": "Q1/2026",
+        "total_revenue_thb_m": 991.01,
+        "core_revenue_thb_m": 967.0,
+        "net_profit_thb_m": 151.8,
+        "net_profit_yoy_pct": 6,
+        "ebitda_thb_m": 532.9,
+        "ebitda_yoy_pct": 2,
+        "net_margin_pct": 14,
+        "aviation_refuelling_volume_yoy_pct": 5,
+        "aviation_volume_vs_pre_covid_pct": 92,
+        "pipeline_transport_volume_yoy_pct": -8,
+        "total_assets_thb_m": 21936.8,
+        "total_liabilities_thb_m": 15466.9,
+        "interest_bearing_debt_to_equity": 2.0,
+        "fitch_rating": "BBB(tha), Stable",
+        "capex_project": "Northern pipeline network phase 3 (Ang Thong-Saraburi), commercial operation expected early 2027"
+      }
+    }
+  },
+
+  "macro_marks": {
+    "usdthb": 33.038,
+    "usdthb_as_of": "2026-08-07",
+    "usdthb_prior_mark": 33.082,
+    "usdthb_change_pct": -0.13,
+    "usdthb_1m_change_pct": -1.26,
+    "usdthb_trend": "Baht STRENGTHENING — fourth consecutive lower print (33.39 -> 33.118 -> 33.082 -> 33.038)",
+    "usdthb_forward_view_conflict": "SCB Financial Markets published a SHORT-TERM WEAKENING call on 2026-08-07 with a 33.00-33.25 band, and separate SCB commentary flags a watch for the baht breaking past 34. The spot trend and the house view now point in opposite directions.",
+    "gold_spot_usd": 4350.00,
+    "gold_spot_as_of": "2026-08-07",
+    "gold_prior_mark_usd": 4341.78,
+    "gold_dec_futures_usd": 4411.70,
+    "gold_futures_vs_spot_note": "The December COMEX future prints ~USD 60 above spot. This is the exact pair that produced the 4,401-for-4,341.78 error corrected on 2026-08-09. Always mark spot.",
+    "gold_ath_usd": 5589.38,
+    "gold_ath_date": "2026-01-28",
+    "gold_drawdown_from_ath_pct": -22.2,
+    "gold_2026_low_approx_usd": 4046,
+    "brent_usd": 77.0,
+    "brent_as_of": "2026-08-07",
+    "brent_prior_mark": 82.0,
+    "bot_policy_rate_pct": 1.0,
+    "bot_next_mpc": "2026-08-26",
+    "us_unemployment_pct": 4.1,
+    "us_july_nfp_thousands": -23
+  },
+
+  "global_closes_2026_08_07": {
+    "sp500": { "day_pct": 0.6, "week_pct": 3.5, "note": "record close; strongest week since April" },
+    "nasdaq_composite": { "day_pct": 1.3, "week_pct": 5.0 },
+    "dow": { "day_pct": 0.3 },
+    "hang_seng": { "close": 25668.03, "day_pct": 0.54, "note": "week mixed: gained Mon, -0.60% Tue, -1.49% Thu, +0.54% Fri" },
+    "nikkei_225": { "close": 65606.71, "day_pct": -0.12, "note": "tech concerns and foreign selling" },
+    "set": { "close": 1612.00, "day_pct": -0.16, "turnover_thb_bn": 63.39 }
+  },
+
+  "resolved_this_run": [
+    "SET equity marks REFRESHED after six carried runs — BAFS 11.60, PTTEP 149.00, SCB 153.50 (all 2026-08-07 closes)",
+    "BAFS 'missed H1-2026 earnings' alarm RETRACTED — the figures were Q2/2568 (2025); BAFS has not reported yet",
+    "US July NFP resolved: -23,000 jobs vs +80,000 expected; unemployment 4.1% (settles the 4.1 vs 4.2 conflict in favour of 4.1)",
+    "PTTEP XD 2026-08-14 at THB 4.50 corroborated by a second independent source",
+    "Hormuz interim arrangement was NOT signed — Iran seeks to exclude US/Israeli vessels and levy fees, the US wants unrestricted transit; the parties remain far apart",
+    "Brent re-marked 82 -> 77"
+  ],
+
+  "open_conflicts": [
+    "Fed path: coverage of the -23k NFP frames it as 'rate HIKE fears fade / Fed can hold', which is weaker than the CUT the 2026-08-09 run adopted. The cut reading is now provisional and should be re-tested against the CPI print due the week of Aug-10.",
+    "USD/THB direction: spot has fallen four consecutive marks while SCB FM forecasts near-term weakening toward 33.25 and flags a 34 watch. Unresolved.",
+    "Gold spot dispersion on 2026-08-07: ~4,350 (Forbes/Fortune) against a 4,411.70 December futures print being quoted loosely as 'gold'. Spot adopted.",
+    "Gold sleeve remains UNVALUED — NAV per unit is known, the unit count is not, so Tho's largest position (~35%) is still excluded from every total in this file.",
+    "The fallback price path has not yet been executed against the live network from the project host — the parser was verified against captured HTML, but self_test() must be run on Tho's machine before these marks are trusted operationally."
+  ]
+}

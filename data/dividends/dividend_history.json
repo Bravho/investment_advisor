@@ -1,0 +1,140 @@
+{
+  "PTTEP.BK": [
+    {
+      "ticker": "PTTEP.BK",
+      "fiscal_year": 2026,
+      "dividend_type": "interim",
+      "amount_per_share_thb": 4.5,
+      "ex_date": "2026-08-14",
+      "record_date": "2026-08-15",
+      "pay_date": "2026-08-28",
+      "source": "SET_announcement",
+      "notes": "CONFIRMED interim H1-2026, declared with the Q2 results; board approved 2026-07-31. Last cum-dividend trading day 2026-08-13. Tho holds 1,400 shares -> THB 6,300 gross (~THB 5,670 net of the 10% Thai withholding). No action needed to capture it: just do not sell before XD. Do NOT add before XD — the Aug-04 oil de-escalation (Brent ~$81) is eroding the forward earnings driver, so buying in pre-XD just repurchases his own dividend at a 10% tax cost.",
+      "recorded_at": "2026-08-08T19:37:35.204073+00:00"
+    },
+    {
+      "ticker": "PTTEP.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "final",
+      "amount_per_share_thb": 4.65,
+      "ex_date": "2026-02-23",
+      "record_date": "2026-02-24",
+      "pay_date": "2026-04-22",
+      "source": "SET_announcement",
+      "notes": "Final dividend FY2025; AGM approved. Source: TFEX/SET notice",
+      "recorded_at": "2026-08-08T19:37:35.204091+00:00"
+    },
+    {
+      "ticker": "PTTEP.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "interim",
+      "amount_per_share_thb": 2.5,
+      "ex_date": "2025-09-10",
+      "record_date": "2025-09-11",
+      "pay_date": "2025-10-08",
+      "source": "estimated",
+      "notes": "Interim H1-2025 estimate based on prior year pattern; verify via SET",
+      "recorded_at": "2026-08-08T19:37:35.204092+00:00"
+    },
+    {
+      "ticker": "PTTEP.BK",
+      "fiscal_year": 2024,
+      "dividend_type": "final",
+      "amount_per_share_thb": 4.5,
+      "ex_date": "2025-02-26",
+      "record_date": "2025-02-27",
+      "pay_date": "2025-04-23",
+      "source": "estimated",
+      "notes": "FY2024 final estimate; verify via PTTEP investor relations",
+      "recorded_at": "2026-08-08T19:37:35.204094+00:00"
+    }
+  ],
+  "SCB.BK": [
+    {
+      "ticker": "SCB.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "final",
+      "amount_per_share_thb": 9.28,
+      "ex_date": "2026-04-09",
+      "record_date": "2026-04-10",
+      "pay_date": "2026-05-07",
+      "source": "SET_announcement",
+      "notes": "Final dividend FY2025 approved at AGM Apr 8 2026; total incl interim = 11.28 THB. Source: MarketScreener/SCBX investor relations",
+      "recorded_at": "2026-08-08T19:37:35.204095+00:00"
+    },
+    {
+      "ticker": "SCB.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "interim",
+      "amount_per_share_thb": 2.0,
+      "ex_date": "2025-09-10",
+      "record_date": "2025-09-11",
+      "pay_date": "2025-10-08",
+      "source": "estimated",
+      "notes": "Interim dividend H1-2025; total FY2025 = 11.28 THB incl final. Estimate based on confirmed total payout; exact interim ex-date — verify via SET",
+      "recorded_at": "2026-08-08T19:37:35.204096+00:00"
+    },
+    {
+      "ticker": "SCB.BK",
+      "fiscal_year": 2024,
+      "dividend_type": "final",
+      "amount_per_share_thb": 7.0,
+      "ex_date": "2025-04-10",
+      "record_date": "2025-04-11",
+      "pay_date": "2025-05-08",
+      "source": "estimated",
+      "notes": "FY2024 final estimate based on prior-year pattern; verify via SCB investor relations",
+      "recorded_at": "2026-08-08T19:37:35.204097+00:00"
+    }
+  ],
+  "BAFS.BK": [
+    {
+      "ticker": "BAFS.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "final",
+      "amount_per_share_thb": 0.2,
+      "ex_date": "2026-05-08",
+      "record_date": "2026-05-09",
+      "pay_date": "2026-05-22",
+      "source": "estimated",
+      "notes": "Estimated FY2025 final; pattern from FY2024. AGM typically April. Verify via SET once announced — estimated based on prior year",
+      "recorded_at": "2026-08-08T19:37:35.204100+00:00"
+    },
+    {
+      "ticker": "BAFS.BK",
+      "fiscal_year": 2025,
+      "dividend_type": "interim",
+      "amount_per_share_thb": 0.1,
+      "ex_date": "2025-09-05",
+      "record_date": "2025-09-06",
+      "pay_date": "2025-09-05",
+      "source": "estimated",
+      "notes": "Estimated H1-2025 interim based on FY2024 pattern. Verify via SET announcement",
+      "recorded_at": "2026-08-08T19:37:35.204099+00:00"
+    },
+    {
+      "ticker": "BAFS.BK",
+      "fiscal_year": 2024,
+      "dividend_type": "final",
+      "amount_per_share_thb": 0.2,
+      "ex_date": "2025-05-08",
+      "record_date": "2025-05-09",
+      "pay_date": "2025-05-22",
+      "source": "SET_announcement",
+      "notes": "Final dividend FY2024; AGM Apr 30 2025. Total FY2024 = 0.30 THB (0.10 interim + 0.20 final). Source: Investing.com dividend history",
+      "recorded_at": "2026-08-08T19:37:35.204098+00:00"
+    },
+    {
+      "ticker": "BAFS.BK",
+      "fiscal_year": 2024,
+      "dividend_type": "interim",
+      "amount_per_share_thb": 0.1,
+      "ex_date": "2024-09-03",
+      "record_date": "2024-09-04",
+      "pay_date": "2024-09-03",
+      "source": "SET_announcement",
+      "notes": "Interim H1-2024 dividend; 0.10 THB. Source: Investing.com dividend history",
+      "recorded_at": "2026-08-08T19:37:35.204099+00:00"
+    }
+  ]
+}

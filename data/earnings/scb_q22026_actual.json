@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "ticker": "SCB.BK",
+    "company_name": "SCB X PCL",
+    "period": "H1-2026 / Q2-2026",
+    "reported_date": "2026-07-17",
+    "captured_by": "nightly-agent",
+    "captured_date": "2026-07-24",
+    "note": "REPORTED actuals + reconciliation vs the pre-earnings preview (scb_h12026_preview.json). Figures from SCBX disclosure as reported by Kaohoon International / ThaiPR (Jul-21). Loaded by earnings_tracker.load_earnings_actual('SCB.BK').",
+    "sources": [
+      "https://www.kaohooninternational.com/markets/587174",
+      "https://www.thaipr.net/en/finance_en/3742911",
+      "https://www.scb.co.th/en/about-us/news/apr-2026/scbx-announced-net-profit-1q26"
+    ]
+  },
+  "reported_results": {
+    "net_profit_q2_2026_m_thb": 11117,
+    "net_profit_q2_qoq_pct": 9.0,
+    "net_profit_q2_yoy_pct": -13.1,
+    "net_profit_h1_2026_est_bn_thb": 21.3,
+    "net_profit_h1_note": "Q1-2026 ~THB 10.2bn + Q2-2026 THB 11.117bn -> H1-2026 ~THB 21.3bn (H1 consolidated not separately restated in the Q2 release).",
+    "net_interest_income_m_thb": 27306,
+    "nii_qoq_pct": 2.0,
+    "nii_yoy_pct": -10.2,
+    "fee_and_other_income_m_thb": 11365,
+    "fee_yoy_pct": 14.8,
+    "investment_trading_income_m_thb": 2552,
+    "trading_yoy_pct": -21.2,
+    "trading_qoq_pct": 349.1,
+    "operating_expenses_m_thb": 17042,
+    "opex_yoy_pct": -2.2,
+    "cost_to_income_ratio_pct": 41.3,
+    "npl_ratio_pct": 3.17,
+    "npl_prev_quarter_pct": 3.23,
+    "coverage_ratio_pct": 158.6,
+    "capital_adequacy_ratio_pct": 18.6,
+    "loan_growth_note": "Broadly flat vs end-2025 — prudent new lending, quality over volume."
+  },
+  "dividend_outcome": {
+    "declared_with_q2_results": false,
+    "interim_2026_status": "not_yet_declared",
+    "expected_interim_window": "Aug-Sep 2026 (declared separately from Q2 filing)",
+    "fy2025_interim_reference": {
+      "amount_per_share_thb": 2.00,
+      "ex_date": "2025-09-02",
+      "pay_date": "2025-09-19"
+    },
+    "fy2025_total_dps_thb": 11.28,
+    "note": "No dividend was declared in the Jul-17 Q2 release. SCBX historically declares the interim in Aug-Sep. Given H1-2026 profit ~-13% YoY, the 2026 interim is likely near the THB 2.00 FY2025 interim, with a full-year payout around THB 10-11 (vs 11.28 in FY2025) under the ~80% payout policy."
+  },
+  "reconciliation_vs_preview": {
+    "verdict": "inline_to_slightly_soft",
+    "net_profit": "H1-2026 ~THB 21.3bn is modestly BELOW the preview consensus range (22.0-25.0bn, base 23.5bn) — a NIM-driven soft print, NII -10.2% YoY on the 2025-26 rate cuts. The ~THB 12.79bn Smartkarma Q2 preview (flagged in the Jul-15/16 logs as possibly echoing the FY2025 Q2 print) proved too high vs the actual THB 11.12bn.",
+    "consensus_beat": "vs the ~THB 10.89bn Q2 consensus, the THB 11.12bn actual was a small (~2%) BEAT; the QoQ +9% was driven mainly by a 349% QoQ jump in investment/trading income, not core NII.",
+    "asset_quality": "POSITIVE surprise — NPL 3.17% came in better than the 3.3% preview and improved QoQ; coverage 158.6% and CAR 18.6% are robust.",
+    "cost_discipline": "Cost/income 41.3% beat the 42.0% preview (AI/automation + expense restructuring).",
+    "vs_scenario_reaction": "Maps to the preview's 'inline' branch (net profit slightly under range but NPL/cost better) rather than 'beat' or 'miss' — muted reaction, yield support keeps the shares range-bound."
+  },
+  "yield_thesis_assessment": {
+    "holds": true,
+    "confidence": "medium-high",
+    "read": "The high-yield medium-term thesis HOLDS but on a lower absolute payout base. Earnings are pressured by NIM compression (rate cuts), but the decline is cyclical, not credit-driven: asset quality improved, capital is strong (CAR 18.6%), and fee/wealth income (+14.8% YoY via Group Wealth Synergy / InnovestX / CardX) plus cost discipline are diversifying away from rate sensitivity. Expect FY2026 total DPS ~THB 10-11 (vs 11.28) => ~6.5-7% yield near recent prices. BankX (new AI-native virtual bank) is a spend item to watch but strategically positive.",
+    "watch_next": [
+      "The interim-dividend declaration (size + ex-date), expected Aug-Sep — the primary catalyst for a yield holder; set the SCB.BK interim event confirmed=True once the board declares.",
+      "BOT policy path from the 1.00% near-four-year low — any further cut extends NIM compression.",
+      "NII trajectory: watch whether -10.2% YoY NII stabilises as the rate-cut cycle matures."
+    ]
+  },
+  "advisory_note_for_tho": "SCB reported a soft-but-clean Q2: profit down YoY on margin pressure, but asset quality, capital and fee/wealth income all firm, and the QoQ gain leaned on trading income. This is a hold, not a re-rate. The next real catalyst is the interim-dividend declaration in Aug-Sep; the yield thesis is intact on a ~THB 10-11 full-year payout. No action implied into strength; a pullback toward the low-130s on broad banking-sector weakness would be the more attractive add zone. Informational, not a recommendation to trade."
+}

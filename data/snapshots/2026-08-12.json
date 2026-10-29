@@ -1,0 +1,161 @@
+{
+ "_meta": {
+  "date": "2026-08-12",
+  "generated_by": "nightly agent (investment-advisor-self-develop)",
+  "run_time_ict": "2026-08-12T02:30:00+07:00",
+  "base_currency": "THB",
+  "mark_policy": "Every mark carries the SESSION DATE it was observed for, never the date it was copied. Source URL recorded. See data/observed_marks.json.",
+  "price_feed_status": "Primary collector DEAD 28 days (clean SIGTERM 2026-07-15 23:53 ICT). NEW TONIGHT: www.set.or.th is reachable by the agent's retrieval tooling, so all three equity legs are marked FIRST-PARTY from the exchange for the first time. Parsing is done by data_collector/set_official.py, which the agent CAN run; fetching is still not possible from Python in this sandbox.",
+  "pnl_status": "SUPPRESSED - avg_cost_price is 0 for every holdings row. See data/cost_basis_audit.json and portfolio_engine/cost_basis_guard.py. Only Tho can clear this.",
+  "session_covered": "2026-08-11"
+ },
+ "equity_book": {
+  "positions": {
+   "BAFS.BK": {
+    "quantity": 18200,
+    "close": 11.3,
+    "value": 205660.0,
+    "observed_as_of": "2026-08-11",
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/bafs/price",
+    "corroboration": 1,
+    "is_corroborated": false
+   },
+   "PTTEP.BK": {
+    "quantity": 1400,
+    "close": 152.0,
+    "value": 212800.0,
+    "observed_as_of": "2026-08-11",
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/PTTEP/price",
+    "corroboration": 1,
+    "is_corroborated": false
+   },
+   "SCB.BK": {
+    "quantity": 1400,
+    "close": 152.0,
+    "value": 212800.0,
+    "observed_as_of": "2026-08-10",
+    "source_name": "set.or.th (Stock Exchange of Thailand, first-party)",
+    "source_url": "https://www.set.or.th/en/market/product/stock/quote/SCB/price",
+    "corroboration": 1,
+    "is_corroborated": false
+   }
+  },
+  "unpriced": [],
+  "valuation_complete": true,
+  "total_value": 631260.0,
+  "mark_dates": [
+   "2026-08-10",
+   "2026-08-11"
+  ],
+  "mark_date_mixed": true,
+  "as_of_range": [
+   "2026-08-10",
+   "2026-08-11"
+  ],
+  "weights_pct": {
+   "BAFS.BK": 32.5793,
+   "PTTEP.BK": 33.7104,
+   "SCB.BK": 33.7104
+  },
+  "caveat": "Legs are marked on different sessions (2026-08-10 .. 2026-08-11). This total is not a portfolio value on any single date; the older legs have not been observed since their session."
+ },
+ "clean_same_session_book_2026_08_10": {
+  "note": "First fully same-session book total this project has ever recorded. All three legs priced from set.or.th for the identical session, so this total - unlike the mixed-date one above - is a real portfolio value on a real date.",
+  "positions": {
+   "BAFS.BK": {
+    "quantity": 18200,
+    "close": 11.2,
+    "value": 203840.0
+   },
+   "PTTEP.BK": {
+    "quantity": 1400,
+    "close": 149.5,
+    "value": 209300.0
+   },
+   "SCB.BK": {
+    "quantity": 1400,
+    "close": 152.0,
+    "value": 212800.0
+   }
+  },
+  "total_value": 625940.0,
+  "weights_pct": {
+   "BAFS.BK": 32.5654,
+   "PTTEP.BK": 33.4377,
+   "SCB.BK": 33.9969
+  }
+ },
+ "correction_to_prior_run": {
+  "published_2026_08_11": 635320.0,
+  "true_same_session_2026_08_10": 625940.0,
+  "overstatement_thb": 9380.0,
+  "overstatement_pct": 1.4985,
+  "attribution": {
+   "BAFS.BK": {
+    "carried": 11.6,
+    "carried_session": "2026-08-07",
+    "actual_2026_08_10": 11.2,
+    "overstatement_thb": 7280.0
+   },
+   "SCB.BK": {
+    "carried": 153.5,
+    "carried_session": "2026-08-07",
+    "actual_2026_08_10": 152.0,
+    "overstatement_thb": 2100.0
+   },
+   "PTTEP.BK": {
+    "carried": 149.5,
+    "carried_session": "2026-08-10",
+    "actual_2026_08_10": 149.5,
+    "overstatement_thb": 0.0
+   }
+  },
+  "diagnosis": "Not the February-price failure repeating. Those marks were honestly labelled with their 7 Aug session and were probably correct for it. The narrower lesson: a stale mark decays silently, and a mixed-date total inherits the decay of its oldest leg."
+ },
+ "gold_sleeve": {
+  "status": "UNVALUED",
+  "consecutive_runs_unvalued": 9,
+  "reason": "NAV per unit known; UNIT COUNT UNKNOWN. Largest position in the book, excluded from every total.",
+  "gold_spot_usd": 4396.53,
+  "gold_spot_observed": "2026-08-11T09:00:00-04:00",
+  "gold_instrument": "SPOT (not futures) - standing rule after the 4,401 error"
+ },
+ "fx": {
+  "usdthb": 33.116,
+  "observed_as_of": "2026-08-11",
+  "session_change_pct": 0.35,
+  "direction": "baht WEAKER - reverses four sessions of strengthening",
+  "baht_1m_pct": 1.15,
+  "baht_12m_pct": -2.21,
+  "portfolio_note": "A weaker baht is a TAILWIND for the unhedged gold sleeve in THB terms. The 11 Aug run flagged the opposite sign under a strengthening baht; the sign has flipped and gold commentary should be read accordingly."
+ },
+ "dated_items": {
+  "PTTEP_last_cum_day": {
+   "date": "2026-08-13",
+   "dps": 4.5,
+   "shares": 1400,
+   "gross": 6300.0,
+   "net_after_10pct_wht": 5670.0,
+   "xd": "2026-08-14",
+   "pay": "2026-08-28",
+   "theoretical_drop_pct_on_152": 2.9605,
+   "action": "HOLD through Thursday's close. Do nothing."
+  },
+  "BAFS_H1_2026_estimated": "2026-08-14",
+  "US_CPI_July": "2026-08-12 08:30 ET (after this run)",
+  "FTSE_Vietnam_constituents": "2026-08-21",
+  "BOT_MPC": "2026-08-26",
+  "FOMC": "2026-09-15/16"
+ },
+ "concentration": {
+  "flag": "ALL THREE LEGS ABOVE 30%",
+  "weights_pct_same_session_2026_08_10": {
+   "BAFS.BK": 32.5654,
+   "PTTEP.BK": 33.4377,
+   "SCB.BK": 33.9969
+  },
+  "hedge_note": "The 11 Aug 'accidental hedge' thesis (PTTEP sells oil, BAFS buys jet fuel) did NOT operate on 11 Aug: Brent rose ~5% and BOTH legs rose (PTTEP +1.67%, BAFS +0.89%). Treat the book as ~33/33/33 concentrated and UNHEDGED until the betas are measured."
+ }
+}

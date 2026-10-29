@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portfolio Analysis — Tho | June 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d2e; --card2: #1e2235; --border: #2a2f45;
+    --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
+    --purple: #8b5cf6; --gold: #d97706; --text: #e2e8f0; --muted: #94a3b8;
+    --accent: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  /* Header */
+  .header { background: linear-gradient(135deg, #1e2235 0%, #0f1117 100%); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .header::before { content:''; position:absolute; top:-60px; right:-60px; width:220px; height:220px; background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%); border-radius:50%; }
+  .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .header .sub { color: var(--muted); font-size: 0.9rem; }
+  .header .date-badge { display:inline-block; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent); font-size:0.78rem; padding: 3px 12px; border-radius:20px; margin-top:8px; }
+  /* Summary cards row */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card .label { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .card .value { font-size: 1.5rem; font-weight: 700; }
+  .card .sub-val { font-size: 0.82rem; margin-top: 4px; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neutral { color: var(--yellow); }
+  /* Section titles */
+  .section-title { font-size: 1.05rem; font-weight: 600; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 12px; margin: 28px 0 16px; }
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  /* Charts */
+  .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-box h3 { font-size: 0.88rem; color: var(--muted); text-transform: uppercase; letter-spacing:.05em; margin-bottom: 14px; }
+  /* Holdings table */
+  .table-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 18px; }
+  table { width:100%; border-collapse:collapse; }
+  th { background: #12152a; color: var(--muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:.05em; padding: 12px 16px; text-align:left; }
+  td { padding: 13px 16px; font-size: 0.9rem; border-top: 1px solid var(--border); }
+  tr:hover td { background: rgba(255,255,255,0.025); }
+  .tag { display:inline-block; font-size:0.7rem; padding: 2px 8px; border-radius: 20px; font-weight:600; }
+  .tag-buy { background: rgba(34,197,94,0.15); color: var(--green); border:1px solid rgba(34,197,94,0.3); }
+  .tag-hold { background: rgba(245,158,11,0.15); color: var(--yellow); border:1px solid rgba(245,158,11,0.3); }
+  .tag-watch { background: rgba(139,92,246,0.15); color: var(--purple); border:1px solid rgba(139,92,246,0.3); }
+  .tag-switch { background: rgba(239,68,68,0.15); color: var(--red); border:1px solid rgba(239,68,68,0.3); }
+  /* Analysis cards */
+  .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 18px; }
+  .analysis-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .analysis-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; display:flex; align-items:center; gap: 8px; }
+  .analysis-card p, .analysis-card li { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+  .analysis-card ul { padding-left: 18px; }
+  .analysis-card li { margin-bottom: 4px; }
+  /* Recommendation box */
+  .rec-box { background: var(--card2); border-radius: 12px; padding: 20px; margin-bottom: 14px; border-left: 4px solid; }
+  .rec-box.green { border-color: var(--green); }
+  .rec-box.yellow { border-color: var(--yellow); }
+  .rec-box.red { border-color: var(--red); }
+  .rec-box.blue { border-color: var(--blue); }
+  .rec-box .ticker { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .rec-box .rec-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing:.06em; margin-bottom: 8px; }
+  .rec-box .rec-text { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+  /* Risk meter */
+  .risk-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size:0.85rem; }
+  .risk-bar-bg { flex: 1; background: #1e2235; border-radius: 4px; height: 8px; }
+  .risk-bar { height: 8px; border-radius: 4px; }
+  /* Fee comparison table */
+  .fee-table td, .fee-table th { padding: 10px 14px; }
+  /* Alternatives */
+  .alt-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .alt-card .alt-name { font-weight: 600; margin-bottom: 4px; }
+  .alt-card .alt-yield { color: var(--green); font-size: 0.85rem; font-weight: 600; }
+  .alt-card .alt-risk { color: var(--muted); font-size: 0.78rem; }
+  .alt-card .alt-desc { font-size: 0.83rem; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+  .alts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  /* Improvements */
+  .imp-list { list-style: none; padding: 0; }
+  .imp-list li { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; font-size:0.87rem; display:flex; gap: 12px; align-items:flex-start; }
+  .imp-list li .imp-icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+  .imp-list li .imp-body strong { display:block; margin-bottom:3px; color: var(--text); font-size:0.9rem; }
+  .imp-list li .imp-body span { color: var(--muted); }
+  /* Footer */
+  .footer { text-align:center; color: var(--muted); font-size: 0.78rem; margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); }
+  .pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:0.72rem; font-weight:600; }
+  .pill-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pill-red { background: rgba(239,68,68,0.12); color: var(--red); }
+  .pill-yellow { background: rgba(245,158,11,0.12); color: var(--yellow); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="date-badge">📅 Analysis Date: June 7, 2026</div>
+    <h1>🏦 Personal Investment Portfolio Analysis</h1>
+    <div class="sub">Thai Stock Exchange (SET) &amp; Mutual Fund Review · Medium-Term Hold (3 months – 2 years)</div>
+    <div class="sub" style="margin-top:8px; color:#94a3b8; font-size:0.8rem;">⚠️ For informational purposes only. Not a licensed financial advisory service. Consult a certified advisor before trading.</div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="section-title">📊 Portfolio Summary</div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Portfolio Value</div>
+      <div class="value" style="color:var(--accent)">฿993,220</div>
+      <div class="sub-val muted">~$30,155 USD (at 32.94 THB/USD)</div>
+    </div>
+    <div class="card">
+      <div class="label">SET Stocks Value</div>
+      <div class="value">฿553,490</div>
+      <div class="sub-val">3 positions · BAFS, PTTEP, SCB</div>
+    </div>
+    <div class="card">
+      <div class="label">Gold Fund Value</div>
+      <div class="value" style="color:var(--gold)">฿439,730</div>
+      <div class="sub-val neg">−฿60,000 unrealised loss (−12%)</div>
+    </div>
+    <div class="card">
+      <div class="label">Est. Annual Dividends</div>
+      <div class="value pos">฿27,550</div>
+      <div class="sub-val">~2.8% blended yield on SET stocks</div>
+    </div>
+    <div class="card">
+      <div class="label">USD/THB Rate</div>
+      <div class="value neutral">32.94</div>
+      <div class="sub-val neg">THB −4.74% YTD vs USD</div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="two-col">
+    <div class="chart-box">
+      <h3>Portfolio Allocation</h3>
+      <canvas id="allocChart" height="240"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Annual Dividend Income (THB)</h3>
+      <canvas id="divChart" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- Holdings Table -->
+  <div class="section-title">📋 Holdings Detail</div>
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Shares / Units</th>
+          <th>Price (THB)</th>
+          <th>Value (THB)</th>
+          <th>Weight</th>
+          <th>Dividend / Yield</th>
+          <th>Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>BAFS</strong><br/><span style="color:var(--muted);font-size:0.76rem">Bangkok Aviation Fuel Services</span></td>
+          <td>18,200</td>
+          <td>8.45</td>
+          <td>153,790</td>
+          <td>15.5%</td>
+          <td>~฿0.30/share · ~3.6%</td>
+          <td><span class="tag tag-hold">HOLD</span></td>
+        </tr>
+        <tr>
+          <td><strong>PTTEP</strong><br/><span style="color:var(--muted);font-size:0.76rem">PTT Exploration &amp; Production</span></td>
+          <td>1,400</td>
+          <td>151.00</td>
+          <td>211,400</td>
+          <td>21.3%</td>
+          <td>฿8.75/share · 5.8%</td>
+          <td><span class="tag tag-buy">STRONG HOLD</span></td>
+        </tr>
+        <tr>
+          <td><strong>SCB</strong><br/><span style="color:var(--muted);font-size:0.76rem">SCB X Public Co. Ltd (Siam Commercial Bank)</span></td>
+          <td>1,400</td>
+          <td>134.50</td>
+          <td>188,300</td>
+          <td>19.0%</td>
+          <td>฿11.28/share · 8.4%</td>
+          <td><span class="tag tag-buy">BUY / HOLD</span></td>
+        </tr>
+        <tr>
+          <td><strong>SCB GOLD Fund</strong><br/><span style="color:var(--muted);font-size:0.76rem">SCB Gold Open End Fund (SCBGOLD)</span></td>
+          <td colspan="1">—</td>
+          <td>~฿22.85 NAV</td>
+          <td>439,730</td>
+          <td>44.3%</td>
+          <td>None (accumulation)</td>
+          <td><span class="tag tag-watch">REVIEW</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Risk Meter -->
+  <div class="section-title">⚠️ Risk Assessment</div>
+  <div class="two-col">
+    <div class="chart-box">
+      <h3>Position Risk Levels</h3>
+      <div style="padding:4px 0">
+        <div class="risk-row"><span style="width:130px;flex-shrink:0">BAFS</span><div class="risk-bar-bg"><div class="risk-bar" style="width:65%;background:#f59e0b"></div></div><span style="width:50px;text-align:right;color:#f59e0b">Med-High</span></div>
+        <div class="risk-row"><span style="width:130px;flex-shrink:0">PTTEP</span><div class="risk-bar-bg"><div class="risk-bar" style="width:45%;background:#22c55e"></div></div><span style="width:50px;text-align:right;color:#22c55e">Medium</span></div>
+        <div class="risk-row"><span style="width:130px;flex-shrink:0">SCB</span><div class="risk-bar-bg"><div class="risk-bar" style="width:35%;background:#22c55e"></div></div><span style="width:50px;text-align:right;color:#22c55e">Low-Med</span></div>
+        <div class="risk-row"><span style="width:130px;flex-shrink:0">Gold Fund</span><div class="risk-bar-bg"><div class="risk-bar" style="width:50%;background:#f59e0b"></div></div><span style="width:50px;text-align:right;color:#f59e0b">Medium</span></div>
+        <div class="risk-row"><span style="width:130px;flex-shrink:0">Portfolio</span><div class="risk-bar-bg"><div class="risk-bar" style="width:52%;background:#3b82f6"></div></div><span style="width:50px;text-align:right;color:#3b82f6">Moderate</span></div>
+      </div>
+      <div style="margin-top:16px;font-size:0.8rem;color:var(--muted)">Risk score based on: volatility, liquidity, sector concentration, and currency exposure.</div>
+    </div>
+    <div class="chart-box">
+      <h3>Concentration Risk</h3>
+      <canvas id="riskChart" height="230"></canvas>
+    </div>
+  </div>
+
+  <!-- Stock Analysis -->
+  <div class="section-title">🔬 Individual Stock Analysis</div>
+  <div class="analysis-grid">
+    <div class="analysis-card">
+      <h4>✈️ BAFS — Bangkok Aviation Fuel Services</h4>
+      <ul>
+        <li><strong>Current price:</strong> ฿8.45 (52-wk range: ฿6.80–฿10.90)</li>
+        <li><strong>Near 52-week low</strong> — stock has significant upside to mean</li>
+        <li>Thailand mandates <strong>1% SAF blend</strong> from Jan 2026 — BAFS is central to implementation</li>
+        <li>Revenue target: <strong>฿7.5B by end 2026</strong>; fuel sales +8% from tourism recovery</li>
+        <li>Diversifying into renewable energy — now ~50% new business by revenue</li>
+        <li><strong>Risk:</strong> Oil price volatility, aviation demand cyclicality, SAF transition costs</li>
+        <li><strong>Position size warning:</strong> 18,200 shares is a large position at a low price — high % gain needed to move portfolio meaningfully</li>
+      </ul>
+    </div>
+    <div class="analysis-card">
+      <h4>⛽ PTTEP — PTT Exploration &amp; Production</h4>
+      <ul>
+        <li><strong>Current price:</strong> ฿151 (52-wk range: ฿94.25–฿164.00)</li>
+        <li>Analyst consensus: <strong>฿151 area — fairly valued</strong></li>
+        <li><strong>Dividend: ฿8.75/share</strong> expected for 2026 — 5.8% yield at current price</li>
+        <li>Production sales volume target: <strong>+10% to 560,000 boe/day</strong></li>
+        <li>Cost discipline: $30/barrel target maintained</li>
+        <li><strong>Natural USD earner</strong> — benefits from THB weakness</li>
+        <li>Oil price hedged ~13% — partial protection against downside</li>
+        <li><strong>Risk:</strong> Global oil price slump, geopolitical tensions in Gulf of Thailand</li>
+      </ul>
+    </div>
+    <div class="analysis-card">
+      <h4>🏦 SCB — SCB X Public Company</h4>
+      <ul>
+        <li><strong>Current price:</strong> ฿134.50 · Analyst target: ฿145</li>
+        <li><strong>Buy recommendation</strong> from Phillip Securities</li>
+        <li><strong>Dividend: ฿11.28/share</strong> (approved April 2026 AGM) — <strong>8.4% yield</strong></li>
+        <li>80% payout ratio maintained since 2023 — highly shareholder-friendly</li>
+        <li>Net profit forecast: ฿48B in 2026 (+1.8% YoY)</li>
+        <li>Leading loan growth on SET in 2026: +3.33% YTD</li>
+        <li>Potential 7.8% capital gain to analyst target + 8.4% dividend = <strong>~16% total return potential</strong></li>
+        <li><strong>Risk:</strong> Lower interest rates squeezing NIM, loan quality in slow economy</li>
+      </ul>
+    </div>
+    <div class="analysis-card">
+      <h4>🥇 SCB Gold Open End Fund (SCBGOLD)</h4>
+      <ul>
+        <li>Tracks <strong>SPDR Gold Trust (GLD)</strong> — USD-denominated, <strong>unhedged to THB</strong></li>
+        <li>Current value: ฿439,730 | Unrealised loss: <strong>−฿60,000 (−12%)</strong></li>
+        <li>Management fee: 0.44% actual | Total expense ratio: 0.56%</li>
+        <li>Gold 2026 outlook: <strong>$4,750–$4,900/oz</strong> forecast (bullish)</li>
+        <li>THB weakened 4.74% YTD vs USD → <strong>helps unhedged gold fund</strong></li>
+        <li>Selling now locks in a ฿60,000 realised loss — timing is unfavourable</li>
+        <li><strong>The loss is largely due to entry price</strong>, not gold's direction (gold is near all-time highs in USD)</li>
+        <li><strong>Options:</strong> Hold for recovery, partial switch to hedged assets, or switch if gold peaks</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-title">💡 Recommendations</div>
+
+  <div class="rec-box green">
+    <div class="ticker">✅ PTTEP — Strong Hold</div>
+    <div class="rec-label">Action: Hold all 1,400 shares</div>
+    <div class="rec-text">PTTEP is your most fundamentally solid position. A 5.8% dividend yield with production growth of +10% in 2026 makes this a strong income generator. The company earns in USD, so THB weakness is actually a tailwind. Hold through medium term — dividend income alone justifies the position. Consider adding on dips below ฿140 if conviction remains.</div>
+  </div>
+
+  <div class="rec-box green">
+    <div class="ticker">✅ SCB — Buy / Hold</div>
+    <div class="rec-label">Action: Hold all 1,400 shares. Consider adding if price drops to ฿120–125 range</div>
+    <div class="rec-text">SCB offers the highest dividend yield in your portfolio at 8.4%, with an 80% payout ratio backed by solid earnings. The analyst price target of ฿145 implies ~7.8% capital upside on top of the dividend. With total return potential around 16%, SCB is your best risk-adjusted holding. The bank leads SET in loan growth, which supports the bullish case.</div>
+  </div>
+
+  <div class="rec-box yellow">
+    <div class="ticker">⚠️ BAFS — Hold with Caution</div>
+    <div class="rec-label">Action: Hold current 18,200 shares. Do NOT add more until price trend reverses above ฿9.50</div>
+    <div class="rec-text">BAFS is trading near its 52-week low at ฿8.45, which means you have a large position in a stock under pressure. The positives are real: SAF mandate, tourism recovery, and a ฿7.5B revenue target. However, the stock has dropped from ฿10.90 — the aviation fuel business faces transition costs and margin pressure. Your 18,200 shares make this 15.5% of the portfolio. Risk management: set a mental stop at ฿7.50 and re-evaluate. Patience is needed here — the recovery thesis is 12–18 months, not immediate.</div>
+  </div>
+
+  <div class="rec-box yellow">
+    <div class="ticker">⚠️ SCB Gold Fund — Review Position</div>
+    <div class="rec-label">Action: Do NOT sell at a loss now. Hold and re-evaluate when gold approaches ฿25–26 NAV (recovery zone)</div>
+    <div class="rec-text">Selling now locks in a ฿60,000 loss permanently. Gold's 2026 outlook is constructive ($4,750–4,900/oz forecast), and THB weakness actually helps this unhedged fund. The fund's 0.56% expense ratio is reasonable. However, this single position is 44.3% of your portfolio — dangerously over-concentrated. The recommended plan: (1) Hold until gold NAV recovers toward your entry cost, then (2) Gradually switch 50% of the position into Thai REITs or government bonds to reduce concentration. Do not switch all at once — spread exits over 2–3 months.</div>
+  </div>
+
+  <!-- Gold Fund Management Fee Comparison -->
+  <div class="section-title">💰 Fund Fee Analysis (Annual Cost on ฿439,730)</div>
+  <div class="table-box">
+    <table class="fee-table">
+      <thead><tr><th>Fund Version</th><th>Management Fee</th><th>Total Expense Ratio</th><th>Annual Cost on ฿439,730</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>SCBGOLD</strong> (Standard)</td>
+          <td>0.44% actual</td>
+          <td>0.56%</td>
+          <td class="neg"><strong>฿2,462/year</strong></td>
+          <td>Most common version</td>
+        </tr>
+        <tr>
+          <td><strong>SCBGOLDE</strong> (E-channel)</td>
+          <td>Waived</td>
+          <td>0.11%</td>
+          <td class="pos"><strong>฿484/year</strong></td>
+          <td>⭐ Cheaper if switching channel</td>
+        </tr>
+        <tr>
+          <td><strong>SCBGOLDH</strong> (THB Hedged)</td>
+          <td>0.44% actual</td>
+          <td>0.56%</td>
+          <td class="neg"><strong>฿2,462/year</strong></td>
+          <td>Hedged = no currency benefit</td>
+        </tr>
+        <tr>
+          <td><strong>Direct Gold ETF</strong> (e.g., GOLD-D on SET)</td>
+          <td>~0.15%</td>
+          <td>~0.20%</td>
+          <td class="pos"><strong>~฿880/year</strong></td>
+          <td>Lower cost alternative</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 18px;font-size:0.85rem;color:#94a3b8;margin-bottom:18px">
+    💡 <strong style="color:#f59e0b">Action:</strong> If staying in gold, check if you are in SCBGOLD (standard) vs SCBGOLDE (E-channel). Switching to e-channel saves <strong style="color:#22c55e">~฿1,978/year</strong> in fees with identical gold exposure. Contact SCBAM to switch class — no capital gains event.
+  </div>
+
+  <!-- Alternatives for Gold Fund -->
+  <div class="section-title">🔄 Gold Fund Alternatives (Limited Risk, No Crypto)</div>
+  <p style="color:var(--muted);font-size:0.84rem;margin-bottom:16px">Consider gradually redirecting 30–50% of gold fund proceeds into these lower-volatility alternatives when exiting:</p>
+  <div class="alts-grid">
+    <div class="alt-card">
+      <div class="alt-name">🏢 CPNREIT</div>
+      <div class="alt-yield">Yield: ~5.5–6.5% p.a.</div>
+      <div class="alt-risk">Risk: Low-Medium | SET Listed REIT</div>
+      <div class="alt-desc">CPN REIT invests in Central Group shopping malls and offices — stable Thai commercial property income. Quarterly distributions. Benefits from Thailand's tourism and consumer recovery.</div>
+    </div>
+    <div class="alt-card">
+      <div class="alt-name">🏭 FTREIT (Frasers Industrial)</div>
+      <div class="alt-yield">Yield: ~6.35% p.a.</div>
+      <div class="alt-risk">Risk: Low-Medium | Warehouses &amp; Factories</div>
+      <div class="alt-desc">Frasers Property Thailand Industrial REIT — warehouses and factories, backed by long-term leases. Benefits from EV and logistics growth in Eastern Economic Corridor (EEC).</div>
+    </div>
+    <div class="alt-card">
+      <div class="alt-name">📜 Thai Government Bond Fund</div>
+      <div class="alt-yield">Yield: ~2.5–3.2% p.a.</div>
+      <div class="alt-risk">Risk: Very Low | Capital Preservation</div>
+      <div class="alt-desc">Lowest risk option. SSF/RMF government bond funds offer tax benefits and near-guaranteed capital protection. Suitable if your goal is reducing gold's currency exposure while protecting the ฿439K principal.</div>
+    </div>
+    <div class="alt-card">
+      <div class="alt-name">⚡ GPSC / EGCO / RATCH (Utility Stocks)</div>
+      <div class="alt-yield">Yield: ~4.5–6% p.a.</div>
+      <div class="alt-risk">Risk: Low-Medium | Defensive Sector</div>
+      <div class="alt-desc">Thai power utilities with regulated revenue streams. Low beta, high dividends. A good defensive substitute for gold if you want equity upside with lower volatility than energy or banking stocks.</div>
+    </div>
+    <div class="alt-card">
+      <div class="alt-name">🌐 SCB Treasury Bond SSF</div>
+      <div class="alt-yield">Yield: ~2.8–3.5% p.a.</div>
+      <div class="alt-risk">Risk: Very Low | Tax-advantaged</div>
+      <div class="alt-desc">SCBAM's Super Savings Fund investing in Thai government bonds. Tax deduction up to 30% of income (max ฿200K). Converts your gold loss into tax savings while preserving capital.</div>
+    </div>
+    <div class="alt-card">
+      <div class="alt-name">💰 KFSDIV / TDIVRMF (Dividend Funds)</div>
+      <div class="alt-yield">Yield: ~5–7% p.a.</div>
+      <div class="alt-risk">Risk: Medium | Diversified Dividend</div>
+      <div class="alt-desc">Kasikorn or Tisco diversified Thai equity dividend funds. Broad SET exposure with focus on high-yield stocks. Better diversification than individual stock picking for the gold reallocation portion.</div>
+    </div>
+  </div>
+
+  <!-- Currency Risk Analysis -->
+  <div class="section-title">💱 Currency Risk Analysis (THB/USD)</div>
+  <div class="two-col">
+    <div class="analysis-card">
+      <h4>🌏 THB Weakness (Current Trend)</h4>
+      <ul>
+        <li>USD/THB at <strong>32.94</strong> — THB down 4.74% YTD in 2026</li>
+        <li>Lower Thai interest rates + external economic pressures weakening baht</li>
+        <li><strong>Winners from THB weakness:</strong> PTTEP (USD revenues), Gold fund (USD-denominated asset)</li>
+        <li><strong>Neutral:</strong> BAFS (THB revenues but some USD fuel costs)</li>
+        <li><strong>Slightly negative:</strong> SCB (domestic THB business, foreign funding costs rise)</li>
+        <li>Net portfolio impact: <strong>Modestly positive</strong> — gold + PTTEP together = 65.6% of portfolio</li>
+      </ul>
+    </div>
+    <div class="analysis-card">
+      <h4>📉 Currency Scenarios</h4>
+      <ul>
+        <li><strong>If THB weakens to 35/USD:</strong> Gold fund gains ~6% from FX alone (+฿26K); PTTEP dividend worth more</li>
+        <li><strong>If THB strengthens to 31/USD:</strong> Gold fund loses ~6% from FX (−฿26K); partially offset by higher gold price</li>
+        <li><strong>Recommendation:</strong> Your unhedged gold position is a natural hedge against THB weakness — this is actually correct for a Thai investor worried about baht depreciation</li>
+        <li>Consider the <strong>hedged version (SCBGOLDH)</strong> only if you believe THB will strengthen significantly</li>
+        <li>No action needed on currency — your mix is appropriately balanced</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Portfolio Improvement Plan -->
+  <div class="section-title">🛠️ Investment System Improvement Plan</div>
+  <p style="color:var(--muted);font-size:0.84rem;margin-bottom:16px">The existing investment advisor system has a strong architecture. These upgrades will make it fully operational for your specific portfolio:</p>
+  <ul class="imp-list">
+    <li>
+      <div class="imp-icon">📡</div>
+      <div class="imp-body">
+        <strong>Real SET Price Feed Integration</strong>
+        <span>Replace mock portfolio data with live prices from Yahoo Finance (BAFS.BK, PTTEP.BK, SCB.BK) via yfinance or Finnhub. The WATCHLIST_TICKERS env variable in opportunity_scanner.py is already designed for this — just populate it with your real positions.</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">📊</div>
+      <div class="imp-body">
+        <strong>Real Position Tracking (main.py mock_portfolio)</strong>
+        <span>The mock_portfolio object in main.py should be replaced with your actual positions stored in the database. Add a portfolio positions table to the PostgreSQL DB: ticker, shares, avg_cost, purchase_date. This enables P&amp;L tracking over time.</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">🥇</div>
+      <div class="imp-body">
+        <strong>Fund NAV Tracking (SCBGOLD)</strong>
+        <span>Add a daily NAV scraper for SCBAM funds using their public API or thaifundstoday.com. Store daily NAV in the market_prices table with a synthetic ticker like "SCBGOLD.FND". This enables the AI engine to analyse your gold fund performance alongside stocks.</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">💱</div>
+      <div class="imp-body">
+        <strong>THB/USD Currency Monitor</strong>
+        <span>Add a currency rate collector to data_collector module. Fetch daily USD/THB from Bank of Thailand's public API (bot.or.th). The risk_scorer.py can then compute currency-adjusted portfolio values and flag when baht moves significantly affect your positions.</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">💸</div>
+      <div class="imp-body">
+        <strong>Management Fee Calculator</strong>
+        <span>Build a fee_analyzer module that tracks the annual cost of holding each fund position. Compare equivalent ETF expense ratios. Alert when a cheaper equivalent is available (e.g., SCBGOLDE vs SCBGOLD).</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">🎯</div>
+      <div class="imp-body">
+        <strong>Thai-Language News Sentiment (SET-specific)</strong>
+        <span>The current sentiment pipeline fetches English news. Add SET-specific Thai-language news sources: Krungthep Turakij, Prachachat, Manager Online. Translate with LLM then score sentiment. SET stocks often react faster to Thai news than English coverage.</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">📅</div>
+      <div class="imp-body">
+        <strong>Dividend Calendar &amp; Alert System</strong>
+        <span>Build a dividend_tracker module that scrapes SET's dividend announcement page. Store ex-dates and payment dates. Alert 5 days before ex-dividend date so you ensure you hold the position. Especially critical for SCB (฿11.28/share) and PTTEP (฿8.75/share).</span>
+      </div>
+    </li>
+    <li>
+      <div class="imp-icon">📈</div>
+      <div class="imp-body">
+        <strong>Target Price &amp; Stop-Loss Tracker in Dashboard</strong>
+        <span>Extend the React dashboard's Recommendations page to show: (a) analyst target prices vs current, (b) configurable stop-loss levels, (c) portfolio allocation drift alerts when any single position exceeds 30%. Add a "rebalance needed" flag for the gold fund concentration.</span>
+      </div>
+    </li>
+  </ul>
+
+  <!-- Summary Action Plan -->
+  <div class="section-title">📌 90-Day Action Plan</div>
+  <div class="table-box">
+    <table>
+      <thead><tr><th>Timeline</th><th>Action</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td><strong>This week</strong></td><td>Check if your gold fund is SCBGOLD or SCBGOLDE — switch to E-channel if standard (saves ~฿2K/year, no tax event)</td><td><span class="pill pill-green">Quick Win</span></td></tr>
+        <tr><td><strong>This month</strong></td><td>Collect all SCB dividends (฿11.28 × 1,400 = <strong>฿15,792</strong>) — confirm ex-dividend date has passed and funds are credited</td><td><span class="pill pill-green">Income</span></td></tr>
+        <tr><td><strong>1–2 months</strong></td><td>Monitor gold NAV recovery. If SCBGOLD NAV reaches ฿24–25, begin switching 30% of fund (฿130K) into CPNREIT or FTREIT for income</td><td><span class="pill pill-yellow">Reduce Risk</span></td></tr>
+        <tr><td><strong>2–3 months</strong></td><td>BAFS: if price breaks above ฿9.50 on strong volume, the reversal thesis is confirmed. If drops below ฿7.50, reassess the thesis and consider partial exit to reduce position size</td><td><span class="pill pill-yellow">Watch</span></td></tr>
+        <tr><td><strong>3–6 months</strong></td><td>Collect PTTEP H2 2026 dividend (~฿4.65/share × 1,400 = <strong>฿6,510</strong>). Hold through oil earnings season</td><td><span class="pill pill-green">Income</span></td></tr>
+        <tr><td><strong>6–12 months</strong></td><td>If gold position has partially recovered and REIT switch is complete — reassess adding SCB shares on any dip below ฿120 to grow the highest-yielding position</td><td><span class="pill pill-yellow">Growth</span></td></tr>
+        <tr><td><strong>Ongoing</strong></td><td>Never let any single position exceed 35% of portfolio. Gold is currently at 44.3% — this is the #1 structural risk to fix over 2026</td><td><span class="pill pill-red">Risk Mgmt</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Generated by Investment Advisor AI · June 7, 2026 · Prices as of most recent available data</p>
+    <p style="margin-top:6px">⚠️ This analysis is for informational purposes only and does not constitute financial advice. Always consult a licensed financial advisor (นักวิเคราะห์การลงทุน) before making investment decisions.</p>
+    <p style="margin-top:6px">Sources: SET Thailand, SCBAM, Yahoo Finance, KaohoonInternational, Phillip Securities, Simply Wall St</p>
+  </div>
+
+</div>
+
+<script>
+// Allocation chart
+const allocCtx = document.getElementById('allocChart').getContext('2d');
+new Chart(allocCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['SCB Gold Fund (44.3%)', 'PTTEP (21.3%)', 'SCB (19.0%)', 'BAFS (15.5%)'],
+    datasets: [{
+      data: [439730, 211400, 188300, 153790],
+      backgroundColor: ['#d97706','#3b82f6','#22c55e','#8b5cf6'],
+      borderColor: '#1a1d2e',
+      borderWidth: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 12 } },
+      tooltip: { callbacks: { label: ctx => ` ฿${ctx.raw.toLocaleString()}` } }
+    },
+    cutout: '62%'
+  }
+});
+
+// Dividend chart
+const divCtx = document.getElementById('divChart').getContext('2d');
+new Chart(divCtx, {
+  type: 'bar',
+  data: {
+    labels: ['BAFS\n(est.)', 'PTTEP', 'SCB', 'Gold Fund'],
+    datasets: [{
+      label: 'Est. Annual Dividend (THB)',
+      data: [5460, 12250, 15792, 0],
+      backgroundColor: ['#8b5cf6','#3b82f6','#22c55e','#6b7280'],
+      borderRadius: 6,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ฿${ctx.raw.toLocaleString()}` } }
+    },
+    scales: {
+      y: { grid: { color: '#2a2f45' }, ticks: { color: '#94a3b8', callback: v => '฿'+v.toLocaleString() } },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+    }
+  }
+});
+
+// Risk concentration chart
+const riskCtx = document.getElementById('riskChart').getContext('2d');
+new Chart(riskCtx, {
+  type: 'radar',
+  data: {
+    labels: ['Concentration\nRisk', 'Currency\nRisk', 'Market\nRisk', 'Liquidity\nRisk', 'Income\nStability'],
+    datasets: [{
+      label: 'Current Portfolio',
+      data: [75, 45, 52, 25, 65],
+      borderColor: '#38bdf8',
+      backgroundColor: 'rgba(56,189,248,0.1)',
+      pointBackgroundColor: '#38bdf8',
+      borderWidth: 2
+    },{
+      label: 'Target (Post-Rebalance)',
+      data: [40, 40, 48, 25, 75],
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.07)',
+      pointBackgroundColor: '#22c55e',
+      borderWidth: 2,
+      borderDash: [5,3]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+    scales: {
+      r: {
+        grid: { color: '#2a2f45' },
+        pointLabels: { color: '#94a3b8', font: { size: 10 } },
+        ticks: { display: false },
+        min: 0, max: 100
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

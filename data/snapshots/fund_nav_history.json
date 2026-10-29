@@ -1,0 +1,38 @@
+{
+  "SCBGOLDE": [
+    {
+      "date": "2026-10-05",
+      "nav_thb": 23.5475,
+      "source": "settrade_official",
+      "recorded_at": "2026-10-07T06:09:02.001057+00:00"
+    },
+    {
+      "date": "2026-10-07",
+      "nav_thb": 23.5475,
+      "source": "settrade_official",
+      "recorded_at": "2026-10-07T06:05:40+00:00",
+      "source_url": "https://www.settrade.com/th/mutualfund/quote/SCBGOLDE/overview",
+      "note": "carried from 2026-10-05 last publish"
+    }
+  ],
+  "SCBGOLDHE": [
+    {
+      "date": "2026-10-07",
+      "nav_thb": 4.3482,
+      "source": "estimated",
+      "recorded_at": "2026-10-07T06:04:08.257867+00:00",
+      "gold_price_usd": 4161.5,
+      "usd_thb_rate": 32.5
+    }
+  ],
+  "SCBGOLDH": [
+    {
+      "date": "2026-10-07",
+      "nav_thb": 4.3482,
+      "source": "estimated",
+      "recorded_at": "2026-10-07T06:04:08.258473+00:00",
+      "gold_price_usd": 4161.5,
+      "usd_thb_rate": 32.5
+    }
+  ]
+}

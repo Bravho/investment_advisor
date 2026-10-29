@@ -1,0 +1,343 @@
+{
+  "investment": {
+    "ticker": "TOP.BK",
+    "name": "TOP.BK",
+    "asset_class": "SET Equity",
+    "currency": "THB",
+    "price": 45.0,
+    "price_display": "45.00",
+    "change_pct": 1.12,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 3.26,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 15.45,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            20.9
+          ],
+          [
+            2023,
+            11.7
+          ],
+          [
+            2024,
+            6.1
+          ],
+          [
+            2025,
+            8.5
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 4.44,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.5,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 14.7,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            -9.2
+          ],
+          [
+            2024,
+            -0.8
+          ],
+          [
+            2025,
+            -13.5
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 3.06,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "฿100.52B",
+        "history": null
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 47.94,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 165.64,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "conservative 12× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 268.1,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:22+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Buy",
+      "conviction": 80,
+      "confidence": 75,
+      "thesis": "TOP.BK offers a compelling valuation and strong free cash flow generation relative to its peers, making it an attractive investment opportunity.",
+      "key_risk": "Potential for further market volatility in the short term",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "Lack of peer data limits conviction. Wait for more clarity.",
+      "key_risk": "Slowing revenue growth could further impact the stock price.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "Lacks clear advantage over peers in FX/rate sensitivities, but still a solid business.",
+      "key_risk": "Extended downturn in end-market could hurt",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "TOP.BK's low valuation and high dividend yield make it an attractive name, but lack of peer data prevents a strong conviction.",
+      "key_risk": "Leverage is moderate, but without peer comparison, the risk/reward balance is unclear.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT — accumulate on dips",
+    "blended_conviction": 65,
+    "agreement": "Value Analyst lean constructive; the rest stay neutral.",
+    "disagreement": "mainly about conviction size, not direction.",
+    "net": "WAIT — accumulate on dips. Blended conviction 65/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Slowing revenue growth could further impact the stock price.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 165.64,
+      "upside_pct": 268.1,
+      "fair_pe": 12.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "TOP.BK": {
+        "P/E": 3.26,
+        "ROE": 15.45,
+        "Dividend yield": 4.44,
+        "Debt/Equity": 0.5,
+        "Revenue growth": 14.7,
+        "Market cap": 3.06,
+        "FCF yield": 47.94
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/TOP.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/TOP.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 7 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=TOP.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=TOP.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:59:40+00:00",
+  "discovered": true,
+  "candidates": []
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Yahoo Finance — quote",
+    "url": "https://finance.yahoo.com/quote/SCBGOLDE",
+    "method": "yahoo_quote",
+    "data_type": "price",
+    "enabled": true
+  },
+  {
+    "name": "Fundamentals (Macrotrends / Yahoo)",
+    "url": "https://www.macrotrends.net/stocks/charts/SCBGOLDE/",
+    "method": "fundamentals",
+    "data_type": "ratios",
+    "enabled": true
+  },
+  {
+    "name": "News headlines (RSS)",
+    "url": "https://news.google.com/rss/search?q=SCBGOLDE",
+    "method": "news_rss",
+    "data_type": "news",
+    "enabled": true
+  }
+]

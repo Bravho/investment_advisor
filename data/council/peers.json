@@ -1,0 +1,31 @@
+{
+  "MSFT": [
+    "AAPL",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "ORCL"
+  ],
+  "SCB.BK": [
+    "KBANK.BK",
+    "BBL.BK",
+    "KTB.BK",
+    "TTB.BK"
+  ],
+  "PTTEP.BK": [
+    "PTT.BK",
+    "BCP.BK",
+    "TOP.BK",
+    "IRPC.BK"
+  ],
+  "BAFS.BK": [
+    "AOT.BK",
+    "PSL.BK",
+    "BA.BK"
+  ],
+  "SCBGOLDE": [
+    "GLD",
+    "IAU",
+    "SGOL"
+  ]
+}

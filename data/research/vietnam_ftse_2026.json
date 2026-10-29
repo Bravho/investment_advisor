@@ -1,0 +1,145 @@
+{
+  "_meta": {
+    "file": "vietnam_ftse_2026.json",
+    "purpose": "Formal decision file on whether Tho should open a Vietnam position ahead of the FTSE Russell emerging-market reclassification. Closes the standing queued item 'Decide the Vietnam question BEFORE Aug-21'.",
+    "created": "2026-08-06",
+    "created_by": "nightly-agent",
+    "_added_by_nightly_agent": "2026-08-06",
+    "decision_status": "DECIDED — DO NOT BUY for this catalyst",
+    "review_trigger": "Re-open only if (a) the intended position size rises above ~THB 150,000, (b) a THB-settled Vietnam vehicle with a verified TER below ~1.0% is found, or (c) the VN-Index gives back materially post-Sep-21.",
+    "companion_module": "portfolio_engine/foreign_access_cost.py — run vietnam_access_report() to recompute the cost table at any size/horizon"
+  },
+
+  "catalyst_timeline": {
+    "2025-10-07": "FTSE Russell country-classification review confirms Vietnam's reclassification from Frontier to Secondary Emerging.",
+    "2026-04-08": "Reclassification reconfirmed; ACBS and others publish inclusion flash notes.",
+    "2026-08-21": "FINAL list of eligible Vietnamese securities published as part of the September semi-annual review, together with capping thresholds.",
+    "2026-09-21": "Reclassification EFFECTIVE. Passive index funds tracking FTSE EM must be aligned by this date.",
+    "note_on_the_edge": "The only genuinely unknown item on this timeline is the Aug-21 final list and caps. Everything else has been public for ten months. That is the central problem with treating this as a trade."
+  },
+
+  "eligible_universe": {
+    "count_current_screen": 32,
+    "prior_screen_count": 28,
+    "screen_basis": "FTSE Global All Cap eligibility screens on data as of 2025-12-31",
+    "large_cap": ["HPG", "VCB", "VIC", "VHM", "BID"],
+    "mid_cap": ["MSN", "SAB", "VNM (Vinamilk)", "FPT"],
+    "added_vs_prior_screen": ["BID (large)", "FPT (mid)", "NVL (small)", "GEE (small)", "BSR (small)"],
+    "removed_vs_prior_screen": ["PLX (Petrolimex)"],
+    "other_constituents": [
+      "SSI", "DPM", "KBC", "Tasco", "SHB", "DIC", "EIB", "DXG", "KDH", "VIX",
+      "VND", "DPR", "DGC", "VJC", "VCI", "VRE", "FRT", "GEX", "KDC", "STB"
+    ],
+    "confidence": "medium — the screen is public but the FINAL list and caps publish 2026-08-21 and may differ",
+    "naming_caution": "Ticker 'VNM' is ambiguous in this file: on the Ho Chi Minh exchange VNM is VINAMILK (a dairy company); on NYSE Arca VNM is the VanEck Vietnam ETF. The cost analysis below concerns the ETF."
+  },
+
+  "market_context_2026_08": {
+    "vn_index": 1777,
+    "vn_index_date": "2026-08-04",
+    "vn_index_note": "+0.82% on Aug-04, outperforming the rest of Asia that session. The index has run into the upgrade, not away from it.",
+    "estimated_passive_inflow_usd": "several billion; a commonly cited figure is ~USD 6bn",
+    "inflow_confidence": "LOW — this number is repeated across secondary sources without a consistent methodology. Treat it as a direction, not a quantity.",
+    "front_running_read": "A confirmed, dated, ten-month-telegraphed index event is the most efficiently front-run category of catalyst that exists. Passive funds are price-insensitive buyers on a known date, which is precisely why active money arrives first."
+  },
+
+  "cost_analysis": {
+    "source": "portfolio_engine/foreign_access_cost.py :: vietnam_access_report()",
+    "assumptions": {
+      "position_thb": 29700,
+      "position_pct_of_ex_gold_book": 5.0,
+      "ex_gold_book_thb": 593460,
+      "book_date": "2026-08-05 snapshot",
+      "horizon_months": 24,
+      "usd_thb": 33.10
+    },
+    "routes": [
+      {
+        "route_id": "th_feeder_fund",
+        "label": "Thai-domiciled Vietnam equity feeder fund (settles in THB)",
+        "total_cost_pct_24m": 10.80,
+        "annualised_cost_pct": 5.40,
+        "breakdown_pct": {
+          "front_load": 1.00,
+          "ter_over_24m": 3.80,
+          "vnd_structural_drift": 6.00
+        },
+        "confidence": "LOW — generic placeholder fee assumptions (~1.9% stacked TER, 1% front load). Pull an actual fund factsheet/FCT before relying on this line.",
+        "advantages": "No offshore account, no THB->USD spread paid directly, no US estate-tax situs, simpler Thai tax treatment.",
+        "disadvantages": "Fees stack: the Thai feeder charges on top of the master fund. FX exposure is not removed, only hidden inside the NAV."
+      },
+      {
+        "route_id": "vnm_us_etf",
+        "label": "VanEck Vietnam ETF (VNM, NYSE Arca) via a Thai offshore account",
+        "total_cost_pct_24m": 12.00,
+        "annualised_cost_pct": 6.00,
+        "breakdown_pct": {
+          "fx_spread_round_trip": 1.00,
+          "commission_round_trip": 3.34,
+          "ter_over_24m": 1.36,
+          "dividend_withholding": 0.30,
+          "vnd_structural_drift": 6.00
+        },
+        "confidence": "medium — TER ~0.66-0.68% and AUM ~USD 560-640m are well sourced; the broker tariff (0.25% / USD 15 minimum) is a representative placeholder.",
+        "flags": [
+          "COMMISSION MINIMUM BINDING — a USD 15 floor on a ~USD 897 ticket is 1.67%, not 0.25%. This is the single most avoidable cost in the whole analysis and it is caused entirely by the small position size.",
+          "US ESTATE-TAX SITUS — US-listed securities held by a non-resident alien carry only a USD 60,000 exemption. Not binding today (the whole book is ~USD 18k) but it constrains how large an offshore sleeve can sensibly get.",
+          "Small fund AUM means bid/ask and premium/discount to NAV are a real secondary cost not captured above."
+        ]
+      }
+    ],
+    "headline_finding": "Both routes cost roughly 11-12% of the position over a 24-month medium-term hold BEFORE the market does anything. That is not a rounding error — it is the entire realistic return of a diversifying satellite position.",
+    "largest_single_cost_both_routes": "VND structural currency drift (~6% over 24 months)",
+    "why_that_matters": "The State Bank of Vietnam runs a managed crawling band that has depreciated the dong against the USD in most years, ~2-4%/yr. For a THB-based investor this stacks BEHIND the THB/USD leg. Unlike volatility it is not two-sided — it is a near-certain negative carry, and it is larger than the TER on either route. Almost no retail write-up on the FTSE upgrade mentions it.",
+    "size_sensitivity": {
+      "note": "Raising the position reduces cost only slowly, because the dominant cost is the currency drift, which is size-invariant.",
+      "thb_29700_5pct": {"vnm_us_etf": 12.00, "th_feeder_fund": 10.80},
+      "thb_89000_15pct": {"vnm_us_etf": 9.78, "th_feeder_fund": 10.80},
+      "read": "Even TRIPLING the position to an uncomfortable 15% of the ex-gold book only takes the cheapest route from 10.8% to 9.8%. There is no size at which this becomes cheap."
+    }
+  },
+
+  "diversification_assessment": {
+    "the_actual_problem": "The ex-gold book is 100% single-country Thai equity, and on the 2026-08-05 snapshot all three positions sit at or above the 30% concentration flag (SCB 35.7%, PTTEP 34.2%, BAFS 30.1%).",
+    "does_vietnam_fix_it": "Weakly. Vietnam and Thailand are both ASEAN economies levered to the same underlying factors — export manufacturing, China demand, regional tourism, USD funding conditions and the oil complex. Swapping single-country Thai concentration for two-country ASEAN concentration is a modest improvement, not a solution.",
+    "correlation_caveat": "No correlation study was run for this file. The claim above is structural reasoning, not a measured statistic — treat it as a hypothesis worth testing before it is relied on.",
+    "cheaper_alternatives_for_the_same_goal": [
+      "The EXISTING SCBGOLDE sleeve already provides genuine non-Thai, non-equity diversification at a 0.50% TER, settles in THB, and needs no new account. It is roughly a tenth the annual cost of either Vietnam route.",
+      "A broad EM or global equity fund diversifies the single-country risk far more than a single frontier-to-EM market does, and typically at a lower TER than a country feeder fund.",
+      "Simply trimming the largest Thai position reduces concentration at SET commission cost only, with no FX leg at all."
+    ]
+  },
+
+  "decision": {
+    "verdict": "DO NOT open a Vietnam position for the FTSE catalyst.",
+    "primary_reason": "The all-in cost of ~11-12% over the intended 24-month hold consumes the entire plausible return of a satellite diversifier, and the dominant cost line (VND drift) cannot be engineered away by better execution or better sizing.",
+    "secondary_reason": "The catalyst has been public since October 2025 and the VN-Index has already run into it. Buying a price-insensitive, known-date passive flow ten months after it was announced is the crowded side of the trade.",
+    "tertiary_reason": "Even if it worked, it is the wrong instrument for the problem it is being proposed to solve. The concentration issue is 100%-Thailand, and Vietnam is a correlated ASEAN neighbour.",
+    "what_would_change_this": [
+      "A verified THB-settled Vietnam vehicle with a real TER below ~1.0% and no front load — that alone removes ~3 points of cost.",
+      "An intended position size above ~THB 150,000, which makes the fixed commission floor irrelevant (though the VND drift persists).",
+      "A material post-Sep-21 give-back in the VN-Index, which would convert this from a catalyst trade into a valuation one — a much better reason to own something.",
+      "Evidence that VND drift has structurally stopped, which would remove the largest single cost line."
+    ],
+    "explicitly_not_claimed": "This is not a view that Vietnam is a bad economy or a bad long-term market. It is a view that Tho cannot access it cheaply enough, at the size he would sensibly use, for this particular catalyst to be worth it.",
+    "advisory_note_for_tho": "The useful takeaway here is not about Vietnam. It is that any new foreign position at your current book size carries a fixed-cost floor that quietly eats a diversifier's whole return, and that managed-float currencies add a second charge nobody advertises. Before the next international idea arrives, the cheaper first move is fixing the concentration you already have inside markets you already pay to access. I am not a licensed financial adviser and this is analysis, not a recommendation to buy or sell — the fee and tax figures in particular are estimates that should be confirmed with your broker and fund documents."
+  },
+
+  "next_actions_for_nightly_agent": [
+    "2026-08-21: capture the FINAL FTSE eligible list and capping thresholds and update eligible_universe; the decision does not depend on it, but the file should stay accurate.",
+    "2026-09-21: log the effective-date VN-Index reaction. If the classic 'sell the fact' pattern appears, note it — it is the scenario that reopens this file on valuation grounds.",
+    "Replace the th_feeder_fund placeholder fees with a real Thai Vietnam fund factsheet (TER, front load, hedging policy) to lift that route's confidence from LOW.",
+    "Verify the actual offshore tariff on Tho's broker (commission % and minimum ticket) and replace the placeholder in foreign_access_cost.vietnam_routes().",
+    "Run a Thailand/Vietnam equity correlation study to convert the diversification_assessment hypothesis into a measured number."
+  ],
+
+  "sources": [
+    "https://theinvestor.vn/ftse-russell-names-32-vietnamese-stocks-eligible-for-emerging-market-index-inclusion-d18800.html",
+    "https://vietnamnews.vn/economy/1778984/ftse-russel-confirms-upgradation-of-viet-nam-s-stock-market-from-sept-21.html",
+    "https://www.cnbc.com/2026/04/08/ftse-russell-confirms-vietnams-emerging-market-status.html",
+    "https://www.vietnam-briefing.com/news/vietnam-secures-ftse-emerging-market-status-upgrade.html/",
+    "https://www.vaneck.com/us/en/investments/vietnam-etf-vnm/",
+    "https://etfdb.com/etf/VNM/",
+    "https://acbs.com.vn/acbsmedia/2026/04/Flashnote-Vietnam-Market-Upgrade-2026Apr.pdf"
+  ]
+}

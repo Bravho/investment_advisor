@@ -1,0 +1,344 @@
+{
+  "investment": {
+    "ticker": "META",
+    "name": "META",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 577.219970703125,
+    "price_display": "577.22",
+    "change_pct": 0.46,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 21.01,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 32.93,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            18.5
+          ],
+          [
+            2023,
+            25.5
+          ],
+          [
+            2024,
+            34.1
+          ],
+          [
+            2025,
+            27.8
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 36.0,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.36,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 33.1,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            15.7
+          ],
+          [
+            2024,
+            21.9
+          ],
+          [
+            2025,
+            22.2
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 1465.23,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "$1.47T",
+        "history": null
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 1.74,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/META/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 824.21,
+        "unit": "USD",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "conservative 30× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 42.8,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:57:43+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated",
+      "Dividend yield=36.0% implausibly high — verify source"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "META scores well on ROE vs peers but has low FCF yield and implausibly high dividend yield. Wait for clarity.",
+      "key_risk": "High valuation could limit upside potential.",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "META's strong revenue growth is offset by valuation concerns and lack of clear peer comparison. Wait for further signs of improved profitability or sector tailwinds.",
+      "key_risk": "Valuation remains stretched relative to peers, limiting upside potential.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "META's high FX risk makes it less attractive than peers, but its high dividend yield is compelling. More clarity on the dividend and FX exposure is needed.",
+      "key_risk": "FX rates moving against META could erode returns",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "META's high dividend yield and model indicating high FX risk suggest caution, but no peers for direct comparison.",
+      "key_risk": "FX rate fluctuations could impact returns",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT",
+    "blended_conviction": 60,
+    "agreement": "all four analysts land on a neutral, wait-and-see stance.",
+    "disagreement": "no material disagreement — differences are of degree, not direction.",
+    "net": "WAIT. Blended conviction 60/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (High valuation could limit upside potential.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 824.21,
+      "upside_pct": 42.8,
+      "fair_pe": 30.0
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "META": {
+        "P/E": 21.01,
+        "ROE": 32.93,
+        "Dividend yield": 36.0,
+        "Debt/Equity": 0.36,
+        "Revenue growth": 33.1,
+        "Market cap": 1465.23,
+        "FCF yield": 1.74
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/META",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/META/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 7 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=META",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=META",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:58:02+00:00",
+  "discovered": true,
+  "candidates": []
+}

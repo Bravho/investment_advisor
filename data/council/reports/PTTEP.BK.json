@@ -1,0 +1,598 @@
+{
+  "investment": {
+    "ticker": "PTTEP.BK",
+    "name": "PTT E&P",
+    "asset_class": "SET Energy",
+    "currency": "THB",
+    "price": 134.0,
+    "price_display": "134.00",
+    "change_pct": -0.37,
+    "as_of": "2026-06-21",
+    "facts": {
+      "Brent": {
+        "metric": "Brent",
+        "value": 80.6,
+        "unit": "$/bbl",
+        "source_name": "Yahoo Finance — quote",
+        "source_url": "https://finance.yahoo.com/quote/PTTEP.BK",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:56:29+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "P/E": {
+        "metric": "P/E",
+        "value": 9.58,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            13.0
+          ],
+          [
+            2021,
+            10.0
+          ],
+          [
+            2022,
+            6.0
+          ],
+          [
+            2023,
+            8.0
+          ],
+          [
+            2024,
+            9.0
+          ],
+          [
+            2025,
+            9.0
+          ],
+          [
+            2026,
+            9.0
+          ]
+        ]
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 10.78,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            15.2
+          ],
+          [
+            2023,
+            15.4
+          ],
+          [
+            2024,
+            14.7
+          ],
+          [
+            2025,
+            11.6
+          ]
+        ]
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.24,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 6.53,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            4.0
+          ],
+          [
+            2021,
+            4.2
+          ],
+          [
+            2022,
+            6.0
+          ],
+          [
+            2023,
+            5.0
+          ],
+          [
+            2024,
+            4.8
+          ],
+          [
+            2025,
+            4.5
+          ],
+          [
+            2026,
+            4.5
+          ]
+        ]
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 0.07,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": [
+          [
+            2020,
+            3.0
+          ],
+          [
+            2021,
+            6.0
+          ],
+          [
+            2022,
+            12.0
+          ],
+          [
+            2023,
+            10.0
+          ],
+          [
+            2024,
+            8.0
+          ],
+          [
+            2025,
+            8.0
+          ],
+          [
+            2026,
+            8.0
+          ]
+        ]
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 14.7,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            -9.3
+          ],
+          [
+            2024,
+            3.9
+          ],
+          [
+            2025,
+            -9.9
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 16.17,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "฿531.98B",
+        "history": null
+      },
+      "Breakeven": {
+        "metric": "Breakeven",
+        "value": 45.0,
+        "unit": "$/bbl",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+        "period": "FY2025",
+        "retrieved_at": "2026-06-21T09:56:29+00:00",
+        "confidence": 1.0,
+        "note": "curated",
+        "history": null
+      },
+      "News sentiment": {
+        "metric": "News sentiment",
+        "value": 0.0,
+        "unit": "score",
+        "source_name": "News headlines (RSS)",
+        "source_url": "https://news.google.com/rss/search?q=PTTEP.BK",
+        "period": "24h",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "Neutral — oil premium unwound",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 125.89,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "conservative 9× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": -6.1,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:56:30+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "PTTEP has a lower P/E than its peers but higher ROE, FCF yield, and dividend yield. It is the second-best on these metrics among its energy sector peers.",
+      "key_risk": "Reliance on commodity prices and potential operational disruptions",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Buy",
+      "conviction": 80,
+      "confidence": 75,
+      "thesis": "PTTEP's strong revenue growth outpaces peers, positioning it well in a supportive energy sector trend.",
+      "key_risk": "Potential slowdown in global energy demand could impact earnings",
+      "metrics_used": [
+        "Revenue growth",
+        "News sentiment"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "News headlines (RSS)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Buy",
+      "conviction": 80,
+      "confidence": 75,
+      "thesis": "PTTEP offers a higher dividend yield than most peers, making it an attractive choice for income-seeking investors. Its low FX risk and supportive commodity linkages further enhance its position relative to the sector.",
+      "key_risk": "Potential underperformance if global energy prices decline significantly",
+      "metrics_used": [
+        "FX risk",
+        "Brent",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Yahoo Finance — quote",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Buy",
+      "conviction": 70,
+      "confidence": 75,
+      "thesis": "PTTEP's lower leverage and higher dividend yield make it a more stable choice compared to peers, despite slightly higher valuation.",
+      "key_risk": "Potential for sector-wide downturn if energy prices fall sharply.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Accumulate",
+    "overall_label": "ACCUMULATE",
+    "blended_conviction": 72,
+    "agreement": "Macro & Tech-Trends, Cross-Asset Linkage, Risk & Control lean constructive; the rest stay neutral.",
+    "disagreement": "mainly about conviction size, not direction.",
+    "net": "ACCUMULATE. Blended conviction 72/100 across four lenses.",
+    "flip": "a pullback toward fair value (~-6.1% from here); avoiding the key risk (Reliance on commodity prices and potential operational disruptions)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 125.89,
+      "upside_pct": -6.1,
+      "fair_pe": 9.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [
+      "PTT.BK",
+      "BCP.BK",
+      "TOP.BK",
+      "IRPC.BK"
+    ],
+    "table": {
+      "PTTEP.BK": {
+        "Brent": 80.6,
+        "P/E": 9.58,
+        "ROE": 10.78,
+        "Debt/Equity": 0.24,
+        "Dividend yield": 6.53,
+        "FCF yield": 0.07,
+        "Revenue growth": 14.7,
+        "Market cap": 16.17,
+        "Breakeven": 45.0
+      },
+      "PTT.BK": {
+        "P/E": 10.85,
+        "ROE": 7.47,
+        "Dividend yield": 5.96,
+        "Debt/Equity": 0.61,
+        "Revenue growth": 2.6,
+        "Market cap": 30.35,
+        "FCF yield": 7.84
+      },
+      "BCP.BK": {
+        "P/E": 15.99,
+        "ROE": 7.72,
+        "Dividend yield": 3.16,
+        "Debt/Equity": 1.37,
+        "Revenue growth": 5.9,
+        "Market cap": 1.48,
+        "FCF yield": 41.17
+      },
+      "TOP.BK": {
+        "P/E": 3.26,
+        "ROE": 15.45,
+        "Dividend yield": 4.44,
+        "Debt/Equity": 0.5,
+        "Revenue growth": 14.7,
+        "Market cap": 3.06,
+        "FCF yield": 47.94
+      },
+      "IRPC.BK": {
+        "P/E": 6.18,
+        "ROE": 7.7,
+        "Dividend yield": 58.0,
+        "Debt/Equity": 0.92,
+        "Revenue growth": 5.4,
+        "Market cap": 1.07,
+        "FCF yield": 85.1
+      }
+    }
+  },
+  "peer_advice": {
+    "available": true,
+    "scores": {
+      "PTTEP.BK": 50,
+      "PTT.BK": 20,
+      "BCP.BK": 13,
+      "TOP.BK": 73,
+      "IRPC.BK": 57
+    },
+    "ranked": [
+      [
+        "TOP.BK",
+        73
+      ],
+      [
+        "IRPC.BK",
+        57
+      ],
+      [
+        "PTTEP.BK",
+        50
+      ],
+      [
+        "PTT.BK",
+        20
+      ],
+      [
+        "BCP.BK",
+        13
+      ]
+    ],
+    "target": "PTTEP.BK",
+    "target_rank": 3,
+    "total": 5,
+    "better_overall": [
+      {
+        "ticker": "TOP.BK",
+        "score": 73
+      },
+      {
+        "ticker": "IRPC.BK",
+        "score": 57
+      }
+    ],
+    "candidates": [
+      {
+        "ticker": "TOP.BK",
+        "score": 73
+      },
+      {
+        "ticker": "IRPC.BK",
+        "score": 57
+      }
+    ],
+    "field_beats": [
+      {
+        "metric": "P/E",
+        "winner": "TOP.BK",
+        "winner_value": 3.26,
+        "target_value": 9.58
+      },
+      {
+        "metric": "FCF yield",
+        "winner": "IRPC.BK",
+        "winner_value": 85.1,
+        "target_value": 0.07
+      },
+      {
+        "metric": "ROE",
+        "winner": "TOP.BK",
+        "winner_value": 15.45,
+        "target_value": 10.78
+      },
+      {
+        "metric": "Dividend yield",
+        "winner": "IRPC.BK",
+        "winner_value": 58.0,
+        "target_value": 6.53
+      }
+    ],
+    "metrics_used": [
+      "P/E",
+      "FCF yield",
+      "ROE",
+      "Dividend yield",
+      "Revenue growth",
+      "Debt/Equity"
+    ]
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/PTTEP.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 1 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/PTTEP.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 8 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=PTTEP.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=PTTEP.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 1 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:56:55+00:00",
+  "candidates": []
+}

@@ -1,0 +1,310 @@
+{
+  "investment": {
+    "ticker": "KBANK.BK",
+    "name": "KBANK.BK",
+    "asset_class": "SET Equity",
+    "currency": "THB",
+    "price": 207.0,
+    "price_display": "207.00",
+    "change_pct": 0.49,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 9.76,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 8.53,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2022,
+            7.1
+          ],
+          [
+            2023,
+            8.0
+          ],
+          [
+            2024,
+            8.7
+          ],
+          [
+            2025,
+            8.5
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 5.8,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 1.1,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            13.8
+          ],
+          [
+            2024,
+            2.3
+          ],
+          [
+            2025,
+            -1.0
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 14.91,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "฿490.45B",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 254.51,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "conservative 12× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 23.0,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T09:59:02+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 5 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Buy",
+      "conviction": 80,
+      "confidence": 75,
+      "thesis": "KBANK.BK offers a compelling valuation and strong financials within its peer group, making it an attractive investment opportunity.",
+      "key_risk": "Potential for currency fluctuations impacting returns",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "Dividend yield",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Wait",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "KBANK.BK's slow revenue growth of 1.1% TTM makes it a hold for now, despite no peer data available.",
+      "key_risk": "Slower than expected industry adoption of new technologies could further hamper KBANK.BK's growth.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Accumulate",
+      "conviction": 75,
+      "confidence": 80,
+      "thesis": "KBANK.BK offers attractive dividend yields relative to peers, despite low FX risk. Commodity/rate linkages are neutral.",
+      "key_risk": "Increased competition and slower loan growth could impact earnings.",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Accumulate",
+      "conviction": 70,
+      "confidence": 75,
+      "thesis": "KBANK offers a high dividend yield and low valuation relative to peers. Its fundamentals are strong.",
+      "key_risk": "FX risk is low, but any significant THB depreciation could impact returns.",
+      "metrics_used": [
+        "P/E",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Accumulate",
+    "overall_label": "ACCUMULATE",
+    "blended_conviction": 71,
+    "agreement": "Value Analyst, Cross-Asset Linkage, Risk & Control lean constructive; the rest stay neutral.",
+    "disagreement": "mainly about conviction size, not direction.",
+    "net": "ACCUMULATE. Blended conviction 71/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Slower than expected industry adoption of new technologies could further hamper KBANK.BK's growth.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 254.51,
+      "upside_pct": 23.0,
+      "fair_pe": 12.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [],
+    "table": {
+      "KBANK.BK": {
+        "P/E": 9.76,
+        "ROE": 8.53,
+        "Dividend yield": 5.8,
+        "Revenue growth": 1.1,
+        "Market cap": 14.91
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/KBANK.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/KBANK.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 5 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=KBANK.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=KBANK.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T09:59:21+00:00",
+  "discovered": true,
+  "candidates": []
+}

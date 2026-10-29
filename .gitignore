@@ -1,0 +1,41 @@
+# Secrets / credentials (never commit)
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*credentials*
+*secret*
+*token*
+data_collector/.orchestrator_control.json
+.orchestrator_control.json
+htpasswd
+public_auth.env
+
+# Runtime / generated
+logs/
+**/logs/
+*.log
+*.log.*
+*.pid
+heartbeat.json
+__pycache__/
+*.pyc
+.DS_Store
+
+# Environments / deps
+venv/
+**/venv/
+.venv/
+node_modules/
+**/node_modules/
+dashboard/dist/
+
+# Large data dumps
+*.sql.gz
+*.dump
+*.sqlite
+*.db

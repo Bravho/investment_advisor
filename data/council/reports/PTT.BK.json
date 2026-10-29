@@ -1,0 +1,408 @@
+{
+  "investment": {
+    "ticker": "PTT.BK",
+    "name": "PTT.BK",
+    "asset_class": "SET Equity",
+    "currency": "THB",
+    "price": 35.25,
+    "price_display": "35.25",
+    "change_pct": 0.0,
+    "as_of": "2026-06-21",
+    "facts": {
+      "P/E": {
+        "metric": "P/E",
+        "value": 10.85,
+        "unit": "×",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "ROE": {
+        "metric": "ROE",
+        "value": 7.47,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2021,
+            NaN
+          ],
+          [
+            2022,
+            8.7
+          ],
+          [
+            2023,
+            10.0
+          ],
+          [
+            2024,
+            7.8
+          ],
+          [
+            2025,
+            8.0
+          ]
+        ]
+      },
+      "Dividend yield": {
+        "metric": "Dividend yield",
+        "value": 5.96,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Debt/Equity": {
+        "metric": "Debt/Equity",
+        "value": 0.61,
+        "unit": "",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Revenue growth": {
+        "metric": "Revenue growth",
+        "value": 2.6,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live)",
+        "history": [
+          [
+            2023,
+            -6.6
+          ],
+          [
+            2024,
+            -1.7
+          ],
+          [
+            2025,
+            -13.9
+          ]
+        ]
+      },
+      "Market cap": {
+        "metric": "Market cap",
+        "value": 30.35,
+        "unit": "USD bn",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "spot",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "฿998.43B",
+        "history": null
+      },
+      "FCF yield": {
+        "metric": "FCF yield",
+        "value": 7.84,
+        "unit": "%",
+        "source_name": "Fundamentals (Macrotrends / Yahoo)",
+        "source_url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+        "period": "TTM",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "Yahoo (live) · curated history",
+        "history": null
+      },
+      "Fair value (model)": {
+        "metric": "Fair value (model)",
+        "value": 38.99,
+        "unit": "THB",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "conservative 12× EPS reversion",
+        "history": null
+      },
+      "Upside to fair value": {
+        "metric": "Upside to fair value",
+        "value": 10.6,
+        "unit": "%",
+        "source_name": "valuation.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "~0.18% round-trip",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "Low",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:32+00:00",
+        "confidence": 1.0,
+        "note": "THB-denominated — negligible FX exposure",
+        "history": null
+      }
+    },
+    "flags": [
+      "Fundamentals: 7 live (Yahoo), remainder curated"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "Buy",
+      "conviction": 85,
+      "confidence": 80,
+      "thesis": "PTT.BK ranks 1st in P/E, FCF yield, and dividend yield among peers, offering strong value.",
+      "key_risk": "Market volatility affecting energy sector performance.",
+      "metrics_used": [
+        "P/E",
+        "ROE",
+        "FCF yield",
+        "Dividend yield",
+        "Debt/Equity",
+        "Upside to fair value"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "valuation.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Pass",
+      "conviction": 40,
+      "confidence": 60,
+      "thesis": "PTT.BK ranks 2/2 in revenue growth against peers, underperforming the median.",
+      "key_risk": "Low growth compared to peers.",
+      "metrics_used": [
+        "Revenue growth"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Buy",
+      "conviction": 85,
+      "confidence": 80,
+      "thesis": "PTT.BK offers a superior dividend yield of 5.96% vs AOT.BK's 1.36%, ranking 1/2 among peers.",
+      "key_risk": "Commodity price volatility could impact returns.",
+      "metrics_used": [
+        "FX risk",
+        "Dividend yield"
+      ],
+      "sources": [
+        "fx.py",
+        "Fundamentals (Macrotrends / Yahoo)"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 60,
+      "confidence": 70,
+      "thesis": "PTT.BK ranks 1st in P/E but 2nd in Debt/Equity among peers, indicating valuation strength but higher leverage risk.",
+      "key_risk": "Higher leverage compared to peer median.",
+      "metrics_used": [
+        "P/E",
+        "Debt/Equity",
+        "FX risk",
+        "Dividend yield",
+        "Market cap"
+      ],
+      "sources": [
+        "Fundamentals (Macrotrends / Yahoo)",
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT — accumulate on dips (council split)",
+    "blended_conviction": 68,
+    "agreement": "the business/asset facts themselves are not in dispute.",
+    "disagreement": "Value Analyst, Cross-Asset Linkage see enough to lean in, while Macro & Tech-Trends, Risk & Control flag valuation or fragility risk.",
+    "net": "WAIT — accumulate on dips (council split). Blended conviction 68/100 across four lenses.",
+    "flip": "confirmation the discount is real (earnings holding up); avoiding the key risk (Low growth compared to peers.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": true,
+      "fair_value": 38.99,
+      "upside_pct": 10.6,
+      "fair_pe": 12.0
+    },
+    "fees": {
+      "display": "~0.18% round-trip",
+      "annual_pct": 0.18
+    },
+    "fx": {
+      "level": "Low",
+      "score": 1,
+      "note": "THB-denominated — negligible FX exposure"
+    }
+  },
+  "peers": {
+    "peers": [
+      "AOT.BK"
+    ],
+    "table": {
+      "PTT.BK": {
+        "P/E": 10.85,
+        "ROE": 7.47,
+        "Dividend yield": 5.96,
+        "Debt/Equity": 0.61,
+        "Revenue growth": 2.6,
+        "Market cap": 30.35,
+        "FCF yield": 7.84
+      },
+      "AOT.BK": {
+        "P/E": 47.05,
+        "ROE": 14.35,
+        "Dividend yield": 1.36,
+        "Debt/Equity": 0.35,
+        "Revenue growth": 3.0,
+        "Market cap": 25.94,
+        "FCF yield": 1.51
+      }
+    }
+  },
+  "peer_advice": {
+    "available": true,
+    "scores": {
+      "PTT.BK": 50,
+      "AOT.BK": 50
+    },
+    "ranked": [
+      [
+        "PTT.BK",
+        50
+      ],
+      [
+        "AOT.BK",
+        50
+      ]
+    ],
+    "target": "PTT.BK",
+    "target_rank": 1,
+    "total": 2,
+    "better_overall": [],
+    "candidates": [
+      {
+        "ticker": "AOT.BK",
+        "score": 50
+      }
+    ],
+    "field_beats": [
+      {
+        "metric": "ROE",
+        "winner": "AOT.BK",
+        "winner_value": 14.35,
+        "target_value": 7.47
+      },
+      {
+        "metric": "Revenue growth",
+        "winner": "AOT.BK",
+        "winner_value": 3.0,
+        "target_value": 2.6
+      },
+      {
+        "metric": "Debt/Equity",
+        "winner": "AOT.BK",
+        "winner_value": 0.35,
+        "target_value": 0.61
+      }
+    ],
+    "metrics_used": [
+      "P/E",
+      "FCF yield",
+      "ROE",
+      "Dividend yield",
+      "Revenue growth",
+      "Debt/Equity"
+    ]
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/PTT.BK",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/PTT.BK/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 7 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=PTT.BK",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=PTT.BK",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T11:20:39+00:00",
+  "discovered_idea": true,
+  "idea_theme": "Thai Equities",
+  "idea_reason": "Energy sector recovery; strong fundamentals in oil and gas.",
+  "candidates": []
+}

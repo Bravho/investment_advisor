@@ -1,0 +1,180 @@
+{
+  "investment": {
+    "ticker": "IAU",
+    "name": "IAU",
+    "asset_class": "US Equity",
+    "currency": "USD",
+    "price": 79.33000183105469,
+    "price_display": "79.33",
+    "change_pct": -1.38,
+    "as_of": "2026-06-21",
+    "facts": {
+      "Cost drag": {
+        "metric": "Cost drag",
+        "value": "broker comm. (varies)",
+        "unit": "",
+        "source_name": "fees.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:46+00:00",
+        "confidence": 1.0,
+        "note": "",
+        "history": null
+      },
+      "FX risk": {
+        "metric": "FX risk",
+        "value": "High",
+        "unit": "",
+        "source_name": "fx.py",
+        "source_url": "",
+        "period": "model",
+        "retrieved_at": "2026-06-21T11:20:46+00:00",
+        "confidence": 1.0,
+        "note": "USD asset for a THB investor — FX cost on entry/exit",
+        "history": null
+      }
+    },
+    "flags": [
+      "No fundamentals for IAU",
+      "P/E unavailable — analysis treats it as unconfirmed",
+      "ROE unavailable — analysis treats it as unconfirmed",
+      "Dividend yield unavailable — analysis treats it as unconfirmed"
+    ]
+  },
+  "verdicts": [
+    {
+      "analyst": "Value Analyst",
+      "lens": "Buffett-style · valuation & quality vs peers",
+      "stance": "n/a",
+      "conviction": 0,
+      "confidence": 0,
+      "thesis": "Outside this lens for this asset type.",
+      "key_risk": "",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "na"
+    },
+    {
+      "analyst": "Macro & Tech-Trends",
+      "lens": "rates · cycle · sector growth vs peers",
+      "stance": "Accumulate",
+      "conviction": 70,
+      "confidence": 75,
+      "thesis": "IAU offers a stable investment in gold, but GDX shows stronger growth potential in the mining sector.",
+      "key_risk": "Market volatility affecting gold prices.",
+      "metrics_used": [],
+      "sources": [],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Cross-Asset Linkage",
+      "lens": "commodity / FX / rate linkages vs peers",
+      "stance": "Caution",
+      "conviction": 50,
+      "confidence": 60,
+      "thesis": "IAU faces high FX risk compared to GDX, which has better positioning.",
+      "key_risk": "High FX volatility impacting returns.",
+      "metrics_used": [
+        "FX risk"
+      ],
+      "sources": [
+        "fx.py"
+      ],
+      "engine": "llm"
+    },
+    {
+      "analyst": "Risk & Control",
+      "lens": "fragility / tail risk / leverage vs peers",
+      "stance": "Caution",
+      "conviction": 45,
+      "confidence": 50,
+      "thesis": "IAU faces high FX risk and lacks fundamental data; GDX is a more stable peer.",
+      "key_risk": "High FX risk and lack of fundamentals.",
+      "metrics_used": [
+        "FX risk"
+      ],
+      "sources": [
+        "fx.py"
+      ],
+      "engine": "llm"
+    }
+  ],
+  "chair": {
+    "overall_stance": "Wait",
+    "overall_label": "WAIT — accumulate on dips (council split)",
+    "blended_conviction": 55,
+    "agreement": "the business/asset facts themselves are not in dispute.",
+    "disagreement": "Macro & Tech-Trends see enough to lean in, while Cross-Asset Linkage, Risk & Control flag valuation or fragility risk.",
+    "net": "WAIT — accumulate on dips (council split). Blended conviction 55/100 across four lenses.",
+    "flip": "avoiding the key risk (High FX risk and lack of fundamentals.)"
+  },
+  "tools": {
+    "valuation": {
+      "available": false
+    },
+    "fees": {
+      "display": "broker comm. (varies)",
+      "annual_pct": 0.0
+    },
+    "fx": {
+      "level": "High",
+      "score": 3,
+      "note": "USD asset for a THB investor — FX cost on entry/exit"
+    }
+  },
+  "peers": {
+    "peers": [
+      "GDX"
+    ],
+    "table": {
+      "IAU": {},
+      "GDX": {
+        "P/E": 15.77,
+        "Dividend yield": 71.0
+      }
+    }
+  },
+  "peer_advice": {
+    "available": false
+  },
+  "sources": [
+    {
+      "name": "Yahoo Finance — quote",
+      "url": "https://finance.yahoo.com/quote/IAU",
+      "method": "yahoo_quote",
+      "data_type": "price",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "Fundamentals (Macrotrends / Yahoo)",
+      "url": "https://www.macrotrends.net/stocks/charts/IAU/",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    },
+    {
+      "name": "SEC / filings (fundamentals detail)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=IAU",
+      "method": "fundamentals",
+      "data_type": "ratios",
+      "enabled": false,
+      "status": "skipped (disabled)"
+    },
+    {
+      "name": "News headlines (RSS)",
+      "url": "https://news.google.com/rss/search?q=IAU",
+      "method": "news_rss",
+      "data_type": "news",
+      "enabled": true,
+      "status": "ok · 0 facts"
+    }
+  ],
+  "llm_used": true,
+  "created_at": "2026-06-21T11:20:50+00:00",
+  "discovered_idea": true,
+  "idea_theme": "Gold ETFs",
+  "idea_reason": "Lower expense ratio than GLD; solid gold exposure.",
+  "candidates": []
+}

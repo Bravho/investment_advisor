@@ -1,0 +1,56 @@
+{
+  "snapshot_date": "2026-08-04",
+  "_note": "Written by the nightly agent 2026-08-04 (run fired late, 00:00 ICT 2026-08-05, covering the missed Aug-04 slot). Two FRESH holding prints this run: BAFS re-priced 9.25 (Jul-28) -> 9.80 (Aug-04) and PTTEP 148 -> 151.0, both marked to the Aug-04 tape. SCB carried at 155.00 (Jul-24, flag resolved Aug-03) — no fresh clean close retrievable. Share counts carried from the 2026-06-21 seed (BAFS 18,200; PTTEP 1,400; SCB 1,400). Gold fund tracked via NAV estimate (no live unit price). risk_score left null because the blended score requires the Postgres risk path (python -m ai_engine.risk_scorer on the live host).",
+  "base_currency": "THB",
+  "usdthb_rate": 33.396,
+  "holdings": {
+    "BAFS.BK": {
+      "shares": 18200,
+      "current_price": 9.80,
+      "price_date": "2026-08-04",
+      "market_value_thb": 178360.0,
+      "price_note": "FRESH print 9.80 (from 9.25 Jul-28, +5.9%) — market paying for the oil de-escalation. 52w range 6.70-17.60. H1 results ~Aug-14; investor meeting Aug-28."
+    },
+    "PTTEP.BK": {
+      "shares": 1400,
+      "current_price": 151.0,
+      "price_date": "2026-08-04",
+      "market_value_thb": 211400.0,
+      "price_note": "FRESH print 151.0 (from 148 Aug-03). Interim THB 4.50 CONFIRMED: XD 2026-08-14, pay 2026-08-28, last cum day 2026-08-13."
+    },
+    "SCB.BK": {
+      "shares": 1400,
+      "current_price": 155.0,
+      "price_date": "2026-07-24",
+      "market_value_thb": 217000.0,
+      "price_note": "carried — no fresh clean SET close retrievable. 152-vs-155 flag resolved Aug-03 (152.50 was the prior close)."
+    },
+    "SCB_GOLD_FUND": {
+      "note": "no live unit price; est NAV ~4.15 THB/unit (gold $4,068.68 x USD/THB 33.396) — flat vs Aug-03"
+    }
+  },
+  "total_market_value_thb_ex_gold": 606760.0,
+  "prior_total_ex_gold_thb": 592550.0,
+  "delta_ex_gold_thb": 14210.0,
+  "delta_note": "+THB 14,210 vs the 2026-08-03 snapshot: BAFS +10,010 (18,200 x +0.55) and PTTEP +4,200 (1,400 x +3.00); SCB unchanged. Both moves trace to the same Aug-03/04 oil de-escalation — BAFS on cheaper jet fuel, PTTEP still riding the post-Q2 result rather than the (now falling) forward oil tape.",
+  "risk_score": null,
+  "risk_level": "pending_live_run",
+  "usd_thb_rate": 33.396,
+  "usd_thb_note": "baht FLAT at 33.396 (Aug-04, +0.05% on the session) vs 33.39 — no FX regime change; gold-fund THB cushion stays thin",
+  "brent_usd": 81.0,
+  "brent_note": "DE-ESCALATION BREAKTHROUGH — Trump called off the planned massive strike on Iran (Aug-03) at the request of Saudi Arabia, the UAE, Qatar and Iran; Brent -4.2% to ~$84 (WTI -5% to ~$80), then ~$81 on Aug-04. LOWEST print of the conflict series. oil_scenario re-ranked to [12,33,30,15,10], weighted Brent $88.69 (from $93.14).",
+  "gold_usd": 4068.68,
+  "gold_note": "spot $4,068.68 (Aug-04 9am ET); Dec futures $4,109.60. Held above $4,060 despite risk-on equities — Iran bid fading, NFP-week/Fed uncertainty keeping a floor.",
+  "set_index": "1,616.56-1,631.58 range Aug-04 (close pending at run time)",
+  "concentration_note": "Ex-gold concentration: SCB 35.8%, PTTEP 34.8%, BAFS 29.4% of the THB 606,760 equity sleeve. SCB and PTTEP both still exceed the 30% concentration flag threshold used by ai_engine.risk_scorer.concentration_flag().",
+  "next_catalysts": [
+    "2026-08-07 — US July jobs report / NFP (macro gauge)",
+    "2026-08-13 — last cum-dividend trading day for PTTEP",
+    "2026-08-14 — PTTEP XD (THB 4.50); BAFS H1-2026 results est.",
+    "2026-08-21 — FTSE Russell publishes final Vietnam constituent list + cap thresholds",
+    "2026-08-28 — PTTEP dividend pay date; BAFS investor meeting",
+    "Aug-Sep — SCB 2026 interim dividend declaration (still undeclared)",
+    "2026-09-21 — FTSE Vietnam EM upgrade effective"
+  ],
+  "_added_by_nightly_agent": "2026-08-04"
+}
