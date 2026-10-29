@@ -123,6 +123,9 @@ def retry(attempts: int = 3, base_delay: float = 2.0) -> Callable:
                     if attempt == attempts - 1:
                         break
                     delay = base_delay * (2**attempt)
+                    # 2026-10-29: rate limited (HTTP 429) -> back off much harder.
+                    if "429" in str(exc) or "too many requests" in str(exc).lower() or "rate limit" in str(exc).lower():
+                        delay = min(30.0 * (2**attempt), 240.0)
                     LOGGER.warning(
                         "%s failed (attempt %s/%s): %s; retrying in %.1fs",
                         function.__name__,
@@ -222,8 +225,35 @@ class MarketDataCollector:
                 LOGGER.exception("Current-price collection failed for %s", ticker)
         self.save_portfolio_snapshot()
 
+    def refresh_fund_navs(self) -> None:
+        """Fetch published NAVs (SCBAM issuer page / SETTRADE) for non-exchange funds.
+
+        Added 2026-10-29 (Phase 2 #5). Writes NAV to fund_nav_history.json and
+        market_prices only -- never touches holdings units or cost.
+        """
+        try:
+            from fund_nav_fetch import fetch_official_nav, record_nav
+        except Exception:
+            from data_collector.fund_nav_fetch import fetch_official_nav, record_nav
+        for fund_code in sorted({i["fund_code"] for i in NON_EXCHANGE_INSTRUMENTS.values()}):
+            try:
+                nav = fetch_official_nav(fund_code)
+                if nav is None:
+                    LOGGER.warning("No published NAV found for %s (SCBAM/SETTRADE)", fund_code)
+                    continue
+                record_nav(fund_code, nav)
+                value = float(nav["nav_thb"])
+                self.database.upsert_prices([(
+                    fund_code, date.fromisoformat(nav["date"]), value, value, value, value, None, nav["source"],
+                )])
+                LOGGER.info("NAV %s = %.4f THB as of %s (%s; cross-check %s)",
+                            fund_code, value, nav["date"], nav["source"], nav.get("cross_check"))
+            except Exception:
+                LOGGER.exception("NAV refresh failed for %s", fund_code)
+
     def collect_end_of_day(self) -> None:
         LOGGER.info("Collecting end-of-day prices and macro indicators")
+        self.refresh_fund_navs()
         for ticker in self.settings.watchlist_tickers:
             try:
                 rows = self.fetch_ticker(ticker, period="10d")
@@ -699,6 +729,41 @@ def resolve_current_price(ticker: str) -> dict[str, Any]:
     }
 
 
+def usdthb_with_fallback(conn: Any = None) -> tuple[Optional[float], str]:
+    """USD/THB: Yahoo first, then free no-key APIs (ECB via frankfurter, open.er-api),
+    then the latest stored USDTHB=X row if <= 3 days old. Added 2026-10-29 (Phase 2 #6).
+    Returns (rate, source); rate None only if every source failed.
+    """
+    try:
+        return current_yfinance_price("USDTHB=X"), "yfinance"
+    except Exception as exc:
+        LOGGER.warning("USD/THB from yfinance failed (%s); trying free fallbacks", exc)
+    try:
+        try:
+            from fund_nav_fetch import fetch_usdthb_fallback
+        except Exception:
+            from data_collector.fund_nav_fetch import fetch_usdthb_fallback
+        fb = fetch_usdthb_fallback()
+        if fb:
+            return fb["rate"], f"{fb['source']} (as of {fb['as_of']})"
+    except Exception:
+        LOGGER.exception("USD/THB free fallback failed")
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT close_price, price_date FROM market_prices WHERE ticker = 'USDTHB=X' "
+                    "AND price_date >= CURRENT_DATE - 3 ORDER BY price_date DESC LIMIT 1"
+                )
+                row = cursor.fetchone()
+            if row:
+                return float(row[0]), f"db_last_close ({row[1]})"
+        except Exception:
+            LOGGER.exception("USD/THB DB fallback failed")
+    LOGGER.error("USD/THB unavailable from every source")
+    return None, "unavailable"
+
+
 def get_current_portfolio_value(conn: Any) -> dict[str, Any]:
     """Return holdings valuation in THB using current yfinance prices."""
     with conn.cursor() as cursor:
@@ -713,11 +778,12 @@ def get_current_portfolio_value(conn: Any) -> dict[str, Any]:
         columns = [description.name for description in cursor.description]
         holdings = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    usdthb = current_yfinance_price("USDTHB=X")
+    usdthb, usdthb_source = usdthb_with_fallback(conn)
     result: dict[str, Any] = {
         "generated_at": datetime.now(UTC).isoformat(),
         "base_currency": "THB",
         "usdthb_rate": usdthb,
+        "usdthb_source": usdthb_source,
         "holdings": {},
         "total_market_value_thb": 0.0,
         "total_pnl_thb": 0.0,
@@ -740,7 +806,10 @@ def get_current_portfolio_value(conn: Any) -> dict[str, Any]:
             current_price = float(resolved["price"])
             quantity = float(holding["quantity"] or Decimal("0"))
             avg_cost = float(holding["avg_cost_price"] or Decimal("0"))
-            conversion = usdthb if str(holding.get("currency", "")).upper() == "USD" else 1.0
+            is_usd = str(holding.get("currency", "")).upper() == "USD"
+            if is_usd and usdthb is None:
+                raise RuntimeError("USD/THB unavailable from all sources; cannot value USD holding")
+            conversion = usdthb if is_usd else 1.0
             market_value_thb = current_price * quantity * conversion
             cost_value_thb = avg_cost * quantity * conversion
             pnl_thb = market_value_thb - cost_value_thb
@@ -812,6 +881,13 @@ def build_scheduler(collector: MarketDataCollector) -> BackgroundScheduler:
         id="market_close_prices",
     )
     scheduler.add_job(
+        guarded_job("fund NAV refresh", collector.refresh_fund_navs),
+        "cron",
+        hour="8,12,20",
+        minute=10,
+        id="fund_nav_refresh",
+    )
+    scheduler.add_job(
         guarded_job("end-of-day prices", collector.collect_end_of_day),
         "cron",
         hour=18,
@@ -847,6 +923,7 @@ def main() -> int:
 
     try:
         collector.backfill_history()
+        guarded_job("startup fund NAV refresh", collector.refresh_fund_navs)()
         scheduler.start()
         LOGGER.info(
             "Market collector started in ICT timezone; watching %s",

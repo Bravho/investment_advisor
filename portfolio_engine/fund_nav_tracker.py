@@ -351,6 +351,7 @@ def fetch_official_nav(fund_code: str = "SCBGOLDE") -> Optional[dict[str, Any]]:
 
     # 3) SCBAM page — often empty shell; attempt embedded numbers near NAV
     for scbam_url in (
+        f"https://www.scbam.com/en/fund/foreign-investment-fund-commodity/fund-information/{fund_code.lower()}",  # fixed 2026-10-29
         f"https://www.scbam.com/en/fund/default/fund-information/{fund_code.lower()}",
         f"https://www.scbam.com/th/fund/default/fund-information/{fund_code.lower()}",
     ):
@@ -401,7 +402,7 @@ def run_nightly_nav_snapshot(
                 fund_code=fund_code,
                 nav_thb=float(official["nav_thb"]),
                 nav_date=date.fromisoformat(official["date"]),
-                source="settrade_official",
+                source=official.get("source", "official"),  # was hardcoded settrade_official
                 gold_price_usd=gold_price_usd,
                 usd_thb_rate=usd_thb_rate,
             )
