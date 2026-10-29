@@ -34,6 +34,7 @@ from utils.db_pool import db_pool
 import watchlists as watch_mod
 import risk_engine as risk_mod
 import trade_plans as plans_mod
+import signals as signals_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -135,6 +136,15 @@ async def _startup_phase3() -> None:
         _last_prop = await _c.fetchval("SELECT max(created_at) FROM trade_plans WHERE source='engine'")
     if _last_prop is None or _last_prop.astimezone(_ict).date() != datetime.now(_ict).date():
         await _safe_job("trade_plan_proposals_startup", _proposals_job)
+    async with pool.acquire() as _c:
+        await _c.execute(signals_mod.DDL)
+        _last_sig = await _c.fetchval("SELECT max(as_of) FROM signal_scores")
+    if _last_sig != datetime.now(_ict).date():
+        await _safe_job("signals_startup", _signals_job)
+
+
+async def _signals_job() -> dict[str, Any]:
+    return await signals_mod.run_signals(await db_pool.get_pool(), council=True)
 
 
 async def _proposals_job() -> dict[str, Any]:
@@ -156,6 +166,7 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["market_factors_prebrief", _factors_job], hour=6, minute=40, id="market_factors_prebrief", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
 
 
 @asynccontextmanager
@@ -563,3 +574,19 @@ async def trade_plans_patch(plan_id: int, body: dict[str, Any] = Body(...)) -> d
         raise HTTPException(status_code=404, detail="plan not found") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# --------------------------------------------------------------------------
+# Phase 4 (2026-10-30): signals (pro layer #2)
+# --------------------------------------------------------------------------
+@app.get("/signals")
+async def signals_latest(kind: Optional[str] = None) -> dict[str, Any]:
+    out = await signals_mod.latest_signals(await db_pool.get_pool())
+    if kind:
+        out["items"] = [i for i in out["items"] if i["kind"] == kind]
+    return out
+
+
+@app.post("/signals/run")
+async def signals_run(council: bool = False) -> dict[str, Any]:
+    return await signals_mod.run_signals(await db_pool.get_pool(), council=council)

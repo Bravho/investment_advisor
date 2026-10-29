@@ -1098,6 +1098,12 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
         logger.warning("Phase 3 brief sections unavailable: %s", _exc)
         facts_md = f"ℹ️ Watch list / factor / risk sections unavailable ({type(_exc).__name__}).\n\n{facts_md}"
         _kp, _rr = [], None
+    # Phase 4 (2026-10-30): signals, regime and PROPOSED trade plans.
+    try:
+        import signals as _sg
+        facts_md = f"{facts_md}\n\n{await _sg.brief_section(await db_pool.get_pool())}"
+    except Exception as _exc:  # noqa: BLE001
+        logger.warning("Phase 4 signals section unavailable: %s", _exc)
     prompt = _commentary_prompt(facts_md, holdings_line)
     if _kp:
         prompt += "\n\nKEY POINTS (verified - your commentary must agree with every one of these):\n" + "\n".join(f"- {k}" for k in _kp)
