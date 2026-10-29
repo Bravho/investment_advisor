@@ -485,10 +485,10 @@ async def create_manual_plan(pool: Any, body: dict[str, Any]) -> dict[str, Any]:
 
 # ------------------------------------------------------------------ paper ledger
 def trade_costs(ticker: str, notional: float) -> float:
-    """Round-trip-per-side cost in instrument currency for one fill."""
+    """Fees for one fill in instrument currency (slippage is applied to the fill price instead)."""
     if ticker.endswith(".BK"):
-        return notional * (COMMISSION_TH * (1 + VAT) + SLIPPAGE)
-    return notional * (US_COMMISSION + FX_SPREAD + SLIPPAGE)
+        return notional * COMMISSION_TH * (1 + VAT)
+    return notional * (US_COMMISSION + FX_SPREAD)
 
 
 async def update_paper_ledger(pool: Any) -> dict[str, Any]:
@@ -499,7 +499,14 @@ async def update_paper_ledger(pool: Any) -> dict[str, Any]:
     async with pool.acquire() as conn:
         plans = [dict(r) for r in await conn.fetch(
             "SELECT * FROM trade_plans WHERE viable AND status IN ('proposed','approved','open')")]
+        # waiting paper orders of superseded/rejected plans lapse; filled ones keep running to exit
+        await conn.execute("""UPDATE paper_trades pt SET status='expired', exit_reason='plan_'||tp.status, exit_date=current_date
+                              FROM trade_plans tp WHERE tp.id = pt.plan_id AND pt.status='waiting'
+                              AND tp.status IN ('superseded','rejected','cancelled','expired')""")
+        open_t = {r["ticker"] for r in await conn.fetch("SELECT ticker FROM paper_trades WHERE status='open'")}
         for p in plans:
+            if p["ticker"] in open_t:
+                continue
             qty = (json.loads(p["size"]) if isinstance(p["size"], str) else (p["size"] or {})).get("shares") or 0
             await conn.execute("""INSERT INTO paper_trades (plan_id, ticker, qty, currency) VALUES ($1,$2,$3,$4)
                                   ON CONFLICT (plan_id) DO NOTHING""", p["id"], p["ticker"], qty or 100, p["currency"])
@@ -529,6 +536,11 @@ async def update_paper_ledger(pool: Any) -> dict[str, Any]:
                     entry_price *= (1 + SLIPPAGE)
                     entry_date, status = d, "open"
                     opened += 1
+                    if bar["Low"] <= st:  # conservative: stopped out on the fill day
+                        exit_price, exit_reason = st * (1 - SLIPPAGE), "stop_same_day"
+                        exit_date, status = d, "closed"
+                        closed += 1
+                        break
                     continue
                 if tr["expiry"] and d > tr["expiry"]:
                     status, exit_reason, exit_date = "expired", "expired_unfilled", d
@@ -571,7 +583,8 @@ async def paper_summary(pool: Any) -> dict[str, Any]:
     return {"trades": rows, "counts": {s: sum(1 for r in rows if r["status"] == s) for s in ("waiting", "open", "closed", "expired")},
             "hit_rate": round(len(wins) / len(closed), 3) if closed else None,
             "avg_r": round(float(np.mean([r["r_multiple"] for r in closed if r.get("r_multiple") is not None])), 3) if closed else None,
-            "note": "Paper ledger: simulated fills on daily bars after plan creation; costs = SET commission+VAT / offshore fees + slippage."}
+            "note": "Paper ledger: simulated fills on daily bars after plan creation; costs = SET commission+VAT / offshore fees + slippage. "
+                    "Qty = checklist size (100 notional when caps give 0). Unfilled orders lapse when the plan is re-proposed."}
 
 
 # ------------------------------------------------------------------ journal

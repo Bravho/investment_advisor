@@ -35,6 +35,7 @@ import watchlists as watch_mod
 import risk_engine as risk_mod
 import trade_plans as plans_mod
 import signals as signals_mod
+import walkforward as wf_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -141,6 +142,24 @@ async def _startup_phase3() -> None:
         _last_sig = await _c.fetchval("SELECT max(as_of) FROM signal_scores")
     if _last_sig != datetime.now(_ict).date():
         await _safe_job("signals_startup", _signals_job)
+    async with pool.acquire() as _c:
+        await _c.execute(wf_mod.DDL)
+        _last_bt = await _c.fetchval("SELECT max(run_at) FROM backtest_runs")
+    if _last_bt is None or (datetime.now(timezone.utc) - _last_bt).days >= 7:
+        await _safe_job("walkforward_backtest_startup", _backtest_job)
+    await _safe_job("paper_ledger_startup", _paper_job)
+
+
+async def _outcome_job() -> dict[str, Any]:
+    return await wf_mod.outcome_job(await db_pool.get_pool(), legacy=record_due_recommendation_outcomes)
+
+
+async def _paper_job() -> dict[str, Any]:
+    return await plans_mod.update_paper_ledger(await db_pool.get_pool())
+
+
+async def _backtest_job() -> dict[str, Any]:
+    return await wf_mod.run_backtest(await db_pool.get_pool())
 
 
 async def _signals_job() -> dict[str, Any]:
@@ -159,7 +178,10 @@ def configure_schedules() -> None:
     for _h, _m in ((7, 30), (8, 30), (10, 0), (13, 0)):
         scheduler.add_job(_safe_job, "cron", args=["retry_daily_brief", retry_daily_brief_if_needed], hour=_h, minute=_m, id=f"retry_daily_brief_{_h:02d}{_m:02d}", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["save_daily_performance", save_daily_performance], hour=17, minute=30, id="save_daily_performance", replace_existing=True)
-    scheduler.add_job(_safe_job, "cron", args=["record_recommendation_outcomes", record_due_recommendation_outcomes], hour=8, minute=0, id="record_recommendation_outcomes", replace_existing=True)
+    # Phase 4: the 08:00 outcome job also scores live signals (hit rate/avg win-loss/Sharpe) and updates the paper ledger.
+    scheduler.add_job(_safe_job, "cron", args=["record_recommendation_outcomes", _outcome_job], hour=8, minute=0, id="record_recommendation_outcomes", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["paper_ledger", _paper_job], hour=18, minute=0, id="paper_ledger", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["walkforward_backtest", _backtest_job], day_of_week="sun", hour=5, minute=0, id="walkforward_backtest", replace_existing=True)
     # Phase 3 (2026-10-29): watch lists, market factors, risk engine
     scheduler.add_job(_safe_job, "interval", args=["watchlist_prices_alerts", _watch_prices_job], minutes=30, id="watchlist_prices_alerts", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["market_factors", _factors_job], minutes=60, id="market_factors", replace_existing=True)
@@ -590,3 +612,33 @@ async def signals_latest(kind: Optional[str] = None) -> dict[str, Any]:
 @app.post("/signals/run")
 async def signals_run(council: bool = False) -> dict[str, Any]:
     return await signals_mod.run_signals(await db_pool.get_pool(), council=council)
+
+
+# --------------------------------------------------------------------------
+# Phase 4 (2026-10-30): backtesting, outcome scoring, paper ledger (pro layer #3)
+# --------------------------------------------------------------------------
+@app.get("/backtest/latest")
+async def backtest_latest() -> dict[str, Any]:
+    out = await wf_mod.latest_backtest(await db_pool.get_pool())
+    return {"universes": out, "method": wf_mod.__doc__}
+
+
+@app.post("/backtest/run")
+async def backtest_run() -> dict[str, Any]:
+    return await _backtest_job()
+
+
+@app.get("/signals/performance")
+async def signals_performance() -> dict[str, Any]:
+    return await wf_mod.signal_performance(await db_pool.get_pool())
+
+
+@app.post("/signals/outcomes/run")
+async def signals_outcomes_run() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    return {"live": await wf_mod.score_live_outcomes(pool), "paper": await plans_mod.update_paper_ledger(pool)}
+
+
+@app.get("/paper-trades")
+async def paper_trades() -> dict[str, Any]:
+    return await plans_mod.paper_summary(await db_pool.get_pool())
