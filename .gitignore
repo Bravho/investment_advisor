@@ -46,3 +46,5 @@ dashboard/dist/
 data/feed_health.json
 data_collector/portfolio_snapshot.json
 *.json.tmp
+data/watchlists_status.json
+data_collector/.market_data_backfill_complete
