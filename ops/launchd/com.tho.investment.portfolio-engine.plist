@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.tho.investment.portfolio-engine</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/admin/Projects/investment_advisor/venv/bin/python</string>
+        <string>-m</string><string>uvicorn</string>
+        <string>api:app</string>
+        <string>--host</string><string>127.0.0.1</string>
+        <string>--port</string><string>8996</string>
+    </array>
+    <key>WorkingDirectory</key><string>/Users/admin/Projects/investment_advisor/portfolio_engine</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key><string>/Users/admin/Projects/investment_advisor:/Users/admin/Projects/investment_advisor/portfolio_engine:/Users/admin/Projects/investment_advisor/ai_engine</string>
+        <key>PATH</key><string>/Users/admin/Projects/investment_advisor/venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>PYTHONUNBUFFERED</key><string>1</string>
+        <!-- Ollama-only: paid LLM fallbacks disabled for this service (remove to re-enable) -->
+        <key>OPENAI_API_KEY</key><string></string>
+        <key>ANTHROPIC_API_KEY</key><string></string>
+    </dict>
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+    <key>ThrottleInterval</key><integer>30</integer>
+    <key>StandardOutPath</key><string>/Users/admin/Projects/investment_advisor/logs/portfolio_engine.launchd.log</string>
+    <key>StandardErrorPath</key><string>/Users/admin/Projects/investment_advisor/logs/portfolio_engine.launchd.log</string>
+</dict>
+</plist>
