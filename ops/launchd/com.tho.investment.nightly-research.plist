@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.tho.investment.nightly-research</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/admin/Projects/investment_advisor/venv/bin/python</string>
+        <string>-W</string><string>ignore</string>
+        <string>/Users/admin/Projects/investment_advisor/ops/nightly_research.py</string>
+    </array>
+    <key>WorkingDirectory</key><string>/Users/admin/Projects/investment_advisor/portfolio_engine</string>
+    <key>EnvironmentVariables</key><dict><key>ALLOW_PAID_LLM</key><string>0</string><key>WATCH_ALERTS_DRY_RUN</key><string>1</string></dict>
+    <key>StartCalendarInterval</key><dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>30</integer></dict>
+    <key>RunAtLoad</key><false/>
+    <key>StandardOutPath</key><string>/Users/admin/Library/Logs/com.tho.investment.nightly-research.log</string>
+    <key>StandardErrorPath</key><string>/Users/admin/Library/Logs/com.tho.investment.nightly-research.log</string>
+</dict>
+</plist>

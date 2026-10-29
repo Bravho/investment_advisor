@@ -1,0 +1,18 @@
+{
+  "_note": "Nightly agent mode switch (2026-10-30). research_only = market intel + watchlist refresh, no code edits. Code mode is prepared but disabled; enable only by Tho (set code_mode_enabled true + approved_by + approved_at).",
+  "mode": "research_only",
+  "code_mode_enabled": false,
+  "approved_by": null,
+  "approved_at": null,
+  "schedule_ict": "02:30",
+  "llm": "ollama:hermes3:8b (local only)",
+  "code_mode": {
+    "worktree_dir": "/Users/admin/Projects/investment_advisor_selfdev",
+    "branch_prefix": "selfdev/",
+    "max_changes": 2,
+    "allowed_paths": ["portfolio_engine/", "ai_engine/", "dashboard/src/"],
+    "forbidden_paths": [".env", "config/", "ops/launchd/", "main.py", "model_router.py"],
+    "checks": ["venv/bin/python -m py_compile portfolio_engine/*.py", "cd dashboard && npm run build"],
+    "never": ["merge", "push", "restart services", "edit .env", "send LINE"]
+  }
+}
