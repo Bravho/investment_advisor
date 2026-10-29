@@ -9,11 +9,75 @@ from catalyst_monitor import catalyst_alert_summary  # Added by nightly agent 20
 from earnings_tracker import pre_earnings_brief, run_nightly_earnings_check, validate_earnings_dates, load_earnings_actual  # Added 2026-06-13; validate_earnings_dates 2026-07-05; load_earnings_actual 2026-07-25
 from oil_scenario import probability_weighted_outlook, run_oil_scenario_report  # Added 2026-06-14, weighted 2026-06-19
 from opportunity_scanner import check_exit_signals, scan_opportunities, tech_screener
-from utils.common import PROJECT_DIR, configure_logging, json_dumps, ollama_chat, parse_json_response, to_jsonable
+from utils.common import PROJECT_DIR, compact_json, configure_logging, json_dumps, ollama_chat, ollama_chat_stream, parse_json_response, to_jsonable
 from utils.db_pool import db_pool
 
 logger = configure_logging("portfolio_engine.brief")
 MODEL = os.getenv("OLLAMA_ADVISORY_MODEL", "hermes3:8b")
+
+# --- Brief reliability settings — Added 2026-10-29 (Phase 2) ---------------
+BRIEF_FAILED_PREFIX = "[BRIEF GENERATION FAILED]"
+BRIEF_NUM_CTX = int(os.getenv("BRIEF_NUM_CTX", "12288"))
+BRIEF_CONTEXT_MAX_CHARS = int(os.getenv("BRIEF_CONTEXT_MAX_CHARS", "16000"))
+BRIEF_PER_KEY_MAX_CHARS = int(os.getenv("BRIEF_PER_KEY_MAX_CHARS", "2500"))
+BRIEF_STALE_DAYS = int(os.getenv("BRIEF_STALE_DAYS", "3"))
+BRIEF_MIN_CONTENT_CHARS = 300
+BRIEF_ATTEMPTS = int(os.getenv("BRIEF_ATTEMPTS", "2"))
+# Context keys derived from the nightly-agent watchlist macro_context. When the
+# watchlist is stale these are dropped so stale levels are never presented as current.
+_WATCHLIST_DERIVED_KEYS = (
+    "multi_market_macro", "pttep_oil_scenarios", "pttep_oil_risk_flag",
+    "pttep_oil_weighted_outlook", "fed_policy_risk_flag", "gold_drawdown_flag",
+    "currency_regime_flag", "japan_policy_risk_flag",
+)
+
+
+def is_failed_brief(content: Any) -> bool:
+    text = str(content or "").strip()
+    return (not text) or text.startswith(BRIEF_FAILED_PREFIX) or text.startswith(
+        "Daily brief generation is temporarily unavailable"
+    )
+
+
+def _age_days(iso_date: Any) -> int | None:
+    try:
+        return (date.today() - date.fromisoformat(str(iso_date)[:10])).days
+    except (TypeError, ValueError):
+        return None
+
+
+def _latest_market_intel_date() -> str | None:
+    intel_dir = PROJECT_DIR / "data" / "market_intel"
+    files = sorted(intel_dir.glob("*.md"), reverse=True) if intel_dir.exists() else []
+    return files[0].stem if files else None
+
+
+def _prepare_brief_context(context: dict[str, Any], watchlist_updated: Any) -> dict[str, Any]:
+    """Drop stale watchlist-derived inputs and shrink everything to fit num_ctx."""
+    ctx = dict(context)
+    omitted: list[str] = []
+    wl_age = _age_days(watchlist_updated)
+    if wl_age is None or wl_age > BRIEF_STALE_DAYS:
+        for key in _WATCHLIST_DERIVED_KEYS:
+            if key in ctx:
+                ctx.pop(key)
+                omitted.append(key)
+    ctx["data_freshness"] = {
+        "today": date.today().isoformat(),
+        "watchlist_macro_last_updated": watchlist_updated,
+        "watchlist_macro_age_days": wl_age,
+        "omitted_stale_inputs": omitted,
+        "note": "Inputs listed in omitted_stale_inputs are older than %d days and were removed. "
+                "Write 'data unavailable' for them; do not estimate." % BRIEF_STALE_DAYS,
+    }
+    perf = ctx.get("portfolio_performance_7d")
+    if isinstance(perf, list):
+        ctx["portfolio_performance_7d"] = [
+            {k: v for k, v in row.items() if k != "snapshot"} if isinstance(row, dict) else row
+            for row in perf
+        ]
+    ctx = {k: compact_json(v, BRIEF_PER_KEY_MAX_CHARS) for k, v in ctx.items()}
+    return compact_json(ctx, BRIEF_CONTEXT_MAX_CHARS)
 
 # ---------------------------------------------------------------------------
 # Multi-market context loader — Added by nightly agent 2026-06-09
@@ -313,7 +377,7 @@ def _load_calendar_integrity() -> dict[str, Any]:
         return {"issue_count": 0, "issues": []}
 
 
-def _load_feed_health() -> dict[str, Any]:
+def _load_feed_health_legacy() -> dict[str, Any]:
     """
     Surface data-feed staleness in the morning brief.
 
@@ -382,6 +446,164 @@ def _load_feed_health() -> dict[str, Any]:
     except Exception:
         logger.debug("feed health unavailable — reporting UNVERIFIED, not healthy")
         return unknown
+
+
+def _load_feed_health() -> dict[str, Any]:
+    """Live feed-health read — Added 2026-10-29 (Phase 2).
+
+    Runs data_collector/feed_health.check_feed_health() in-process (stdlib only)
+    so the brief never relies on a days-old report, and separates PRICE feeds
+    from the nightly research artifacts: a dead nightly research agent must not
+    be reported as stale prices (and vice versa).
+    """
+    import importlib.util
+
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "dc_feed_health", PROJECT_DIR / "data_collector" / "feed_health.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        spec.loader.exec_module(module)  # type: ignore[union-attr]
+        report = module.check_feed_health(write_report=True)
+    except Exception:
+        logger.exception("live feed-health check failed — falling back to report file")
+        return _load_feed_health_legacy()
+    checks = report.get("checks") or []
+    price_checks = [c for c in checks if c.get("name") != "nightly_artifacts"]
+    research = next((c for c in checks if c.get("name") == "nightly_artifacts"), None)
+    ok = ("FRESH", "AGING")
+    stale = [
+        {"name": c.get("name"), "severity": c.get("severity"),
+         "age_days": c.get("age_days"), "detail": c.get("detail") or c.get("error")}
+        for c in price_checks if c.get("severity") not in ok
+    ]
+    return {
+        "checked_at": report.get("generated_at"),
+        "healthy": not stale,
+        "worst_severity": "FRESH" if not stale else stale[0]["severity"],
+        "interpretation": (
+            "Price feeds are fresh." if not stale else
+            "Some price inputs are stale or incomplete — see stale_checks; affected figures are not current."
+        ),
+        "stale_checks": stale,
+        "nightly_research": {
+            "severity": research.get("severity") if research else "STALE_UNKNOWN",
+            "age_days": research.get("age_days") if research else None,
+            "note": "Nightly research/watchlist artifacts (macro levels, market intel). "
+                    "Not a price feed.",
+        },
+    }
+
+
+_CRYPTO_MARKERS = ("BTC", "ETH", "CRYPTO", "COIN", "DOGE", "SOL-")
+
+
+def _fmt_num(value: Any, digits: int = 2) -> str:
+    try:
+        return f"{float(value):,.{digits}f}"
+    except (TypeError, ValueError):
+        return "n/a"
+
+
+def _render_facts(ctx: dict[str, Any], perf_rows: list[dict[str, Any]], snap: dict[str, Any]) -> str:
+    """Deterministic, sourced facts block — Added 2026-10-29 (Phase 2).
+
+    Built in Python (never by the LLM) so every number shown is a real, dated
+    value from the DB / snapshot. Missing values are shown as n/a.
+    """
+    kf = ctx.get("key_facts") or {}
+    fh = ctx.get("feed_health") or {}
+    lines: list[str] = []
+    if not fh.get("healthy", False):
+        lines.append("🚨 DATA WARNING: " + str(fh.get("interpretation", "price freshness unverified")))
+        for c in fh.get("stale_checks") or []:
+            lines.append(f"  - {c.get('name')}: {c.get('severity')} ({c.get('detail') or 'no detail'})")
+    research = fh.get("nightly_research") or {}
+    if research.get("severity") not in (None, "FRESH", "AGING"):
+        lines.append(
+            f"ℹ️ Nightly research/macro inputs are {research.get('severity')} "
+            f"(~{_fmt_num(research.get('age_days'), 0)} days old) — macro levels omitted."
+        )
+    lines.append("")
+    lines.append("**Holdings (latest closes)**")
+    snap_h = (snap or {}).get("holdings") or {}
+    for r in kf.get("latest_closes") or []:
+        t = r.get("ticker")
+        if t == "USDTHB=X":
+            continue
+        h = snap_h.get(t) or {}
+        extra = ""
+        if h.get("market_value_thb") is not None:
+            extra = (f" | value {_fmt_num(h.get('market_value_thb'), 0)} THB, "
+                     f"P/L {_fmt_num(h.get('pnl_thb'), 0)} THB ({_fmt_num(h.get('pnl_pct'))}%)")
+        elif h.get("error"):
+            extra = " | not valued in snapshot"
+        lines.append(f"- {t}: {_fmt_num(r.get('close_price'), 4 if t == 'SCBGOLDE' else 2)} "
+                     f"(as of {r.get('price_date')}, {r.get('source')}){extra}")
+    fx = next((r for r in kf.get("latest_closes") or [] if r.get("ticker") == "USDTHB=X"), None)
+    if fx:
+        lines.append(f"- USD/THB: {_fmt_num(fx.get('close_price'), 3)} (as of {fx.get('price_date')})")
+    ps = kf.get("portfolio_snapshot") or {}
+    lines.append(
+        f"- Portfolio total: {_fmt_num(ps.get('total_market_value_thb'), 0)} THB, "
+        f"P/L {_fmt_num(ps.get('total_pnl_thb'), 0)} THB (snapshot {str(ps.get('generated_at'))[:16]} UTC)"
+    )
+    if ps.get("valuation_complete") is False:
+        lines.append(f"  ⚠️ {ps.get('total_value_caveat') or 'valuation incomplete'}")
+    lines.append("")
+    lines.append("**Portfolio health**")
+    rs = kf.get("latest_risk_score") or {}
+    lines.append(f"- Risk score: {_fmt_num(rs.get('risk_score'), 4)} (recorded {rs.get('record_date', 'n/a')})")
+    vals = [(r.get("record_date"), r.get("total_value_thb")) for r in perf_rows if r.get("total_value_thb") is not None]
+    if len(vals) >= 2:
+        newest, oldest = vals[0], vals[-1]
+        try:
+            chg = (float(newest[1]) / float(oldest[1]) - 1) * 100
+            lines.append(f"- Value trend: {_fmt_num(oldest[1], 0)} → {_fmt_num(newest[1], 0)} THB "
+                         f"({chg:+.2f}%, {oldest[0]} → {newest[0]}, priced holdings only)")
+        except (TypeError, ValueError, ZeroDivisionError):
+            pass
+    exits = ctx.get("exit_signals") or []
+    lines.append(f"- Exit signals: {len(exits)}" + ("" if not exits else " — " + ", ".join(
+        str(e.get("ticker")) for e in exits if isinstance(e, dict))))
+    ms = kf.get("macro_mood") or {}
+    lines.append(f"- News-sentiment mood: {ms.get('market_mood', 'n/a')} (as of {ms.get('snapshot_date', 'n/a')})")
+    cat = ctx.get("catalyst_alerts") or {}
+    for c in (cat.get("imminent") or [])[:3]:
+        if isinstance(c, dict):
+            lines.append(f"- Upcoming catalyst {c.get('date')}: {c.get('description')}"
+                         f"{'' if c.get('confirmed') else ' (unconfirmed)'}")
+    ea = ctx.get("earnings_alerts") or {}
+    if ea.get("summary_text"):
+        lines.append(f"- Earnings: {ea.get('summary_text')}")
+    arts = [a for a in (ctx.get("high_impact_articles") or []) if isinstance(a, dict)
+            and not any(m in str(a.get("ticker", "")).upper() or m in str(a.get("source", "")).upper()
+                        for m in _CRYPTO_MARKERS)]
+    if arts:
+        lines.append("")
+        lines.append("**Notable headlines (24h)**")
+        for a in arts[:4]:
+            lines.append(f"- [{a.get('sentiment')}] {a.get('title')} — {a.get('source')}")
+    return "\n".join(lines)
+
+
+def _commentary_prompt(facts_md: str, holdings_line: str) -> str:
+    return f"""You are a careful investment advisor for Tho, a Thai retail investor
+(horizon 3 months to 2 years, base currency THB, not interested in crypto).
+His holdings: {holdings_line}.
+
+Below are VERIFIED FACTS. Write a short advisor commentary based ONLY on them.
+Rules: do not introduce any number, price, level or date that is not in the facts.
+If something important is missing, say it is unavailable. Advisory only, no trades.
+Do not mention asset classes or holdings that are not listed above (he holds no bonds unless listed).
+
+Respond ONLY as JSON:
+{{"commentary": "3-5 short bullet points (markdown '- '), max 220 words, covering the holdings, portfolio risk/concentration and any data warning",
+  "action_items": ["max 3 concrete, cautious next steps"]}}
+
+VERIFIED FACTS:
+{facts_md}"""
 
 
 def _load_reported_actuals(
@@ -774,14 +996,56 @@ async def generate_daily_brief() -> dict[str, Any]:
             "council_reports": _load_council_reports(),
         }
     )
+    # Phase 2 (2026-10-29): real holdings from DB, stale-input filter, size budget
+    holdings_rows = await pool.fetch(
+        "SELECT ticker, name, asset_class FROM holdings WHERE quantity > 0 ORDER BY ticker"
+    )
+    holdings_line = ", ".join(
+        f"{r['ticker']} ({r['name'] or r['asset_class']})" for r in holdings_rows
+    ) or "no holdings recorded"
+    # key_facts: verified, dated numbers computed here so the model need not dig
+    latest_px = await pool.fetch(
+        """
+        SELECT DISTINCT ON (ticker) ticker, price_date, close_price, source
+        FROM market_prices WHERE ticker IN (SELECT ticker FROM holdings) OR ticker = 'USDTHB=X'
+        ORDER BY ticker, price_date DESC
+        """
+    )
+    try:
+        from utils.common import load_snapshot as _load_snap
+        snap = _load_snap()
+    except Exception:
+        snap = {}
+    context["key_facts"] = to_jsonable({
+        "latest_closes": [dict(r) for r in latest_px],
+        "portfolio_snapshot": {
+            k: snap.get(k) for k in (
+                "generated_at", "total_market_value_thb", "total_pnl_thb",
+                "valuation_complete", "unpriced_holdings", "total_value_caveat",
+            )
+        },
+        "latest_risk_score": (
+            {"record_date": performance[0]["record_date"], "risk_score": performance[0]["risk_score"]}
+            if performance else None
+        ),
+        "macro_mood": (
+            {"snapshot_date": macro["snapshot_date"], "market_mood": macro["market_mood"]}
+            if macro else None
+        ),
+    })
+    context = _prepare_brief_context(
+        context, (watchlist_snapshot.get("_meta") or {}).get("last_updated")
+    )
+    intel_age = _age_days(_latest_market_intel_date())
+    if intel_age is None or intel_age > BRIEF_STALE_DAYS:
+        market_intel_text = ""
     # Enhanced prompt with per-market sections — Added by nightly agent 2026-06-09
     market_intel_section = (
         f"\n\nLatest nightly market intelligence:\n{market_intel_text}"
         if market_intel_text else ""
     )
     prompt = f"""You are a professional investment advisor writing a morning brief for a private
-Thai investor (Tho). His holdings: BAFS.BK (aviation fuel), PTTEP.BK (oil/gas), SCB.BK (bank),
-and SCBGOLDE gold fund. Medium-term horizon (3 months–2 years). Base currency: THB.
+Thai investor (Tho). His current holdings: {holdings_line}. Medium-term horizon (3 months–2 years). Base currency: THB.
 
 Write in clear structured format. FIRST, before anything else including the Catalyst Watch header, check feed_health. If feed_health.healthy is false, open the brief with a **🚨 DATA FEED WARNING** block quoting feed_health.interpretation and, for each entry in feed_health.stale_checks, the check name and its age_days. Then state plainly, in your own words, that because the feed is stale ANY price, weight, P&L or "no change" figure in the rest of this brief is a CARRIED-FORWARD mark of that age and not a current one — a flat reading is absence of data, not absence of movement — and that Tho should not rebalance, size a position, or act on a level off these numbers until the feed is restored. Do NOT soften this and do NOT bury it lower down; it changes how every other number in the brief should be read. If feed_health.healthy is true, omit the block entirely and write nothing about feeds. Then the one-line **⚠️ Catalyst Watch** header BEFORE Section 1, built from catalyst_alerts: if slipped_count > 0, list each slipped entry's date + a short label and say it needs verification before any dependent thesis is treated as resolved; then on the same header list imminent catalysts (date + short label) landing within 5 days. If both counts are 0, write "⚠️ Catalyst Watch: none flagged". Then, if calendar_integrity.issue_count > 0, add a one-line **📅 Calendar integrity** note immediately after the Catalyst Watch header: for each item in calendar_integrity.issues give ticker + expected_date + status, and if reconciliation is present quote its KEEP/REVIEW/AMBIGUOUS verdict verbatim (e.g. "📅 Calendar integrity: PTTEP.BK Aug-11 vs Yahoo Jul-23 — KEEP internal (in 30-45d band); REJECT Jul-23 (suspiciously_early)"). If an item's event_type is "interim_dividend_announcement", label it as a dividend ex-date issue (e.g. "📅 Calendar integrity: SCB.BK interim-dividend ex-date looks mis-dated vs its results date — verify on the SET calendar"), not an earnings-date issue. This tells Tho a vendor/calendar date is unverified so he does not act on a wrong earnings or ex-dividend date. If issue_count is 0, omit this line entirely. Then the SECTIONS:
 1. **Thailand / SET** — SET index level, BAFS/PTTEP/SCB news, tourism/economy. For PTTEP, use pttep_oil_scenarios (current_impact + scenarios keyed by Brent regime) to give a concrete oil-sensitivity read: note the deal-signed/Hormuz-open scenario, estimated net-income change vs base, and whether the dividend looks maintained — do NOT just repeat oil headlines. Then state PTTEP's position-level oil risk from pttep_oil_risk_flag in one short phrase (risk_level + position_risk_score), e.g. "oil risk: elevated (0.42)". Also add one line from pttep_oil_weighted_outlook giving the single probability-weighted expectation (expected_brent_usd, expected_net_income_change_pct, expected_yield_base_pct), e.g. "weighted view: Brent ~$83, PTTEP NI -11% vs base, yield ~4.5%"
@@ -793,19 +1057,66 @@ Write in clear structured format. FIRST, before anything else including the Cata
 7. **Guru Council** — if council_reports.available is true, add a compact Council block: for each item in council_reports.holdings give ticker + overall_label + blended_conviction (and one short clause from agreement if present); then optionally list up to 3 from council_reports.other_top the same way. Mark the block as ADVISORY ONLY (no auto-trade). If council_reports.available is false, write a one-line section: "Guru Council: no council report on file — run `python3 -m guru_council.cli analyze …`" quoting council_reports.message.
 
 Write in English. Keep under 700 words total. Be direct and data-driven.
+STRICT DATA RULE: use only numbers present in the context below. If a field is missing,
+null, or listed in data_freshness.omitted_stale_inputs, write "data unavailable" for it.
+Never estimate, recall from memory, or invent prices, levels, dates or percentages.
+Start from key_facts (verified, dated numbers) and quote the as-of date next to each figure.
+Only write "data unavailable" when the value truly is absent from the context.
 
 Respond ONLY as JSON:
 {{"content": "full brief with all 6 sections", "action_items": ["item 1", "item 2", "item 3"]}}
 
 Portfolio context: {json_dumps(context)}{market_intel_section}"""
+    # Phase 2: deterministic facts + short LLM commentary (the 7k-char template
+    # prompt above is kept for reference but is too complex for a local 8B model)
     try:
-        generated = parse_json_response(await ollama_chat(MODEL, prompt, 120, json_mode=True))
-        content = str(generated.get("content", "")).strip()
-        action_items = list(generated.get("action_items") or [])[:3]
+        from utils.common import load_snapshot as _load_snap2
+        _snap_full = _load_snap2()
     except Exception:
-        logger.exception("Daily brief generation failed")
-        content = "Daily brief generation is temporarily unavailable. Review opportunities and exit signals."
-        action_items = [item["suggested_action"] + " " + item["ticker"] for item in opportunities[:3]]
+        _snap_full = {}
+    facts_md = _render_facts(context, [dict(r) for r in performance], _snap_full)
+    prompt = _commentary_prompt(facts_md, holdings_line)
+    content, action_items, failure = "", [], None
+    for attempt in range(1, BRIEF_ATTEMPTS + 1):
+        try:
+            raw = await ollama_chat_stream(
+                MODEL, prompt, json_mode=True, num_ctx=BRIEF_NUM_CTX, num_predict=1800
+            )
+            generated = parse_json_response(raw)
+            commentary = generated.get("commentary", "")
+            if isinstance(commentary, list):
+                commentary = "\n".join(f"- {c}" for c in commentary)
+            commentary = str(commentary).strip()
+            action_items = [str(a) for a in (generated.get("action_items") or [])][:3]
+            if len(commentary) < 120:
+                raise ValueError(f"model returned too little commentary ({len(commentary)} chars)")
+            content = (
+                f"# Morning brief — {date.today().isoformat()}\n\n{facts_md}\n\n"
+                f"**Advisor commentary (AI, local model; opinion)**\n{commentary}\n\n"
+                "_Advisory only. Not licensed financial advice. No trades are executed._"
+            )
+            failure = None
+            break
+        except Exception as exc:  # noqa: BLE001
+            failure = f"{type(exc).__name__}: {exc}"[:300]
+            logger.exception("Daily brief generation attempt %d/%d failed", attempt, BRIEF_ATTEMPTS)
+            content, action_items = "", []
+            if attempt < BRIEF_ATTEMPTS:
+                import asyncio as _asyncio
+                await _asyncio.sleep(30)
+    if failure:
+        from datetime import datetime as _dt
+        content = (
+            f"{BRIEF_FAILED_PREFIX} {_dt.now().strftime('%Y-%m-%d %H:%M')} ICT — local AI "
+            f"generation failed after {BRIEF_ATTEMPTS} attempts ({failure}). No brief content "
+            "was generated and nothing has been filled in. An automatic retry is scheduled."
+            f"\n\nVerified facts at time of failure (no AI involved):\n{facts_md}"
+        )
+        action_items = []
+    logger.info(
+        "Daily brief %s (prompt %d chars, content %d chars)",
+        "FAILED" if failure else "generated", len(prompt), len(content),
+    )
     risk_score = float(performance[0]["risk_score"] or 0) if performance else 0.0
     macro_mood = str(macro["market_mood"]) if macro else "unknown"
     await pool.execute(
@@ -825,4 +1136,19 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
         json_dumps(opportunities),
         json_dumps(action_items),
     )
-    return {"brief_date": date.today().isoformat(), "content": content, "action_items": action_items}
+    return {
+        "brief_date": date.today().isoformat(),
+        "status": "failed" if failure else "ok",
+        "content": content,
+        "action_items": action_items,
+    }
+
+
+async def retry_daily_brief_if_needed() -> dict[str, Any]:
+    """Regenerate today's brief only if it is missing, empty or marked failed."""
+    pool = await db_pool.get_pool()
+    row = await pool.fetchrow("SELECT content FROM daily_briefs WHERE brief_date = CURRENT_DATE")
+    if row and not is_failed_brief(row["content"]):
+        return {"status": "ok", "skipped": True}
+    logger.info("Retrying daily brief (row %s)", "missing" if not row else "failed/empty")
+    return await generate_daily_brief()

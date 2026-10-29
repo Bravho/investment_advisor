@@ -25,7 +25,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from backtesting import get_accuracy_report, record_due_recommendation_outcomes, record_recommendation_outcome
-from brief_generator import ensure_daily_briefs_table, generate_daily_brief
+from brief_generator import ensure_daily_briefs_table, generate_daily_brief, is_failed_brief, retry_daily_brief_if_needed
 from opportunity_scanner import check_exit_signals, scan_advisory_candidates, scan_opportunities, tech_screener
 from performance_analytics import get_performance_summary
 from rebalancer import generate_rebalancing_plan
@@ -108,6 +108,9 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["scan_opportunities", scan_opportunities, opportunity_cache], minutes=30, id="scan_opportunities", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["check_exit_signals", check_exit_signals, exit_cache], minutes=15, id="check_exit_signals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["generate_daily_brief", generate_daily_brief], hour=7, minute=0, id="generate_daily_brief", replace_existing=True)
+    # Phase 2 (2026-10-29): retry a failed/missing brief instead of leaving it empty
+    for _h, _m in ((7, 30), (8, 30), (10, 0), (13, 0)):
+        scheduler.add_job(_safe_job, "cron", args=["retry_daily_brief", retry_daily_brief_if_needed], hour=_h, minute=_m, id=f"retry_daily_brief_{_h:02d}{_m:02d}", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["save_daily_performance", save_daily_performance], hour=17, minute=30, id="save_daily_performance", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["record_recommendation_outcomes", record_due_recommendation_outcomes], hour=8, minute=0, id="record_recommendation_outcomes", replace_existing=True)
 
@@ -127,6 +130,7 @@ async def lifespan(app: FastAPI):
         active_tasks.add(task)
         task.add_done_callback(active_tasks.discard)
     logger.info("Portfolio engine started on ICT schedule")
+    logger.info("Scheduled jobs: %s", ", ".join(sorted(j.id for j in scheduler.get_jobs())))
     try:
         yield
     finally:
@@ -373,7 +377,11 @@ async def exits() -> list[dict[str, Any]]:
 async def today_brief() -> dict[str, Any]:
     pool = await db_pool.get_pool()
     row = await pool.fetchrow("SELECT * FROM daily_briefs WHERE brief_date = CURRENT_DATE")
-    return to_jsonable(dict(row)) if row else await generate_daily_brief()
+    if not row:
+        return await generate_daily_brief()
+    out = to_jsonable(dict(row))
+    out["status"] = "failed" if is_failed_brief(out.get("content")) else "ok"
+    return out
 
 
 @app.get("/brief/history")

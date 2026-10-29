@@ -154,3 +154,91 @@ async def save_recommendation(
         list(validated_by or []),
     )
     return str(recommendation_id)
+
+
+# ---------------------------------------------------------------------------
+# Robust streaming Ollama call — Added 2026-10-29 (Phase 2, brief reliability)
+# ---------------------------------------------------------------------------
+async def ollama_chat_stream(
+    model: str,
+    prompt: str,
+    *,
+    json_mode: bool = False,
+    num_ctx: int = 8192,
+    num_predict: int = 1800,
+    idle_timeout: float = 240.0,
+    total_timeout: float = 900.0,
+    keep_alive: str = "30m",
+) -> str:
+    """Stream a chat completion from local Ollama.
+
+    * ``num_ctx`` is set explicitly: Ollama's default context window silently
+      truncates long prompts (the old brief prompt was ~60k tokens), which made
+      the model answer with empty/garbled JSON.
+    * Streaming + ``idle_timeout`` means a slow-but-alive generation is not
+      killed after a fixed 120 s; only a stalled stream or ``total_timeout`` is.
+    * ``keep_alive`` keeps the model loaded between retries.
+    """
+    import asyncio
+    import time as _time
+
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": True,
+        "keep_alive": keep_alive,
+        "options": {"temperature": 0.1, "num_ctx": num_ctx, "num_predict": num_predict},
+    }
+    if json_mode:
+        payload["format"] = "json"
+    parts: list[str] = []
+    deadline = _time.monotonic() + total_timeout
+    timeout = httpx.Timeout(connect=10.0, read=idle_timeout, write=30.0, pool=10.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        async with client.stream("POST", f"{OLLAMA_URL}/api/chat", json=payload) as response:
+            response.raise_for_status()
+            async for line in response.aiter_lines():
+                if _time.monotonic() > deadline:
+                    raise asyncio.TimeoutError(f"Ollama generation exceeded {total_timeout:.0f}s")
+                if not line.strip():
+                    continue
+                chunk = json.loads(line)
+                if chunk.get("error"):
+                    raise RuntimeError(f"Ollama error: {chunk['error']}")
+                parts.append((chunk.get("message") or {}).get("content", ""))
+                if chunk.get("done"):
+                    break
+    return "".join(parts).strip()
+
+
+def compact_json(value: Any, max_chars: int, *, max_list: int = 5, depth: int = 0) -> Any:
+    """Shrink a JSON-able value so its serialisation fits ``max_chars``.
+
+    Keeps scalars, trims lists to the first ``max_list`` items and drops deep
+    nesting. Never invents values; trimmed parts are marked explicitly.
+    """
+    text = json_dumps(value)
+    if len(text) <= max_chars:
+        return value
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        budget = max(200, max_chars // max(1, len(value)))
+        for k, v in value.items():
+            if k in {"snapshot", "raw", "raw_html", "history", "series", "articles_full"}:
+                out[k] = "[omitted for brevity]"
+                continue
+            out[k] = compact_json(v, budget, max_list=max_list, depth=depth + 1) if depth < 4 else "[nested data omitted]"
+        if len(json_dumps(out)) > max_chars:
+            keep = {k: v for k, v in out.items() if not isinstance(v, (dict, list))}
+            keep["_trimmed"] = "nested fields omitted to fit model context"
+            return keep
+        return out
+    if isinstance(value, list):
+        items = [compact_json(v, max(200, max_chars // max(1, min(len(value), max_list))), max_list=max_list, depth=depth + 1)
+                 for v in value[:max_list]]
+        if len(value) > max_list:
+            items.append(f"[{len(value) - max_list} more items omitted]")
+        return items
+    if isinstance(value, str):
+        return value[: max(50, max_chars - 20)] + "…[truncated]"
+    return value
