@@ -33,6 +33,7 @@ from utils.common import configure_logging, latest_price, load_snapshot, to_json
 from utils.db_pool import db_pool
 import watchlists as watch_mod
 import risk_engine as risk_mod
+import trade_plans as plans_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -129,6 +130,15 @@ async def _startup_phase3() -> None:
     _last_day = (datetime.fromisoformat(latest["run_at"]).astimezone(_ict).date() if latest and latest.get("run_at") else None)
     if _last_day != datetime.now(_ict).date():
         await _safe_job("risk_report_startup", _risk_job)
+    await plans_mod.ensure_tables(pool)
+    async with pool.acquire() as _c:
+        _last_prop = await _c.fetchval("SELECT max(created_at) FROM trade_plans WHERE source='engine'")
+    if _last_prop is None or _last_prop.astimezone(_ict).date() != datetime.now(_ict).date():
+        await _safe_job("trade_plan_proposals_startup", _proposals_job)
+
+
+async def _proposals_job() -> dict[str, Any]:
+    return await plans_mod.generate_proposals(await db_pool.get_pool())
 
 
 def configure_schedules() -> None:
@@ -145,6 +155,7 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["market_factors", _factors_job], minutes=60, id="market_factors", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["market_factors_prebrief", _factors_job], hour=6, minute=40, id="market_factors_prebrief", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
 
 
 @asynccontextmanager
@@ -516,5 +527,39 @@ async def risk_position_size(ticker: str, entry: float, stop: float, sector: Opt
     total = sum(p["value_thb"] for p in positions)
     try:
         return risk_mod.position_size(ticker.upper(), entry, stop, total, positions, sector=sector, risk_pct=risk_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# --------------------------------------------------------------------------
+# Phase 4 (2026-10-30): trade plans (engine proposals need Tho's approval)
+# --------------------------------------------------------------------------
+@app.get("/trade-plans")
+async def trade_plans_list(status: Optional[str] = None) -> dict[str, Any]:
+    plans = await plans_mod.list_plans(await db_pool.get_pool(), status)
+    return {"plans": plans, "count": len(plans),
+            "note": "Engine plans are 'proposed' and never trigger alerts. PATCH status=approved copies the zone/stop/target "
+                    "to the watch list, which then drives 'ready' alerts. Not financial advice."}
+
+
+@app.post("/trade-plans/propose")
+async def trade_plans_propose() -> dict[str, Any]:
+    return await _proposals_job()
+
+
+@app.post("/trade-plans")
+async def trade_plans_create(body: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    try:
+        return await plans_mod.create_manual_plan(await db_pool.get_pool(), body)
+    except (KeyError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=f"bad plan: {exc}") from exc
+
+
+@app.patch("/trade-plans/{plan_id}")
+async def trade_plans_patch(plan_id: int, body: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    try:
+        return await plans_mod.update_plan(await db_pool.get_pool(), plan_id, body)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="plan not found") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

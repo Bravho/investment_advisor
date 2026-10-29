@@ -115,3 +115,42 @@ def http_bytes(url: str, timeout: float = 30) -> bytes:
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def download_ohlc(tickers: list[str], period: str = "2y", ttl: int = 1800) -> dict[str, pd.DataFrame]:
+    """{ticker: DataFrame[Open, High, Low, Close, Volume]} of auto-adjusted daily bars (cached)."""
+    import yfinance as yf
+
+    tickers = sorted(set(t for t in tickers if t))
+    key = ("ohlc", tuple(tickers), period)
+    with _LOCK:
+        hit = _CACHE.get(key)
+        if hit and time.time() - hit[0] < ttl:
+            return hit[1]
+    last: Optional[Exception] = None
+    for attempt in range(3):
+        try:
+            frame = yf.download(tickers=tickers, period=period, interval="1d", auto_adjust=True,
+                                progress=False, threads=False, group_by="ticker")
+            if frame is None or frame.empty:
+                raise RuntimeError("yfinance returned no data")
+            out: dict[str, pd.DataFrame] = {}
+            for t in tickers:
+                try:
+                    sub = frame[t] if isinstance(frame.columns, pd.MultiIndex) else frame
+                except KeyError:
+                    continue
+                sub = sub.dropna(how="all")
+                if not sub.empty:
+                    sub.index = pd.to_datetime(sub.index).tz_localize(None)
+                    out[t] = sub[["Open", "High", "Low", "Close", "Volume"]]
+            with _LOCK:
+                _CACHE[key] = (time.time(), out)
+            return out
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+            delay = min(30 * 2 ** attempt, 240) if _is_rate_limited(exc) else 3 * 2 ** attempt
+            LOGGER.warning("download_ohlc failed (%s); retry in %ss", exc, delay)
+            if attempt < 2:
+                time.sleep(delay)
+    raise RuntimeError(f"download_ohlc failed: {last}")
