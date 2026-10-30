@@ -10,6 +10,7 @@
   },
   "classification": {
     "PTTEP.BK": "thai_equity", "SCB.BK": "thai_equity", "SCBGOLDE": "gold",
+    "K-TNZ-ThaiESG": "thai_equity", "ES-SETESG-ThaiESG-A": "thai_equity", "TDSThaiESG-A": "thai_equity",
     "default_bk": "thai_equity", "GLDM": "gold", "IAU": "gold", "default_other": "global_equity"
   },
   "implementation": {

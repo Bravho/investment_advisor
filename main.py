@@ -809,7 +809,18 @@ async def execute_advisor(request: Request):
                         line += f" | Unrealised P&L: {sign}{pnl:,.0f} THB"
                     if h.get("price_as_of"):
                         line += f" | price as of {h['price_as_of']}"
+                    if h.get("units_status") == "pending":
+                        line += (f" | UNITS PENDING CONFIRMATION (invested {float(h.get('amount_invested_thb') or 0):,.0f} THB, "
+                                 f"allotment {h.get('purchase_date')}; value is an estimate"
+                                 + (f", latest NAV {h['nav_price']}" if h.get("nav_price") else "") + ")")
+                    if h.get("tax_wrapper"):
+                        line += f" | tax wrapper {h['tax_wrapper']}"
+                        if h.get("locked"):
+                            line += f", LOCKED until {h.get('lock_until')} - do NOT suggest selling, switching or trimming it"
                     lines.append(line)
+                if any(h.get("locked") for h in holdings):
+                    lines.append("  NOTE: tax-locked funds (ThaiESG) must be held until their lock date; never recommend "
+                                 "selling/switching them before then (that would void the tax deduction). They count as Thai equity.")
                 secretary_portfolio_block = "\n".join(lines)
                 context = secretary_portfolio_block + ("\n\n" + context if context else "")
                 logger.info("[AdvisorMessage] Portfolio context injected by secretary appended to context")

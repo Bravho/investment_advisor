@@ -297,7 +297,9 @@ async def _universe(pool: Any) -> list[dict[str, Any]]:
     async with pool.acquire() as conn:
         ideas = [dict(r) for r in await conn.fetch("SELECT ticker, name, sector, currency FROM investment_watchlist WHERE status <> 'dropped'")]
     import risk_engine as re_mod
-    held = await re_mod._positions(pool)
+    # Locked tax-wrapper funds (ThaiESG, lock_until in the future) get no buy/sell signal: nothing may be sold or
+    # switched before the lock ends, and they have no free daily NAV history (2026-10-30).
+    held = [p for p in await re_mod._positions(pool) if not p.get("locked")]
     uni = [{**i, "kind": "idea"} for i in ideas]
     have = {i["ticker"] for i in uni}
     for p in held:

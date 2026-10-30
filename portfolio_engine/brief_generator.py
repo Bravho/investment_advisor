@@ -1006,11 +1006,16 @@ async def generate_daily_brief() -> dict[str, Any]:
         }
     )
     # Phase 2 (2026-10-29): real holdings from DB, stale-input filter, size budget
+    from holding_meta import lock_label, load_attrs, is_pending
+    _attrs = await load_attrs(pool)
     holdings_rows = await pool.fetch(
-        "SELECT ticker, name, asset_class FROM holdings WHERE quantity > 0 ORDER BY ticker"
+        "SELECT ticker, name, asset_class FROM holdings WHERE quantity > 0 OR ticker = ANY($1::text[]) ORDER BY ticker",
+        [t for t, a in _attrs.items() if is_pending(a)],
     )
     holdings_line = ", ".join(
-        f"{r['ticker']} ({r['name'] or r['asset_class']})" for r in holdings_rows
+        f"{r['ticker']} ({r['name'] or r['asset_class']}"
+        + (f"; {lock_label(_attrs.get(r['ticker']))}" if lock_label(_attrs.get(r['ticker'])) else "") + ")"
+        for r in holdings_rows
     ) or "no holdings recorded"
     # key_facts: verified, dated numbers computed here so the model need not dig
     latest_px = await pool.fetch(

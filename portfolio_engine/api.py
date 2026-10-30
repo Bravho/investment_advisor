@@ -295,6 +295,8 @@ async def portfolio_summary() -> dict[str, Any]:
     pool = await db_pool.get_pool()
     rows = await pool.fetch("SELECT * FROM holdings ORDER BY ticker")
     snapshot = load_snapshot()
+    from holding_meta import is_locked, is_pending, load_attrs, lock_label
+    attrs = await load_attrs(pool)
     positions = []
     total_value = 0.0
     total_pnl = 0.0
@@ -329,6 +331,15 @@ async def portfolio_summary() -> dict[str, Any]:
                 "price_source": snapshot_position.get("price_source"),
             }
         )
+        a = attrs.get(row["ticker"])
+        if a:  # tax wrapper / lock / pending units (2026-10-30)
+            positions[-1].update({
+                "tax_wrapper": a.get("tax_wrapper"), "purchase_date": a.get("purchase_date"), "lock_until": a.get("lock_until"),
+                "locked": is_locked(a), "units_status": a.get("units_status"), "amount_invested_thb": a.get("amount_invested_thb"),
+                "is_estimated": is_pending(a), "estimated_units": snapshot_position.get("estimated_units"),
+                "nav_price": snapshot_position.get("current_price"), "valuation_basis": snapshot_position.get("valuation_basis"),
+                "fund_house": a.get("fund_house"), "lock_note": lock_label(a),
+            })
     return {
         "base_currency": snapshot.get("base_currency", "THB"),
         "total_value_thb": round(total_value, 2),

@@ -268,7 +268,9 @@ def _series_for(subj: str, closes: pd.DataFrame, base_override: Optional[float] 
 
 async def _subjects(pool: Any) -> list[dict[str, Any]]:
     import risk_engine as re_mod
-    held = await re_mod._positions(pool)
+    # Locked ThaiESG funds are not forecast separately (no free NAV history; their SET exposure is covered by the
+    # TDEX.BK factor forecast) - added 2026-10-30.
+    held = [p for p in await re_mod._positions(pool) if not p.get("locked")]
     async with pool.acquire() as conn:
         ideas = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' ORDER BY ticker")]
     out = [{"subject": p["ticker"], "type": "holding", "value_thb": p["value_thb"], "qty": p["quantity"]} for p in held]

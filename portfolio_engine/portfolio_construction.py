@@ -210,8 +210,13 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     # instrument targets
     max_pos = float(caps.get("max_position_pct", 25))
     tgt_val: dict[str, float] = {}
-    thai_hold = [t for t, p in by_ticker.items() if classify(t, pol) == "thai_equity"]
-    thai_target = rec["thai_equity"] / 100 * total
+    # Tax-locked holdings (ThaiESG until lock_until) are fixed: never sold, switched or trimmed (2026-10-30).
+    locked = {t for t, p in by_ticker.items() if p.get("locked")}
+    for t in locked:
+        tgt_val[t] = by_ticker[t]["value_thb"]
+    thai_hold = [t for t, p in by_ticker.items() if classify(t, pol) == "thai_equity" and t not in locked]
+    locked_thai = sum(by_ticker[t]["value_thb"] for t in locked if classify(t, pol) == "thai_equity")
+    thai_target = max(0.0, rec["thai_equity"] / 100 * total - locked_thai)
     if "thai_equity" in trade_classes:
         cur_thai = sum(by_ticker[t]["value_thb"] for t in thai_hold) or 1
         rem = thai_target
@@ -224,7 +229,7 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     else:
         for t in thai_hold:
             tgt_val[t] = by_ticker[t]["value_thb"]
-    gold_hold = [t for t in by_ticker if classify(t, pol) == "gold"] or ["SCBGOLDE"]
+    gold_hold = [t for t in by_ticker if classify(t, pol) == "gold" and t not in locked] or ["SCBGOLDE"]
     for t in gold_hold:
         tgt_val[t] = rec["gold"] / 100 * total / len(gold_hold) if "gold" in trade_classes else by_ticker.get(t, {}).get("value_thb", 0)
     glob = pol["implementation"]["global_equity"]["core_proxy"]
@@ -232,6 +237,8 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     trades, cash_flow = [], 0.0
     lp = {SET_PROXY: float(px[SET_PROXY].dropna().iloc[-1]), glob: spy}
     for t, tv in tgt_val.items():
+        if t in locked:
+            continue  # fixed weight; no trade suggested before lock_until
         cv = by_ticker.get(t, {}).get("value_thb", 0.0)
         qty_now = float(hold[t]["quantity"]) if t in hold else 0.0
         price_thb = (cv / qty_now) if qty_now else (lp.get(t, 0) * (usdthb if not t.endswith(".BK") and t != "SCBGOLDE" else 1))
@@ -266,12 +273,17 @@ async def run_construction(pool: Any) -> dict[str, Any]:
         "class_vol_pct": {k: round(float(math.sqrt(cov[i, i])) * 100, 1) for i, k in enumerate(RISKY)},
         "bands": band_rows,
         "trades": trades,
+        "locked_holdings": [{"ticker": t, "tax_wrapper": by_ticker[t].get("tax_wrapper"), "lock_until": by_ticker[t].get("lock_until"),
+                             "value_thb": round(by_ticker[t]["value_thb"], 0), "units_status": by_ticker[t].get("units_status")}
+                            for t in sorted(locked)],
         "cash_after_trades_thb": round(cash_after, 0),
         "cash_yield_ref": {"bot_policy_rate_pct": float(bot) if bot is not None else None, "source": "market_factors.bot_rate"},
         "notes": ["Cash balance is not tracked in the DB; cash after trades assumes zero starting cash.",
                   f"Global sleeve uses {glob} as a placeholder; USD/THB {usdthb:.2f}. A THB global fund avoids FX costs.",
                   "Prices/covariance: yfinance daily closes, 1y; gold = GC=F x THB=X; Thai = TDEX.BK.",
                   "Phase in large changes (e.g. thirds over 3 months) to limit timing risk.",
+                  "Tax-locked holdings (ThaiESG) are held at their current value and never sold/switched before lock_until; "
+                  "they count toward the Thai equity class, so the other Thai positions absorb any Thai trim.",
                   "Position cap %.0f%% and sector caps from config/risk_limits.json apply." % max_pos],
         "sources": {"prices": "yfinance", "regime": "market_regime", "views": "predictions (frozen 1y)", "policy": str(POLICY_PATH.name)},
     }

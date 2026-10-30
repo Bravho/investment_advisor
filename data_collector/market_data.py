@@ -549,6 +549,22 @@ NON_EXCHANGE_INSTRUMENTS: dict[str, dict[str, str]] = {
         "kind": "thai_open_end_fund",
         "note": "SCB Gold Open End Fund (E-channel) — unhedged, tracks USD gold; NAV struck daily post-close.",
     },
+    # ThaiESG funds bought 2026-10-30 (allotment 2026-11-02, 100,000 THB each; units pending). NAV from SETTRADE.
+    "K-TNZ-ThaiESG": {
+        "fund_code": "K-TNZ-ThaiESG",
+        "kind": "thai_open_end_fund",
+        "note": "K Thai Net Zero ThaiESG Fund (KAsset) - Thai ESG equity; ThaiESG tax wrapper, locked to 2031-11-02.",
+    },
+    "ES-SETESG-ThaiESG-A": {
+        "fund_code": "ES-SETESG-ThaiESG-A",
+        "kind": "thai_open_end_fund",
+        "note": "Eastspring SET ESG Index ThaiESG Fund class A - SETESG index; ThaiESG, locked to 2031-11-02.",
+    },
+    "TDSThaiESG-A": {
+        "fund_code": "TDSThaiESG-A",
+        "kind": "thai_open_end_fund",
+        "note": "TISCO Dividend Select Equity Thailand ESG Fund class A - Thai ESG equity; ThaiESG, locked to 2031-11-02.",
+    },
     # Legacy alias kept so old DB rows / snapshots still resolve during migration.
     "SCB_GOLD_FUND": {
         "fund_code": "SCBGOLDE",
@@ -778,6 +794,65 @@ def usdthb_with_fallback(conn: Any = None) -> tuple[Optional[float], str]:
     return None, "unavailable"
 
 
+def _fund_nav_on(fund_code: str, day: date) -> Optional[dict[str, Any]]:
+    """Stored published NAV struck exactly on `day` (fund_nav_history.json), else None."""
+    try:
+        history = json.loads(FUND_NAV_HISTORY_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    for e in history.get(fund_code) or []:
+        if str(e.get("date")) == day.isoformat():
+            return e
+    return None
+
+
+def _value_pending_fund(ticker: str, attr: dict[str, Any]) -> dict[str, Any]:
+    """Value a fund whose units are not confirmed yet (added 2026-10-30).
+
+    Never guesses units into the DB. Until a NAV struck on the allotment date is known
+    (attr.allotment_nav, or the published NAV for purchase_date) the position is carried at the
+    amount invested. Afterwards: amount x NAV_now / NAV_allotment (fees ignored), labelled estimated.
+    """
+    amount = float(attr.get("amount_invested_thb") or 0)
+    purchase = attr.get("purchase_date")
+    nav_now = latest_fund_nav(ticker)
+    alloc_nav = float(attr["allotment_nav"]) if attr.get("allotment_nav") else None
+    alloc_src = "holding_attributes.allotment_nav" if alloc_nav else None
+    if alloc_nav is None and purchase is not None:
+        e = _fund_nav_on(ticker, purchase)
+        if e:
+            alloc_nav, alloc_src = float(e["nav_thb"]), f"published NAV {e['date']} ({e.get('source')})"
+    if alloc_nav and nav_now:
+        est_units = amount / alloc_nav
+        value = est_units * float(nav_now["price"])
+        basis = (f"estimated: {amount:,.0f} THB x NAV {float(nav_now['price']):.4f} / allotment NAV {alloc_nav:.4f} "
+                 f"({alloc_src}); units pending confirmation")
+    else:
+        est_units = None
+        value = amount
+        basis = (f"carried at amount invested {amount:,.0f} THB - allotment {purchase} NAV not known yet; "
+                 "units pending confirmation")
+    return {
+        "current_price": round(float(nav_now["price"]), 6) if nav_now else None,
+        "market_value_thb": round(value, 2),
+        "cost_value_thb": round(amount, 2),
+        "pnl_thb": round(value - amount, 2),
+        "pnl_pct": round((value - amount) / amount * 100, 2) if amount else 0.0,
+        "price_as_of": nav_now.get("as_of") if nav_now else None,
+        "price_source": nav_now.get("source") if nav_now else None,
+        "is_modelled": True,
+        "is_estimated": True,
+        "estimated_units": round(est_units, 4) if est_units else None,
+        "allotment_nav": alloc_nav,
+        "valuation_basis": basis,
+        "units_status": "pending",
+        "tax_wrapper": attr.get("tax_wrapper"),
+        "purchase_date": str(purchase) if purchase else None,
+        "lock_until": str(attr["lock_until"]) if attr.get("lock_until") else None,
+        "amount_invested_thb": amount,
+    }
+
+
 def get_current_portfolio_value(conn: Any) -> dict[str, Any]:
     """Return holdings valuation in THB using current yfinance prices."""
     with conn.cursor() as cursor:
@@ -811,8 +886,34 @@ def get_current_portfolio_value(conn: Any) -> dict[str, Any]:
     result["unpriced_holdings"] = []
     result["valuation_complete"] = True
 
+    # Added 2026-10-30: tax wrapper / lock / pending-units attributes (holding_attributes, local investor_db).
+    attrs: dict[str, dict[str, Any]] = {}
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT ticker, tax_wrapper, purchase_date, lock_until, amount_invested_thb, units_status, allotment_nav "
+                "FROM holding_attributes"
+            )
+            cols = [d.name for d in cursor.description]
+            attrs = {r[0]: dict(zip(cols, r)) for r in cursor.fetchall()}
+    except Exception:  # table absent -> behave as before
+        conn.rollback()
+        attrs = {}
+
     for holding in holdings:
         ticker = holding["ticker"]
+        attr = attrs.get(ticker)
+        if attr and attr.get("units_status") == "pending":
+            try:
+                result["holdings"][ticker] = _value_pending_fund(ticker, attr)
+                result["total_market_value_thb"] += result["holdings"][ticker]["market_value_thb"]
+                result["total_pnl_thb"] += result["holdings"][ticker]["pnl_thb"]
+            except Exception as exc:
+                LOGGER.exception("Pending-fund valuation failed for %s", ticker)
+                result["holdings"][ticker] = {"error": str(exc)}
+                result["unpriced_holdings"].append(ticker)
+                result["valuation_complete"] = False
+            continue
         try:
             resolved = resolve_current_price(ticker)
             if resolved["price"] is None:

@@ -9,6 +9,7 @@
   "lookback_days": {"cov": 252, "hist_var": 504, "drawdown": 756},
   "thai_board_lot": 100,
   "sectors": {
-    "PTTEP.BK": "energy", "SCB.BK": "banks", "SCBGOLDE": "gold", "BAFS.BK": "energy_services"
+    "PTTEP.BK": "energy", "SCB.BK": "banks", "SCBGOLDE": "gold", "BAFS.BK": "energy_services",
+    "K-TNZ-ThaiESG": "thai_esg_equity", "ES-SETESG-ThaiESG-A": "thai_esg_equity", "TDSThaiESG-A": "thai_esg_equity"
   }
 }

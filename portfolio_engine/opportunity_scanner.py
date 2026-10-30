@@ -457,9 +457,13 @@ async def tech_screener(top_n: int = 10) -> list[dict[str, Any]]:
 async def check_exit_signals() -> list[dict[str, Any]]:
     pool = await db_pool.get_pool()
     holdings = await pool.fetch("SELECT ticker, avg_cost_price FROM holdings ORDER BY ticker")
+    from holding_meta import load_attrs, locked_tickers
+    locked = locked_tickers(await load_attrs(pool))  # ThaiESG: no exit/reduce signal before lock_until (2026-10-30)
     alerts: list[dict[str, Any]] = []
     for holding in holdings:
         ticker = holding["ticker"]
+        if ticker in locked:
+            continue
         try:
             sentiment, _ = await _sentiment_metrics(pool, ticker)
             metrics = await _price_metrics(pool, ticker)

@@ -29,6 +29,8 @@ export default function Desk() {
       {reg && <Badge tone={reg.regime === 'risk_on' ? 'green' : reg.regime === 'risk_off' ? 'red' : 'yellow'}>{reg.regime} {number(reg.score, 2)}</Badge>}
       {(s.limit_breaches || []).length > 0 && <Badge tone="red">{s.limit_breaches.length} limit breaches</Badge>}
       {risk.data?.provisional && <Badge tone="yellow">PROVISIONAL holdings</Badge>}
+      {s.thai_equity_pct != null && <span>Thai equity {number(s.thai_equity_pct, 1)}%</span>}
+      {(s.locked_positions || []).length > 0 && <Badge tone="yellow">🔒 {s.locked_positions.length} ThaiESG locked to {s.locked_positions[0].lock_until}{s.locked_positions.some(l => l.units_status === 'pending') ? ' · units pending' : ''}</Badge>}
       <span className="ml-auto flex gap-1"><SourceBadge source="risk" asOf={risk.data?.run_at} /><SourceBadge source="regime" asOf={reg?.created_at} /></span>
     </div>
     <div className="grid gap-3 xl:grid-cols-2">

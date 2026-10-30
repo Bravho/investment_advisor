@@ -30,7 +30,12 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_DIR / "config" / "risk_limits.json"
 FACTOR_TICKERS = {"brent": "BZ=F", "usdthb": "THB=X", "gold": "GC=F", "set": SET_PROXY, "us10y": "^TNX"}
 PROXIES = {"SCBGOLDE": {"kind": "gold_thb", "note": "proxy = GC=F x THB=X (unhedged USD gold in THB)"},
-           "SCB_GOLD_FUND": {"kind": "gold_thb", "note": "proxy = GC=F x THB=X"}}
+           "SCB_GOLD_FUND": {"kind": "gold_thb", "note": "proxy = GC=F x THB=X"},
+           # ThaiESG funds (2026-10-30): NAV history not free in bulk -> SET50 ETF proxy (Thai ESG equity,
+           # overlaps SET banks/energy). Look-through holdings not available free; treated as one Thai ESG equity bucket.
+           "K-TNZ-ThaiESG": {"kind": "set_proxy", "note": f"proxy = {SET_PROXY} (Thai ESG equity fund; no free look-through)"},
+           "ES-SETESG-ThaiESG-A": {"kind": "set_proxy", "note": f"proxy = {SET_PROXY} (SETESG index fund; no free look-through)"},
+           "TDSThaiESG-A": {"kind": "set_proxy", "note": f"proxy = {SET_PROXY} (Thai ESG dividend equity fund; no free look-through)"}}
 SCENARIOS = {
     "brent_minus_30": {"label": "Brent -30%", "shocks": {"brent": -0.30}},
     "thb_plus_10": {"label": "THB +10% (USD/THB -10%)", "shocks": {"usdthb": -0.10}},
@@ -72,7 +77,10 @@ def _thb_prices(raw: pd.DataFrame, tickers: list[str]) -> tuple[pd.DataFrame, di
     fx = raw["THB=X"].ffill()
     out, notes = {}, {}
     for t in tickers:
-        if t in PROXIES:
+        if t in PROXIES and PROXIES[t]["kind"] == "set_proxy":
+            out[t] = raw[SET_PROXY].ffill()
+            notes[t] = PROXIES[t]["note"]
+        elif t in PROXIES:
             out[t] = raw["GC=F"].ffill() * fx
             notes[t] = PROXIES[t]["note"]
         elif t in raw.columns:
@@ -270,17 +278,43 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
 async def _positions(pool: Any) -> list[dict[str, Any]]:
     from utils.common import latest_price, load_snapshot
     snap = load_snapshot().get("holdings", {})
+    from holding_meta import is_locked, is_pending, load_attrs
+    attrs = await load_attrs(pool)
+    pending = [t for t, a in attrs.items() if is_pending(a)]
     async with pool.acquire() as conn:
-        rows = await conn.fetch("SELECT ticker, name, asset_class, quantity, avg_cost_price, currency FROM holdings WHERE quantity > 0")
+        rows = await conn.fetch("SELECT ticker, name, asset_class, quantity, avg_cost_price, currency FROM holdings "
+                                "WHERE quantity > 0 OR ticker = ANY($1::text[])", pending)
     out = []
     for r in rows:
         sp = snap.get(r["ticker"], {})
+        a = attrs.get(r["ticker"])
         value = sp.get("market_value_thb")
+        if value is None and is_pending(a):
+            value = float(a.get("amount_invested_thb") or 0)  # units pending -> carried at amount invested
         if value is None:
             value = float(await latest_price(pool, r["ticker"])) * float(r["quantity"])
-        out.append({"ticker": r["ticker"], "name": r["name"], "quantity": float(r["quantity"]), "value_thb": float(value),
-                    "price_as_of": sp.get("price_as_of"), "price_source": sp.get("price_source")})
+        pos = {"ticker": r["ticker"], "name": r["name"], "quantity": float(r["quantity"]), "value_thb": float(value),
+               "price_as_of": sp.get("price_as_of"), "price_source": sp.get("price_source")}
+        if a:
+            pos.update({"tax_wrapper": a.get("tax_wrapper"), "lock_until": a.get("lock_until"), "locked": is_locked(a),
+                        "units_status": a.get("units_status"), "is_estimated": is_pending(a),
+                        "amount_invested_thb": a.get("amount_invested_thb"), "look_through": a.get("look_through")})
+            if is_pending(a):
+                pos["valuation_basis"] = sp.get("valuation_basis") or "carried at amount invested; units pending confirmation"
+        out.append(pos)
     return out
+
+
+def thai_equity_exposure(positions: list[dict[str, Any]], cfg: dict[str, Any]) -> dict[str, Any]:
+    """Thai equity share: SET-listed stocks + Thai equity funds (ThaiESG treated as one Thai ESG equity bucket)."""
+    total = sum(p["value_thb"] for p in positions) or 1.0
+    sectors = cfg.get("sectors") or {}
+    direct = sum(p["value_thb"] for p in positions if p["ticker"].endswith(".BK"))
+    funds = sum(p["value_thb"] for p in positions if sectors.get(p["ticker"]) == "thai_esg_equity")
+    return {"thai_equity_thb": round(direct + funds, 2), "thai_equity_pct": round((direct + funds) / total * 100, 2),
+            "direct_set_stocks_pct": round(direct / total * 100, 2), "thai_esg_funds_pct": round(funds / total * 100, 2),
+            "note": "ThaiESG funds counted as Thai ESG equity (no free look-through); they very likely also hold SET "
+                    "banks/energy, so true SCB/PTTEP-type exposure is somewhat higher than the direct figures."}
 
 
 async def run_risk_report(pool: Any) -> dict[str, Any]:
@@ -299,9 +333,15 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
     report["provisional"] = provisional
     report["provisional_note"] = ("PROVISIONAL - holdings units/cost not yet confirmed by Tho (SCBGOLDE units in DB "
                                   "conflict with Tho's stated cost). Figures scale with position sizes.") if provisional else None
+    if any(p.get("units_status") == "pending" for p in positions):
+        report["provisional_note"] = ((report["provisional_note"] or "") + " ThaiESG funds: units pending confirmation - "
+                                      "valued at amount invested / estimated from NAV until Tho confirms units.").strip()
     report["positions_input"] = positions
     report["limits"] = {k: cfg.get(k) for k in ("risk_budget_per_trade_pct", "max_position_pct", "max_sector_pct")}
     report["limit_breaches"] = _limit_breaches(positions, cfg)
+    report["thai_equity_exposure"] = thai_equity_exposure(positions, cfg)
+    report["locked_positions"] = [{"ticker": p["ticker"], "tax_wrapper": p.get("tax_wrapper"), "lock_until": p.get("lock_until"),
+                                   "units_status": p.get("units_status")} for p in positions if p.get("locked")]
     report["generated_at"] = datetime.now(timezone.utc).isoformat()
     v95 = report["var"].get("hist_95", {})
     summary = {
@@ -312,6 +352,7 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
         "worst_stress": min(({"key": k, "label": s["label"], "pnl_thb": s["pnl_thb"], "pnl_pct": s["pnl_pct"]}
                              for k, s in report["stress"].items()), key=lambda x: x["pnl_thb"]),
         "limit_breaches": report["limit_breaches"], "provisional": provisional, "price_as_of": report["price_as_of"],
+        "thai_equity_pct": report["thai_equity_exposure"]["thai_equity_pct"], "locked_positions": report["locked_positions"],
     }
     report["summary"] = summary
     async with pool.acquire() as conn:

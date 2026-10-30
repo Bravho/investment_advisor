@@ -23,6 +23,8 @@ export default function RiskPanel({ report, loading, error, retry }) {
       <Stat label="Volatility (ann.)" value={`${number(p.vol_ann_pct, 1)}%`} sub={`beta to SET ${number(p.beta_set, 2)}`} />
       <Stat label="Max drawdown (3y)" value={`${number(p.max_drawdown_pct, 1)}%`} sub={`now ${number(p.current_drawdown_pct, 1)}%`} />
     </div>
+    {report.thai_equity_exposure && <p className="mt-3 text-[11px] text-slate-300" title={report.thai_equity_exposure.note}>Thai equity {number(report.thai_equity_exposure.thai_equity_pct, 1)}% of portfolio · SET stocks {number(report.thai_equity_exposure.direct_set_stocks_pct, 1)}% · ThaiESG funds {number(report.thai_equity_exposure.thai_esg_funds_pct, 1)}% <span className="text-slate-500">(funds = Thai ESG equity bucket, no look-through)</span></p>}
+    {(report.locked_positions || []).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{report.locked_positions.map(l => <span key={l.ticker} className="rounded bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-200">🔒 {l.ticker} · {l.tax_wrapper} until {l.lock_until}{l.units_status === 'pending' ? ' · units pending' : ''} · no sell/rebalance</span>)}</div>}
     {(s.limit_breaches || []).length > 0 && <div className="mt-3 space-y-1">{s.limit_breaches.map(b => <p key={b} className="text-[11px] text-red-300">⚠️ {b}</p>)}</div>}
     <div className="mt-4 grid gap-4 xl:grid-cols-2">
       <div><p className="mb-2 text-xs font-semibold text-slate-300">Stress scenarios</p>

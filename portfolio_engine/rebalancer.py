@@ -58,6 +58,9 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
         "SELECT ticker, name, asset_class, quantity, avg_cost_price, currency FROM holdings ORDER BY ticker"
     )
     snapshot = load_snapshot()
+    from holding_meta import is_pending, load_attrs, locked_tickers
+    attrs = await load_attrs(pool)
+    locked = locked_tickers(attrs)  # ThaiESG etc.: never a sell/switch/trim candidate before lock_until (2026-10-30)
     base_currency = snapshot.get("base_currency", os.getenv("BASE_CURRENCY", "THB"))
     values_by_class: dict[str, float] = defaultdict(float)
     positions: list[dict[str, Any]] = []
@@ -66,6 +69,8 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
         ticker = row["ticker"]
         price = _snapshot_price(snapshot, ticker) or await latest_price(pool, ticker)
         value = _snapshot_value(snapshot, ticker) or float(row["quantity"] or 0) * price
+        if not value and is_pending(attrs.get(ticker)):
+            value = float(attrs[ticker].get("amount_invested_thb") or 0)  # units pending -> amount invested
         asset_class = str(row["asset_class"] or "other").lower()
         values_by_class[asset_class] += value
         positions.append({**dict(row), "price": price, "value_thb": value, "asset_class": asset_class})
@@ -85,7 +90,23 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
             continue
         action = "sell" if drift > 0 else "buy"
         amount = abs(drift) * total_value
-        candidates = [position for position in positions if position["asset_class"] == asset_class]
+        candidates = [position for position in positions if position["asset_class"] == asset_class
+                      and not (action == "sell" and position["ticker"] in locked)]
+        if not candidates and action == "sell" and any(p["asset_class"] == asset_class for p in positions):
+            trades.append(
+                {
+                    "ticker": asset_class.upper(),
+                    "action": "hold",
+                    "amount_thb": 0.0,
+                    "reason": f"{asset_class} is overweight by {drift:+.1%} but every holding in it is tax-locked "
+                              f"({', '.join(sorted(t for t in locked if any(p['ticker'] == t for p in positions)))}); no sell suggested",
+                    "sentiment_conflict": False,
+                    "validated": False,
+                    "tradable": False,
+                    "confidence": 0.0,
+                }
+            )
+            continue
         if not candidates:
             trades.append(
                 {
@@ -130,6 +151,7 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
         "current_allocations": current,
         "target_allocations": targets,
         "trades": trades,
+        "locked_holdings": sorted(locked),
     }
     narrative = "No rebalancing is required."
     if trades:
