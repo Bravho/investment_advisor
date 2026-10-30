@@ -1249,20 +1249,17 @@ async def save_daily_performance() -> dict[str, Any]:
     pool = await db_pool.get_pool()
     await pool.execute(
         """
-        WITH updated AS (
-            UPDATE portfolio_performance SET
-                total_value_thb = $1, daily_pnl = $2, daily_pnl_pct = $3,
-                unrealized_pnl = $4, risk_score = $5, snapshot = $6::jsonb,
-                created_at = NOW()
-            WHERE record_date = CURRENT_DATE
-            RETURNING id
-        )
+        -- Atomic upsert (2026-10-30): the portfolio engine (8996) and the collector's ai_engine worker both run
+        -- this at 17:30; the old UPDATE-then-INSERT CTE raced and hit portfolio_performance_record_date_key.
         INSERT INTO portfolio_performance (
             record_date, total_value_thb, daily_pnl, daily_pnl_pct,
             unrealized_pnl, risk_score, snapshot
         )
-        SELECT CURRENT_DATE, $1, $2, $3, $4, $5, $6::jsonb
-        WHERE NOT EXISTS (SELECT 1 FROM updated)
+        VALUES (CURRENT_DATE, $1, $2, $3, $4, $5, $6::jsonb)
+        ON CONFLICT (record_date) DO UPDATE SET
+            total_value_thb = EXCLUDED.total_value_thb, daily_pnl = EXCLUDED.daily_pnl,
+            daily_pnl_pct = EXCLUDED.daily_pnl_pct, unrealized_pnl = EXCLUDED.unrealized_pnl,
+            risk_score = EXCLUDED.risk_score, snapshot = EXCLUDED.snapshot, created_at = NOW()
         """,
         total_value, daily_pnl, daily_pnl_pct, unrealized,
         risk["portfolio_risk_score"], json.dumps(snapshot),
