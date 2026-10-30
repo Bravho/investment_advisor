@@ -4,10 +4,11 @@ import RiskPanel from '../components/RiskPanel'
 import WatchlistPanel from '../components/WatchlistPanel'
 import SignalsPanel from '../components/SignalsPanel'
 import PredictionsPanel from '../components/PredictionsPanel'
+import SetupPanel from '../components/SetupPanel'
 import Stamp from '../components/Stamp'
 import { Badge, SourceBadge } from '../components/UI'
 import { useFactors, useRiskReport, useWatchlist } from '../hooks/usePhase3'
-import { useJournal, usePredictionScoreboard, usePredictions, useSignals, useTradePlans } from '../hooks/usePhase4'
+import { useJournal, useMomentumBase, usePredictionScoreboard, usePredictions, useSignals, useTradePlans } from '../hooks/usePhase4'
 import { number } from '../utils/format'
 
 const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k] : m), '')
@@ -15,7 +16,7 @@ const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k
 // Pro #8 (2026-10-30): one-screen trading desk.
 export default function Desk() {
   const risk = useRiskReport(), factors = useFactors(), watch = useWatchlist(), signals = useSignals()
-  const plans = useTradePlans(120000), journal = useJournal(), preds = usePredictions(), board = usePredictionScoreboard()
+  const plans = useTradePlans(120000), journal = useJournal(), preds = usePredictions(), board = usePredictionScoreboard(), setup = useMomentumBase()
   const s = risk.data?.summary || {}
   const reg = signals.data?.regime
   const boardAsOf = board.data?.model_weights?.[0]?.as_of
@@ -39,6 +40,8 @@ export default function Desk() {
         <SignalsPanel payload={signals.data} plans={plans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} /></Stamp>
       <Stamp items={[{ source: 'predictions (frozen)', asOf: maxTs(preds.data?.items || preds.data?.predictions, 'made_at') }, { source: 'scoreboard', asOf: boardAsOf, staleHours: 48 }]}>
         <PredictionsPanel preds={preds.data} board={board.data} loading={preds.loading || board.loading} error={preds.error || board.error} retry={preds.refetch} /></Stamp>
+      <div className="xl:col-span-2"><Stamp items={[{ source: 'setup screen · yfinance daily', asOf: maxTs(setup.data?.items, 'created_at') }, { source: 'setup backtest', asOf: setup.data?.backtest?.run_at, staleHours: 24 * 8 }]}>
+        <SetupPanel payload={setup.data} loading={setup.loading} error={setup.error} retry={setup.refetch} /></Stamp></div>
       <Stamp items={[{ source: 'watchlist prices · yfinance', asOf: maxTs(watch.data?.items, 'price_as_of'), staleHours: 96 }]}>
         <WatchlistPanel payload={watch.data} loading={watch.loading} error={watch.error} retry={watch.refetch} /></Stamp>
     </div>

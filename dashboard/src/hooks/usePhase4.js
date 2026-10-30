@@ -13,3 +13,5 @@ export const usePredictionScoreboard = (refreshMs = 600000) => useApi(() => port
 // Pro #4/#6 (2026-10-30)
 export const useConstruction = (refreshMs = 900000) => useApi(() => portfolioClient.get('/portfolio/construction'), [], refreshMs)
 export const useAttribution = (refreshMs = 900000) => useApi(() => portfolioClient.get('/performance/attribution'), [], refreshMs)
+// 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation)
+export const useMomentumBase = (refreshMs = 600000) => useApi(() => portfolioClient.get('/setups/momentum-base'), [], refreshMs)
