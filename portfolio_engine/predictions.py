@@ -635,8 +635,14 @@ async def write_lessons(pool: Any) -> int:
     n = 0
     async with pool.acquire() as conn:
         for h, subj, kind, text, ev in lessons:
+            # Idempotent (2026-10-30 fix): one lesson per (as_of, kind, horizon, subject) - the unique key. Re-runs on the same
+            # day refresh the text/evidence instead of crashing when counts changed; nothing is deleted.
             r = await conn.execute("""INSERT INTO prediction_lessons (as_of, horizon, subject, kind, lesson, evidence)
-                                      SELECT $1,$2,$3,$4,$5,$6::jsonb WHERE NOT EXISTS (SELECT 1 FROM prediction_lessons WHERE as_of=$1 AND lesson=$5)""",
+                                      VALUES ($1,$2,$3,$4,$5,$6::jsonb)
+                                      ON CONFLICT (as_of, kind, horizon, subject) DO UPDATE
+                                        SET lesson = EXCLUDED.lesson, evidence = EXCLUDED.evidence
+                                        WHERE prediction_lessons.lesson IS DISTINCT FROM EXCLUDED.lesson
+                                           OR prediction_lessons.evidence IS DISTINCT FROM EXCLUDED.evidence""",
                                    today, h, subj or "*", kind, text, json.dumps(ev, default=str))
             n += int(r.endswith("1"))
     return n
