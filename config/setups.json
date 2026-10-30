@@ -1,0 +1,23 @@
+{
+  "_note": "Swing/position setups (2026-10-30). momentum_base_swing = adaptation of Tho's Thai trading lesson parts 1-3 (see docs/lessons/momentum_base_setup.md). Edit freely. risk_pct null = use risk_limits.json risk_budget_per_trade_pct (currently 1.0%). The lesson itself uses 0.5%. Caps (25% per stock / 40% per sector) always come from risk_limits.json. No order execution exists anywhere: plans are proposals; Tho trades himself.",
+  "momentum_base_swing": {
+    "enabled": true,
+    "risk_pct": null,
+    "lesson_risk_pct": 0.5,
+    "screen": {
+      "rs_weights": {"ret_1m": 0.2, "ret_3m": 0.4, "ret_6m": 0.4},
+      "min_rs_percentile": 70,
+      "min_return": {"TH": 0.20, "US": 0.30},
+      "min_return_note": "Lesson says >30%. Kept 30% for US; 20% for SET because SET large caps rarely move 30% in 3-6 months and the universe is small - percentile rank still requires the top 30%.",
+      "min_avg_traded_value": {"TH": 50000000, "US": 20000000},
+      "min_price": {"TH": 1.0, "US": 5.0}
+    },
+    "base": {"lookback": 60, "max_atr_ratio": 1.0, "ema21_min_slope_5d": -0.002},
+    "breakout": {"pivot_lookback": 50, "max_age_sessions": 25},
+    "trigger": {"max_sessions_after_pullback": 5, "pullback_atr_band": 0.5},
+    "stop": {"atr_buffer": 1.0, "max_risk_pct_of_price": 0.10},
+    "exit": {"rule": "ema21", "partial_at_r": 3.0, "partial_fraction": 0.5, "max_hold_sessions": 252},
+    "gap": {"quantile": 0.05, "lookback": 252},
+    "plan_expiry_days": 14
+  }
+}

@@ -39,6 +39,7 @@ import walkforward as wf_mod
 import predictions as pred_mod
 import portfolio_construction as pc_mod
 import attribution as attr_mod
+import momentum_base as mb_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -207,6 +208,14 @@ async def _proposals_job() -> dict[str, Any]:
     return await plans_mod.generate_proposals(await db_pool.get_pool())
 
 
+async def _setup_screen_job() -> dict[str, Any]:
+    return await mb_mod.run_screen(await db_pool.get_pool(), make_plans=True)
+
+
+async def _setup_backtest_job() -> dict[str, Any]:
+    return await mb_mod.run_backtest(await db_pool.get_pool())
+
+
 def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["scan_opportunities", scan_opportunities, opportunity_cache], minutes=30, id="scan_opportunities", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["check_exit_signals", check_exit_signals, exit_cache], minutes=15, id="check_exit_signals", replace_existing=True)
@@ -226,6 +235,11 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
+    # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation). Screen after the SET close (daily bars complete)
+    # and again pre-brief; weekly walk-forward backtest. Proposals only - no order code exists.
+    scheduler.add_job(_safe_job, "cron", args=["setup_screen_evening", _setup_screen_job], day_of_week="mon-fri", hour=17, minute=45, id="setup_screen_evening", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["setup_screen_prebrief", _setup_screen_job], hour=6, minute=47, id="setup_screen_prebrief", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["setup_backtest", _setup_backtest_job], day_of_week="sun", hour=5, minute=30, id="setup_backtest", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_validate", _predictions_validate_job], hour=8, minute=5, id="predictions_validate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
@@ -820,3 +834,40 @@ async def performance_attribution() -> dict[str, Any]:
 @app.post("/performance/attribution/run")
 async def performance_attribution_run() -> dict[str, Any]:
     return await attr_mod.run_attribution(await db_pool.get_pool())
+
+
+# --------------------------------------------------------------------------
+# 2026-10-30: momentum_base_swing setup (docs/lessons/momentum_base_setup.md). Advisory only: no orders.
+# --------------------------------------------------------------------------
+@app.get("/setups/momentum-base")
+async def setup_mb_screen(passed: bool = False) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    out = await mb_mod.latest_screen(pool, only_passed=passed)
+    bt = await mb_mod.latest_backtest(pool)
+    out["backtest"] = {k: bt.get(k) for k in ("run_at", "comparison", "live_params", "data_to", "caveats", "risk_pct")} if bt else None
+    return out
+
+
+@app.post("/setups/momentum-base/run")
+async def setup_mb_run(plans: bool = True) -> dict[str, Any]:
+    return await mb_mod.run_screen(await db_pool.get_pool(), make_plans=plans)
+
+
+@app.get("/setups/momentum-base/backtest")
+async def setup_mb_backtest() -> dict[str, Any]:
+    return await mb_mod.latest_backtest(await db_pool.get_pool()) or {"note": "no setup backtest yet"}
+
+
+@app.post("/setups/momentum-base/backtest/run")
+async def setup_mb_backtest_run() -> dict[str, Any]:
+    return await _setup_backtest_job()
+
+
+@app.get("/setups/momentum-base/advisor-context")
+async def setup_mb_advisor_context(tickers: str = "") -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    scr = await mb_mod.latest_screen(pool)
+    bt = await mb_mod.latest_backtest(pool)
+    tk = [t.strip().upper() for t in tickers.split(",") if t.strip()]
+    return {"context": "\n".join(mb_mod.advisor_lines(scr, bt, tk))}
+

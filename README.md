@@ -72,3 +72,9 @@ DB: `~/backups/investor_db/investor_db.full.<stamp>.dump` (`pg_dump -Fc`). File 
 ### Python environments
 There are four venvs (`venv/`, `ai_engine/venv/`, `data_collector/venv/`, `ai_secretary_brain/venv/`), all CPython 3.9.6 (Xcode).
 For the unification plan (not migrated yet), see `docs/VENV_UNIFICATION_PLAN.md`.
+
+## Setups (2026-10-30)
+- `momentum_base_swing`: a swing/position adaptation of Tho's momentum + base lesson. Docs: `docs/lessons/momentum_base_setup.md`. Config: `config/setups.json`.
+- Jobs (8996): `setup_screen_evening` 17:45 ICT Mon–Fri, `setup_screen_prebrief` 06:47 ICT, `setup_backtest` Sunday 05:30 ICT.
+- API: `GET /setups/momentum-base`, `POST /setups/momentum-base/run`, `GET|POST /setups/momentum-base/backtest[/run]`, `GET /setups/momentum-base/advisor-context`.
+- **No order execution exists anywhere in this project.** Plans are `proposed`. Approving one only logs the decision and copies its levels to the watch list for alerts. Tho places every trade himself.

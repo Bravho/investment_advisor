@@ -338,8 +338,17 @@ async def build_checklist(pool: Any, plan: dict[str, Any], ctx: Optional[dict[st
     size: dict[str, Any] = {}
     if entry and stop and stop < entry:
         sector = ctx["sectors"].get(t, "unclassified")
-        size = re_mod.position_size(t, entry * fx, stop * fx, total, positions, cfg, sector=sector)
+        _inp = plan.get("inputs") or {}
+        if isinstance(_inp, str):
+            _inp = json.loads(_inp)
+        # setup plans (e.g. momentum_base_swing) size off a gap-adjusted stop and their own risk % (default = config)
+        size_stop = _f(_inp.get("stop_for_sizing")) if _f(_inp.get("stop_for_sizing")) and _f(_inp.get("stop_for_sizing")) < stop else stop
+        size = re_mod.position_size(t, entry * fx, size_stop * fx, total, positions, cfg, sector=sector,
+                                    risk_pct=_f(_inp.get("risk_pct")))
         size["fx_used"] = fx
+        if size_stop != stop:
+            size["gap_adjusted_stop"] = size_stop
+            size["note"] = (size.get("note") or "") + " Sized on a gap-adjusted stop (typical bad overnight gap) - real stop is the plan stop."
         after_pos = size["position_pct"] or 0
         add("position_cap", after_pos <= float(cfg.get("max_position_pct", 25)),
             f"size {size['shares']} sh = {after_pos}% of portfolio (cap {cfg.get('max_position_pct')}%; binding: {size['binding_constraint']})")
