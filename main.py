@@ -274,6 +274,11 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
             tickers = _normalise_tickers(tickers, known)
             fc = (await client.get(f"{ENGINE_URL}/predictions/advisor-context", params={"tickers": ",".join(tickers)})).json().get("context", "")
             plans = (await client.get(f"{ENGINE_URL}/trade-plans", params={"status": "proposed"})).json().get("plans", [])
+            try:  # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation)
+                setup_ctx = (await client.get(f"{ENGINE_URL}/setups/momentum-base/advisor-context",
+                                              params={"tickers": ",".join(tickers)})).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                setup_ctx = ""
     except Exception as exc:  # noqa: BLE001
         logger.warning("engine context unavailable: %s", exc)
         return "=== ENGINE DATA NOTE ===\n  Forecast/signal engine (8996) unreachable - do not quote forecasts.", tickers
@@ -293,8 +298,11 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
     if pl:
         lines.append("=== PROPOSED TRADE PLANS (engine, NOT approved by Tho) ===")
         for p in pl:
-            lines.append(f"  - {p['ticker']}: entry {p['entry_low']:.4g}-{p['entry_high']:.4g}, stop {p['stop']:.4g}, target {p['target']:.4g}, "
+            lines.append(f"  - {p['ticker']}{' [setup ' + p['setup'] + ']' if p.get('setup') else ''}: entry {p['entry_low']:.4g}-{p['entry_high']:.4g}, "
+                         f"stop {p['stop']:.4g}, target {p['target']:.4g}, "
                          f"R:R {p['rr']:.2f}, checklist {'pass' if p.get('checklist_pass') else 'FAIL'}; {p.get('rationale', '')[:300]}")
+    if setup_ctx:
+        lines.append(setup_ctx)
     return "\n".join(lines) + "\n\n" + fc, tickers
 
 
@@ -312,6 +320,47 @@ def requested_horizons(query: str) -> list[str]:
     q = query.lower()
     hs = [h for h, pats in HORIZON_WORDS.items() if any(re.search(p, q) for p in pats)]
     return hs or list(HORIZON_WORDS)
+
+
+SETUP_WORDS = ["setup", "momentum", "base", "vcp", "breakout", "pullback", "retest", "support", "ฐาน", "แนวรับ", "เบรค", "เบรก",
+               "ย่อ", "จุดเข้า", "จุดซื้อ", "รอซื้อ", "stop loss", "สต็อป", "ตัดขาดทุน", "หุ้นแข็งแกร่ง", "screener", "สกรีน"]
+SETUP_STATE_TH = {"triggered_today": "เกิดสัญญาณวันนี้", "at_support_wait_trigger": "ย่อมาที่แนวรับ รอสัญญาณ", "extended_wait_pullback": "วิ่งไปไกลแล้ว รอย่อ",
+                  "in_trade": "สัญญาณเกิดไปแล้ว (เลยจุดเข้า)", "base_forming": "กำลังสร้างฐาน", "weekly_not_ok": "กราฟสัปดาห์ยังไม่ผ่าน",
+                  "no_setup": "แข็งแรงแต่ยังไม่มี setup", "fails_screen": "ไม่ผ่านการคัดกรอง"}
+
+
+async def setup_table(tickers: list[str], thai: bool) -> str:
+    """Verified momentum_base_swing rows (engine data, not LLM text) appended to setup questions."""
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            scr = (await client.get(f"{ENGINE_URL}/setups/momentum-base")).json()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("setup table unavailable: %s", exc)
+        return ""
+    items = scr.get("items") or []
+    tk = {t.upper() for t in tickers} | {t.upper().replace(".BK", "") for t in tickers}
+    rows = [i for i in items if i["ticker"] in tk or i["ticker"].replace(".BK", "") in tk]
+    if not rows:
+        rows = [i for i in items if i["state"] in ("triggered_today", "at_support_wait_trigger", "extended_wait_pullback")][:5]
+    if not rows:
+        return ""
+    out = [("📐 Momentum-base swing setup (ข้อมูลจากระบบ, ณ " if thai else "📐 Momentum-base swing setup (engine data, as of ") + f"{scr.get('as_of')})"]
+    for i in rows:
+        z = i.get("zone") or {}
+        st = SETUP_STATE_TH.get(i["state"], i["state"]) if thai else i["state"].replace("_", " ")
+        line = f"• {i['ticker']}: {st}; RS {i.get('rs_pct')}; 1/3/6m {i['ret_1m']:+.0%}/{i['ret_3m']:+.0%}/{i['ret_6m']:+.0%}"
+        if z:
+            line += (f"; โซนแนวรับ {z['low']:.4g}–{z['high']:.4g}" if thai else f"; support zone {z['low']:.4g}-{z['high']:.4g}")
+        if i["state"] in ("triggered_today", "at_support_wait_trigger"):
+            line += (f"; buy-stop {i['trigger']['price']:.4g}, stop {i['stop']:.4g}, เป้า {i.get('target') or '-'}" if thai
+                     else f"; buy-stop {i['trigger']['price']:.4g}, stop {i['stop']:.4g}, target {i.get('target') or '-'}")
+        elif i.get("open_trade"):
+            ot = i["open_trade"]
+            line += (f"; สัญญาณเกิด {ot['entry_date']} ที่ {ot['entry']:.4g} - ไม่ไล่ราคา, เส้น trail {ot['trail_level']:.4g}" if thai
+                     else f"; triggered {ot['entry_date']} at {ot['entry']:.4g} - don't chase; trail {ot['trail_level']:.4g}")
+        out.append(line)
+    out.append("ระบบแนะนำเท่านั้น ไม่มีการส่งคำสั่งซื้อขาย - คุณ Tho ส่งคำสั่งเอง" if thai else "Advisory only - no orders are placed; Tho places every trade himself.")
+    return "\n".join(out)
 
 
 async def forecast_table(tickers: list[str], horizons: list[str], thai: bool) -> tuple[str, str]:
@@ -359,8 +408,8 @@ def extract_tickers(message: str) -> list[str]:
 
 def detect_recommendation(response: str) -> Optional[str]:
     patterns = {
-        "BUY": r"\bBUY\b|ซื้อ",
-        "SELL": r"\bSELL\b|ขาย",
+        "BUY": r"\bBUY\b(?!-stop)|ซื้อ(?!ขาย)",
+        "SELL": r"\bSELL\b|(?<!ซื้อ)ขาย",
         "HOLD": r"\bHOLD\b|ถือ",
     }
     for action, pattern in patterns.items():
@@ -795,15 +844,25 @@ async def execute_advisor(request: Request):
                         "(mean reversion), regime (macro risk-on/off), signal (composite signal score) and analyst (consensus target); "
                         "do not name any other model. The track record is from the historical backfill until live forecasts mature; it is "
                         "reported PER HORIZON across all subjects (there is no per-ticker track record) - never invent sample sizes or rates.")
+        _is_setup = any(w in query.lower() for w in SETUP_WORDS)
+        if _is_setup:
+            context += ("\n\nTHE USER IS ASKING ABOUT THE MOMENTUM-BASE SWING SETUP: use ONLY the SETUP block above (state, RS, zone, trigger, "
+                        "stop, backtest). If a ticker has no line there, say it is not in the setup screen - never invent RS, returns or levels. "
+                        "Swing/position horizon only (no intraday). Never say you will buy or sell: Tho places all orders himself.")
         enriched_prompt = build_system_prompt(context)
         advisory_route = model_router.route_for_task("advisory")
         response_text, llm_model_used = await generate_llm_response(
             enriched_prompt, query, history, advisory_route
         )
 
+        _llm_text = response_text  # recommendation detection must only see the LLM's own words, not appended engine tables
         if _is_fc and _fc_table:
             response_text = f"{response_text.rstrip()}\n\n{_fc_table}"
-        recommendation = detect_recommendation(response_text)
+        if _is_setup:
+            _st = await setup_table(tickers, bool(re.search(r"[\u0E00-\u0E7F]", query)))
+            if _st:
+                response_text = f"{response_text.rstrip()}\n\n{_st}"
+        recommendation = detect_recommendation(_llm_text)
         if recommendation and tickers:
             await _db_call(
                 "save_recommendation",
