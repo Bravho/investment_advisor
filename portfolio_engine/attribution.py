@@ -216,9 +216,16 @@ async def run_attribution(pool: Any) -> dict[str, Any]:
         "rows": len(legacy), "first": str(legacy[0]["record_date"]) if legacy else None,
         "gap": "no rows 2026-07-16 .. 2026-10-06", "partial_rows": sum(1 for r in legacy if r["vc"] == "false"),
         "why_not_used": "June-July portfolio differed (BAFS.BK, unpriced gold fund) and SCBGOLDE was unpriced from 15 Oct, so recorded totals contain flows and gaps; TWR from them would be wrong."}
+    # 2026-10-31 FX layer: explicit FX leg per holding (economic betas incl. PTTEP USD revenue), not just the class-level currency effect.
+    try:
+        import fx_risk as _fx
+        out["fx_leg"] = _fx.attribution_fx_leg(px, {t: float(P[t].iloc[-1] * units[t]) for t in P.columns})
+    except Exception as exc:  # noqa: BLE001
+        out["fx_leg"] = {"error": f"{type(exc).__name__}: {exc}"}
     out["notes"] = ["SCBGOLDE daily path = GC=F x THB=X scaled to its latest official NAV (proxy; fund TER not deducted).",
                     "Returns are log-additive; attribution effects sum to the active return up to the residual.",
                     "Currency effect = (portfolio USD exposure - benchmark USD exposure) x USD/THB log move; SCBGOLDE treated as USD-exposed (unhedged).",
+                    "fx_leg = current weight x FX beta (fx_risk: structural/measured/assumed) x USD/THB move; includes PTTEP's economic USD exposure and SCB's flow-driven negative beta.",
                     "Timing = buy-and-hold drift vs holding the start weights constant (no trades were recorded in the window).",
                     "Live window is short: ratios and alpha are not statistically meaningful yet."]
     out["sources"] = {"prices": "yfinance auto-adjusted closes", "units_cost": "holdings table", "nav": "risk engine position price (SCBGOLDE official NAV)"}

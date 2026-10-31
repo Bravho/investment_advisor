@@ -640,6 +640,19 @@ FACTORS: list[dict[str, Any]] = [
     {"key": "usdthb", "name": "USD/THB", "category": "fx", "yf": "THB=X", "unit": "THB per USD", "flat": 0.3,
      "affected": ["SCBGOLDE (+) unhedged USD gold", "US watch list (+) in THB", "PTTEP.BK (+) USD revenue"],
      "threshold": {"abs_1d": 1.0, "abs_5d": 2.0}, "threshold_text": "|1d| >= 1% or |5d| >= 2%"},
+    # 2026-10-31 FX layer: other baht crosses + the broad dollar (free yfinance). Feed fx_risk.py and the brief.
+    {"key": "dxy", "name": "US dollar index (DXY)", "category": "fx", "yf": "DX-Y.NYB", "unit": "index", "flat": 0.3,
+     "affected": ["USD/THB (+)", "SCBGOLDE (-) gold usually falls when the dollar rises", "EM/Thai equity flows (-)"],
+     "threshold": {"abs_1d": 0.8, "abs_5d": 2.0}, "threshold_text": "|1d| >= 0.8% or |5d| >= 2%"},
+    {"key": "eurthb", "name": "EUR/THB", "category": "fx", "yf": "EURTHB=X", "unit": "THB per EUR", "flat": 0.3,
+     "affected": ["European exposure in THB (+)", "Thai exporters to EU"], "threshold": {"abs_1d": 1.0, "abs_5d": 2.5},
+     "threshold_text": "|1d| >= 1% or |5d| >= 2.5%"},
+    {"key": "jpythb", "name": "JPY/THB", "category": "fx", "yf": "JPYTHB=X", "unit": "THB per JPY", "flat": 0.3,
+     "affected": ["Japan exposure in THB (+)", "Thai auto/industrial supply chain"], "threshold": {"abs_1d": 1.2, "abs_5d": 3.0},
+     "threshold_text": "|1d| >= 1.2% or |5d| >= 3%"},
+    {"key": "sgdthb", "name": "SGD/THB (regional FX check)", "category": "fx", "yf": "SGDTHB=X", "unit": "THB per SGD", "flat": 0.3,
+     "affected": ["regional exposure in THB (+)", "THB-specific vs regional move"], "threshold": {"abs_1d": 0.8, "abs_5d": 2.0},
+     "threshold_text": "|1d| >= 0.8% or |5d| >= 2%"},
     {"key": "gold", "name": "Gold (COMEX front month)", "category": "commodities", "yf": "GC=F", "unit": "USD/oz", "flat": 0.5,
      "affected": ["SCBGOLDE (+)"], "threshold": {"abs_1d": 2.0, "abs_5d": 5.0}, "threshold_text": "|1d| >= 2% or |5d| >= 5%"},
     {"key": "set_index", "name": "SET index (SET50 ETF TDEX for trend)", "category": "equity", "yf": SET_PROXY, "unit": "TDEX THB", "flat": 0.5,
@@ -985,11 +998,21 @@ async def key_points(pool: Any, risk_summary: Optional[dict[str, Any]] = None) -
             pts.append(f"{f['name']}: {f.get('breach_reason')}")
     rs = risk_summary or {}
     if rs.get("limit_breaches"):
-        pts.append("Risk limits ARE exceeded: " + "; ".join(rs["limit_breaches"]))
+        info = [b for b in rs["limit_breaches"] if "INFORMATIONAL" in b]
+        act = [b for b in rs["limit_breaches"] if "INFORMATIONAL" not in b]
+        if act:
+            pts.append("Risk limits ARE exceeded: " + "; ".join(act))
+        if info:
+            pts.append("Concentration above the position cap (INFORMATIONAL ONLY - Tho has decided to keep these; do NOT suggest selling or trimming them): "
+                       + "; ".join(b.replace(" (INFORMATIONAL - owner hold, no sell/trim suggested)", "") for b in info))
     elif rs:
         pts.append("No position/sector risk limits are exceeded.")
     if rs.get("provisional"):
         pts.append("Risk-engine figures are PROVISIONAL (holdings not yet confirmed by Tho).")
+    fx = rs.get("fx") or {}
+    if fx.get("portfolio_fx_beta") is not None:
+        pts.append(f"FX risk: USD/THB {fx.get('usdthb')} (up = weaker baht). Portfolio FX beta {fx['portfolio_fx_beta']:+.2f}; "
+                   f"a 10% stronger baht would cost about {abs(fx.get('thb_plus10_pnl_thb') or 0):,} THB (FX leg only, other prices unchanged).")
     return pts
 
 

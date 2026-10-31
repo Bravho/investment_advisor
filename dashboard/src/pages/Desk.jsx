@@ -5,9 +5,10 @@ import WatchlistPanel from '../components/WatchlistPanel'
 import SignalsPanel from '../components/SignalsPanel'
 import PredictionsPanel from '../components/PredictionsPanel'
 import SetupPanel from '../components/SetupPanel'
+import FxRiskPanel from '../components/FxRiskPanel'
 import Stamp from '../components/Stamp'
 import { Badge, SourceBadge } from '../components/UI'
-import { useFactors, useRiskReport, useWatchlist } from '../hooks/usePhase3'
+import { useFactors, useFxRisk, useRiskReport, useWatchlist } from '../hooks/usePhase3'
 import { useJournal, useMomentumBase, usePredictionScoreboard, usePredictions, useSignals, useTradePlans } from '../hooks/usePhase4'
 import { number } from '../utils/format'
 
@@ -15,7 +16,7 @@ const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k
 
 // Pro #8 (2026-10-30): one-screen trading desk.
 export default function Desk() {
-  const risk = useRiskReport(), factors = useFactors(), watch = useWatchlist(), signals = useSignals()
+  const risk = useRiskReport(), fx = useFxRisk(), factors = useFactors(), watch = useWatchlist(), signals = useSignals()
   const plans = useTradePlans(120000), journal = useJournal(), preds = usePredictions(), board = usePredictionScoreboard(), setup = useMomentumBase()
   const s = risk.data?.summary || {}
   const reg = signals.data?.regime
@@ -27,7 +28,9 @@ export default function Desk() {
       <span>VaR95 {number(s.hist_var95_thb, 0)} · ES95 {number(s.hist_es95_thb, 0)}</span>
       <span>Vol {number(s.vol_ann_pct, 1)}% · β(SET) {number(s.beta_set, 2)}</span>
       {reg && <Badge tone={reg.regime === 'risk_on' ? 'green' : reg.regime === 'risk_off' ? 'red' : 'yellow'}>{reg.regime} {number(reg.score, 2)}</Badge>}
-      {(s.limit_breaches || []).length > 0 && <Badge tone="red">{s.limit_breaches.length} limit breaches</Badge>}
+      {(s.limit_breaches || []).filter(b => !b.includes('INFORMATIONAL')).length > 0 && <Badge tone="red">{s.limit_breaches.filter(b => !b.includes('INFORMATIONAL')).length} limit breaches</Badge>}
+      {(s.limit_breaches || []).some(b => b.includes('INFORMATIONAL')) && <Badge tone="gray">ℹ️ concentration info (owner hold: {(s.owner_holds || []).map(t => t.replace('.BK', '')).join(', ')})</Badge>}
+      {fx.data?.summary && <span title={(fx.data.reading || []).join('\n')}>USD/THB {number(fx.data.summary.usdthb, 2)} · FX β {number(fx.data.summary.portfolio_fx_beta, 2)}</span>}
       {risk.data?.provisional && <Badge tone="yellow">PROVISIONAL holdings</Badge>}
       {s.thai_equity_pct != null && <span>Thai equity {number(s.thai_equity_pct, 1)}%</span>}
       {(s.locked_positions || []).length > 0 && <Badge tone="yellow">🔒 {s.locked_positions.length} ThaiESG locked to {s.locked_positions[0].lock_until}{s.locked_positions.some(l => l.units_status === 'pending') ? ' · units pending' : ''}</Badge>}
@@ -36,6 +39,8 @@ export default function Desk() {
     <div className="grid gap-3 xl:grid-cols-2">
       <Stamp items={[{ source: 'risk engine · yfinance', asOf: risk.data?.run_at }, { source: 'prices', asOf: s.price_as_of, staleHours: 96 }]}>
         <RiskPanel report={risk.data} loading={risk.loading} error={risk.error} retry={risk.refetch} /></Stamp>
+      <Stamp items={[{ source: 'fx risk · yfinance FX', asOf: fx.data?.generated_at, staleHours: 3 }, { source: 'USD/THB close', asOf: fx.data?.summary?.usdthb_as_of, staleHours: 96 }]}>
+        <FxRiskPanel report={fx.data} loading={fx.loading} error={fx.error} retry={fx.refetch} /></Stamp>
       <FactorHeatmap report={risk.data} factors={factors.data} loading={risk.loading} error={risk.error} retry={risk.refetch} />
       <DeskPlans plans={plans.data} journal={journal.data} loading={plans.loading} error={plans.error} retry={plans.refetch} />
       <Stamp items={[{ source: 'signals · local LLM council', asOf: maxTs(signals.data?.items, 'created_at') }]}>

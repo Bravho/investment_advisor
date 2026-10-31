@@ -596,6 +596,11 @@ def _render_facts(ctx: dict[str, Any], perf_rows: list[dict[str, Any]], snap: di
 
 
 def _commentary_prompt(facts_md: str, holdings_line: str) -> str:
+    try:
+        from holding_meta import owner_hold_tickers
+        _holds = ", ".join(sorted(owner_hold_tickers())) or "none"
+    except Exception:  # noqa: BLE001
+        _holds = "none"
     return f"""You are a careful investment advisor for Tho, a Thai retail investor
 (horizon 3 months to 2 years, base currency THB, not interested in crypto).
 His holdings: {holdings_line}.
@@ -606,6 +611,9 @@ If something important is missing, say it is unavailable. Advisory only, no trad
 Do not mention asset classes or holdings that are not listed above (he holds no bonds unless listed).
 When you mention a price move, use exactly the direction and sign shown in the facts (e.g. "-4.6%" means it FELL).
 Risk-engine figures are provisional until Tho confirms his holdings; say so if you cite them.
+Include one point on FOREIGN-CURRENCY risk (USD/THB; up = weaker baht) using only the FX figures in the facts.
+OWNER HOLDS ({_holds}): Tho will not sell them until he is satisfied with this project. Never suggest
+selling or trimming them; a concentration/limit note about them is INFORMATIONAL only.
 
 Respond ONLY as JSON:
 {{"commentary": "3-5 short bullet points (markdown '- '), max 220 words, covering the holdings, portfolio risk/concentration and any data warning",

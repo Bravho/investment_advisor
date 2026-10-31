@@ -8,3 +8,6 @@ export const useFactors = (refreshMs = 120000) =>
   useApi(() => portfolioClient.get('/factors'), [], refreshMs)
 export const useRiskReport = (refreshMs = 300000) =>
   useApi(() => portfolioClient.get('/risk/report'), [], refreshMs)
+// 2026-10-31: FX (currency) risk layer
+export const useFxRisk = (refreshMs = 300000) =>
+  useApi(() => portfolioClient.get('/fx/risk'), [], refreshMs)

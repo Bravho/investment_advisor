@@ -1,0 +1,100 @@
+{
+  "_note": "FX exposure registry (added 2026-10-31). Convention: USD/THB = baht per 1 USD; UP = WEAKER baht. direct_foreign = share of the instrument's NAV held in foreign-currency assets (null = unknown). hedge_ratio = share of that foreign exposure hedged back to THB (null = unknown, 0 = unhedged). economic_beta_assumed = % change in the THB value of the position for +1% USD/THB, from how the business earns (assumption, NOT measured). structural=true means the beta follows from the instrument's construction. The engine also measures a beta from price history and reports both. Never fill unknowns by guessing - mark them null and list them as open questions.",
+  "holdings": {
+    "PTTEP.BK": {
+      "listing_currency": "THB",
+      "direct_foreign": {"USD": 0.0},
+      "hedge_ratio": null,
+      "hedge_note": "Listed THB share: no fund-level hedge concept. Company-level hedging of USD revenue is not modelled (unknown).",
+      "economic_usd_revenue_share": 0.95,
+      "economic_beta_assumed": 0.50,
+      "structural": false,
+      "confidence": "high on direction, medium on magnitude",
+      "basis": "Upstream oil & gas sold at USD-referenced prices; USD functional currency translated to THB. Weaker baht raises THB earnings. Oil and THB are linked (high oil -> weaker THB), so FX and oil effects must not be added independently.",
+      "source": "portfolio_engine/currency_exposure.py assumptions (2026-08-07)"
+    },
+    "SCB.BK": {
+      "listing_currency": "THB",
+      "direct_foreign": {"USD": 0.0},
+      "hedge_ratio": null,
+      "hedge_note": "Domestic THB lender; no fund-level hedge concept.",
+      "economic_usd_revenue_share": 0.05,
+      "economic_beta_assumed": -0.30,
+      "structural": false,
+      "confidence": "medium-low",
+      "basis": "Earnings are local. Negative FX link runs through foreign equity flows: a weakening baht usually comes with foreign selling of Thai banks.",
+      "source": "portfolio_engine/currency_exposure.py assumptions (2026-08-07)"
+    },
+    "BAFS.BK": {
+      "listing_currency": "THB",
+      "direct_foreign": {"USD": 0.0},
+      "hedge_ratio": null,
+      "economic_usd_revenue_share": 0.02,
+      "economic_beta_assumed": 0.10,
+      "structural": false,
+      "confidence": "medium",
+      "basis": "THB fee per litre; weak FX link via inbound tourism demand (long lag).",
+      "source": "portfolio_engine/currency_exposure.py assumptions (2026-08-07)"
+    },
+    "SCBGOLDE": {
+      "listing_currency": "THB",
+      "direct_foreign": {"USD": 1.0},
+      "hedge_ratio": 0.0,
+      "hedge_note": "Published FX policy: 'ไม่ป้องกันความเสี่ยงอัตราแลกเปลี่ยน' (does not hedge FX) per Finnomena / Navtable fund pages; feeder into SPDR Gold Trust traded in USD (top holding ~98.8%). SCBAM prospectus wording allows discretionary derivatives for efficient portfolio management, so the hedge ratio is 0 per policy but not contractually fixed. The THB-hedged sibling is SCBGOLDH (hedges 95-105%).",
+      "economic_usd_revenue_share": 1.0,
+      "economic_beta_assumed": 1.0,
+      "structural": true,
+      "confidence": "high",
+      "basis": "THB NAV = gold in USD x USD/THB (unhedged), so beta to USD/THB is 1.0 by construction.",
+      "source": "https://www.finnomena.com/fund/SCBGOLDE ; https://navtable.com/funds/SCBGOLDE/ ; https://www.scbam.com/en/fund/foreign-investment-fund-commodity/fund-information/scbgolde (checked 2026-10-31)"
+    },
+    "K-TNZ-ThaiESG": {
+      "listing_currency": "THB",
+      "direct_foreign": null,
+      "hedge_ratio": null,
+      "hedge_note": "ThaiESG funds must invest mainly in Thai ESG assets, so direct foreign exposure is expected to be ~0, but the latest factsheet has not been checked - unknown.",
+      "economic_usd_revenue_share": null,
+      "economic_beta_assumed": null,
+      "structural": false,
+      "confidence": "unknown - measured via SET50 proxy (TDEX) only",
+      "basis": "Thai equity fund; FX link is indirect (foreign flows into SET, exporters/energy holdings). No free look-through.",
+      "source": "none yet - verify KAsset factsheet"
+    },
+    "ES-SETESG-ThaiESG-A": {
+      "listing_currency": "THB",
+      "direct_foreign": null,
+      "hedge_ratio": null,
+      "hedge_note": "SETESG index fund (Thai listed shares); direct foreign exposure expected ~0 but not verified - unknown.",
+      "economic_usd_revenue_share": null,
+      "economic_beta_assumed": null,
+      "structural": false,
+      "confidence": "unknown - measured via SET50 proxy (TDEX) only",
+      "basis": "Tracks SETESG index; FX link indirect via foreign flows and index constituents (energy, exporters, banks).",
+      "source": "none yet - verify Eastspring factsheet"
+    },
+    "TDSThaiESG-A": {
+      "listing_currency": "THB",
+      "direct_foreign": null,
+      "hedge_ratio": null,
+      "hedge_note": "Thai dividend ESG equity fund; direct foreign exposure expected ~0 but not verified - unknown.",
+      "economic_usd_revenue_share": null,
+      "economic_beta_assumed": null,
+      "structural": false,
+      "confidence": "unknown - measured via SET50 proxy (TDEX) only",
+      "basis": "Thai dividend equities (banks/energy/utilities heavy); FX link indirect.",
+      "source": "none yet - verify TISCO factsheet"
+    }
+  },
+  "defaults": {
+    "usd_listed": {"listing_currency": "USD", "direct_foreign": {"USD": 1.0}, "hedge_ratio": 0.0, "economic_beta_assumed": 1.0, "structural": true,
+                   "basis": "USD-listed share/ETF held directly: THB value = USD price x USD/THB.", "confidence": "high"},
+    "thai_listed": {"listing_currency": "THB", "direct_foreign": {"USD": 0.0}, "hedge_ratio": null, "economic_beta_assumed": null, "structural": false,
+                    "basis": "Thai-listed share with no FX assumption on file; measured beta only.", "confidence": "unknown"},
+    "thai_fif_fund": {"listing_currency": "THB", "direct_foreign": null, "hedge_ratio": null, "economic_beta_assumed": null, "structural": false,
+                      "basis": "Thai fund investing abroad (FIF): hedge policy differs by class (H/UH) - check the factsheet before buying.", "confidence": "unknown"}
+  },
+  "proposal_rules": [
+    "Global/US exposure via a Thai FIF fund: prefer to state the class's hedge policy (hedged 'H' vs unhedged 'UH') in every proposal.",
+    "Direct US shares/ETFs: count 100% USD exposure, plus FX conversion spread on both legs (see trade_plans.FX_SPREAD)."
+  ]
+}

@@ -40,6 +40,7 @@ import predictions as pred_mod
 import portfolio_construction as pc_mod
 import attribution as attr_mod
 import momentum_base as mb_mod
+import fx_risk as fx_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -158,9 +159,16 @@ async def _startup_phase3() -> None:
     if not _bf:
         await _safe_job("predictions_backfill_startup", lambda: pred_mod.run_backfill(pool))
     await _safe_job("predictions_generate_startup", _predictions_job)
+    if fx_mod.latest_cached() is None:
+        await _safe_job("fx_risk_startup", _fx_job)
     _pc = await pc_mod.latest(pool)
     if not _pc or _pc["created_at"][:10] != datetime.now(_ict).date().isoformat():
         await _safe_job("portfolio_construction_startup", _construction_job)
+
+
+async def _fx_job() -> dict[str, Any]:
+    rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
+    return rep.get("summary", {})
 
 
 async def _attribution_job() -> dict[str, Any]:
@@ -233,6 +241,8 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["market_factors", _factors_job], minutes=60, id="market_factors", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["market_factors_prebrief", _factors_job], hour=6, minute=40, id="market_factors_prebrief", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
+    # 2026-10-31 FX layer: refresh the FX risk view hourly (free yfinance; downloads are cached 1h).
+    scheduler.add_job(_safe_job, "interval", args=["fx_risk", _fx_job], minutes=60, id="fx_risk", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
     # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation). Screen after the SET close (daily bars complete)
@@ -882,3 +892,28 @@ async def setup_mb_advisor_context(tickers: str = "") -> dict[str, Any]:
     tk = [t.strip().upper() for t in tickers.split(",") if t.strip()]
     return {"context": "\n".join(mb_mod.advisor_lines(scr, bt, tk))}
 
+
+# ------------------------------------------------------------------ FX risk (2026-10-31)
+@app.get("/fx/risk")
+async def fx_risk_report() -> dict[str, Any]:
+    rep = fx_mod.latest_cached()
+    if not rep:
+        rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
+    return rep
+
+
+@app.post("/fx/run")
+async def fx_risk_run() -> dict[str, Any]:
+    rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
+    return rep.get("summary", {})
+
+
+@app.get("/fx/advisor-context")
+async def fx_advisor_context() -> dict[str, Any]:
+    return {"context": fx_mod.advisor_context(fx_mod.latest_cached())}
+
+
+@app.get("/owner-holds")
+async def owner_holds() -> dict[str, Any]:
+    from holding_meta import load_owner_holds
+    return {"holds": load_owner_holds(), "rule": "never suggest selling/trimming these; concentration notes are informational only"}

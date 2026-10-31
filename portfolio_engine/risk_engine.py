@@ -39,6 +39,8 @@ PROXIES = {"SCBGOLDE": {"kind": "gold_thb", "note": "proxy = GC=F x THB=X (unhed
 SCENARIOS = {
     "brent_minus_30": {"label": "Brent -30%", "shocks": {"brent": -0.30}},
     "thb_plus_10": {"label": "THB +10% (USD/THB -10%)", "shocks": {"usdthb": -0.10}},
+    # 2026-10-31 FX layer: both directions of the baht (Tho: include FX-rate risk in the analysis structure).
+    "thb_minus_10": {"label": "THB -10% (USD/THB +10%, baht weaker)", "shocks": {"usdthb": 0.10}},
     "set_minus_20": {"label": "SET -20%", "shocks": {"set": -0.20}},
     "rate_cut": {"label": "Rate cut (US10y -50bp proxy; BoT -25bp not separately modelled)", "shocks": {"us10y": -0.50}},
 }
@@ -339,6 +341,13 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
     report["positions_input"] = positions
     report["limits"] = {k: cfg.get(k) for k in ("risk_budget_per_trade_pct", "max_position_pct", "max_sector_pct")}
     report["limit_breaches"] = _limit_breaches(positions, cfg)
+    # 2026-10-31: FX (currency) risk layer - see fx_risk.py. Failure must not break the risk report.
+    try:
+        import fx_risk as fx_mod
+        report["fx_risk"] = await fx_mod.run_fx_risk(pool, positions)
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.exception("fx risk layer failed")
+        report["fx_risk"] = {"error": f"{type(exc).__name__}: {exc}"}
     report["thai_equity_exposure"] = thai_equity_exposure(positions, cfg)
     report["locked_positions"] = [{"ticker": p["ticker"], "tax_wrapper": p.get("tax_wrapper"), "lock_until": p.get("lock_until"),
                                    "units_status": p.get("units_status")} for p in positions if p.get("locked")]
@@ -353,6 +362,8 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
                              for k, s in report["stress"].items()), key=lambda x: x["pnl_thb"]),
         "limit_breaches": report["limit_breaches"], "provisional": provisional, "price_as_of": report["price_as_of"],
         "thai_equity_pct": report["thai_equity_exposure"]["thai_equity_pct"], "locked_positions": report["locked_positions"],
+        "fx": (report.get("fx_risk") or {}).get("summary"),
+        "owner_holds": sorted(_owner_holds()),
     }
     report["summary"] = summary
     async with pool.acquire() as conn:
@@ -361,13 +372,25 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
     return report
 
 
+def _owner_holds() -> set[str]:
+    try:
+        from holding_meta import owner_hold_tickers
+        return owner_hold_tickers()
+    except Exception:  # noqa: BLE001
+        return set()
+
+
 def _limit_breaches(positions: list[dict[str, Any]], cfg: dict[str, Any]) -> list[str]:
     total = sum(p["value_thb"] for p in positions) or 1.0
     out, sectors = [], {}
+    holds = _owner_holds()
     for p in positions:
         w = p["value_thb"] / total * 100
         if w > float(cfg.get("max_position_pct", 25)):
-            out.append(f"{p['ticker']} {w:.1f}% > max position {cfg.get('max_position_pct')}%")
+            msg = f"{p['ticker']} {w:.1f}% > max position {cfg.get('max_position_pct')}%"
+            if p["ticker"] in holds:  # 2026-10-31: Tho will not sell PTTEP/SCB yet -> information, not an action
+                msg += " (INFORMATIONAL - owner hold, no sell/trim suggested)"
+            out.append(msg)
         sec = (cfg.get("sectors") or {}).get(p["ticker"], "unclassified")
         sectors[sec] = sectors.get(sec, 0) + w
     for sec, w in sectors.items():
@@ -429,5 +452,10 @@ def render_brief_section(rep: Optional[dict[str, Any]]) -> str:
     if ws:
         lines.append(f"- Worst scenario: {ws.get('label')} -> {ws.get('pnl_thb'):,} THB ({ws.get('pnl_pct')}%).")
     for b in s.get("limit_breaches") or []:
-        lines.append(f"- ⚠️ Limit: {b}")
+        lines.append(f"- {'ℹ️' if 'INFORMATIONAL' in b else '⚠️'} Limit: {b}")
+    fx = s.get("fx") or {}
+    if fx.get("portfolio_fx_beta") is not None:
+        lines.append(f"- FX: USD/THB {fx.get('usdthb')} (up = weaker baht); portfolio FX beta {fx['portfolio_fx_beta']:+.2f}; "
+                     f"baht +10% stronger -> {fx.get('thb_plus10_pnl_thb'):+,} THB, 10% weaker -> {fx.get('thb_minus10_pnl_thb'):+,} THB; "
+                     f"FX VaR95 1m ~{fx.get('fx_var95_1m_thb'):,} THB.")
     return "\n".join(lines)

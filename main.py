@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 import re
 import html
 import logging
@@ -88,6 +89,12 @@ RESPONSE RULES:
   "การลงทุนมีความเสี่ยง ผู้ลงทุนควรศึกษาข้อมูลก่อนการตัดสินใจลงทุน"
 - Match language to user (Thai -> Thai, English -> English)
 - Never recommend specific stocks as direct financial advice
+- Always consider FOREIGN-CURRENCY (USD/THB) risk: when you discuss risk, returns, gold, PTTEP,
+  global/US ideas or forecasts, state the FX effect using only the FX RISK block numbers
+  (USD/THB up = weaker baht). If FX data is unavailable, say so.
+- Respect OWNER HOLDS: never recommend selling or trimming a holding listed there; any
+  concentration/limit remark about it is informational only.
+- Never say you will buy or sell anything: Tho places every order himself.
 """
     if context:
         base += f"\n\n{context}"
@@ -279,6 +286,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                                               params={"tickers": ",".join(tickers)})).json().get("context", "")
             except Exception:  # noqa: BLE001
                 setup_ctx = ""
+            try:  # 2026-10-31: FX (currency) risk layer - Tho asked that FX-rate risk is part of every analysis
+                fx_ctx = (await client.get(f"{ENGINE_URL}/fx/advisor-context")).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                fx_ctx = "=== FX RISK ===\n  FX risk report unavailable - do not quote FX numbers."
     except Exception as exc:  # noqa: BLE001
         logger.warning("engine context unavailable: %s", exc)
         return "=== ENGINE DATA NOTE ===\n  Forecast/signal engine (8996) unreachable - do not quote forecasts.", tickers
@@ -303,7 +314,23 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                          f"R:R {p['rr']:.2f}, checklist {'pass' if p.get('checklist_pass') else 'FAIL'}; {p.get('rationale', '')[:300]}")
     if setup_ctx:
         lines.append(setup_ctx)
+    lines.append(fx_ctx)
+    lines.append(owner_holds_block())
     return "\n".join(lines) + "\n\n" + fc, tickers
+
+
+def owner_holds_block() -> str:
+    """2026-10-31: Tho will not sell PTTEP/SCB until satisfied with the project (config/owner_holds.json)."""
+    try:
+        holds = json.loads((Path(__file__).resolve().parent / "config" / "owner_holds.json").read_text(encoding="utf-8")).get("holds") or {}
+    except Exception:  # noqa: BLE001
+        holds = {}
+    holds = {t: h for t, h in holds.items() if h.get("no_sell")}
+    if not holds:
+        return ""
+    return ("=== OWNER HOLDS (Tho's decision - binding) ===\n  " + ", ".join(sorted(holds)) + ": Tho will NOT sell these until he is "
+            "completely satisfied with this project. NEVER recommend selling, trimming or switching them. If they exceed a position "
+            "or concentration limit, state it as INFORMATION only (no action), e.g. diversify with NEW money instead.")
 
 
 HORIZON_WORDS = {

@@ -341,6 +341,16 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
     track = await scoreboard(pool, brief=True)
     made = 0
     now = datetime.now(timezone.utc)
+    # 2026-10-31 FX layer: forecast USD/THB first so every other subject can carry an explicit FX assumption
+    # (informational: the models already see FX inside THB price history; the FX leg is NOT added on top).
+    subs = sorted(subs, key=lambda x: 0 if x["subject"] == "THB=X" else 1)
+    fx_fc: dict[str, dict[str, Any]] = {}
+    fx_ret_all = closes["THB=X"].pct_change(fill_method=None) if "THB=X" in closes else None
+    try:
+        import fx_risk as _fx
+        _fx_reg = _fx.load_registry()
+    except Exception:  # noqa: BLE001
+        _fx, _fx_reg = None, {}
     for s in subs:
         subj = s["subject"]
         base_override = (s["value_thb"] / s["qty"]) if subj in PROXY and s.get("qty") else None
@@ -389,6 +399,26 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                 "assumptions": assumptions(h, subj, mo, extras),
                 "track_record_at_creation": (track.get("by_horizon") or {}).get(h),
             }
+            if subj == "THB=X":
+                fx_fc[h] = {"median": c["median"], "mu": c["mu"], "b80": c["b80"], "p_up": c["p_up"], "base": base}
+            elif fx_ret_all is not None and fx_fc.get(h):
+                jj = pd.concat([ser.pct_change(fill_method=None), fx_ret_all], axis=1, join="inner").dropna().iloc[-252:]
+                fxb = float(jj.iloc[:, 0].cov(jj.iloc[:, 1]) / jj.iloc[:, 1].var()) if len(jj) > 60 and jj.iloc[:, 1].var() > 0 else None
+                ex = _fx.exposure_for(subj, _fx_reg) if _fx else {}
+                f = fx_fc[h]
+                method["inputs"]["fx"] = {
+                    "usdthb_spot": round(f["base"], 4), "usdthb_forecast_median": round(f["median"], 4),
+                    "usdthb_80pct": [round(f["b80"][0], 4), round(f["b80"][1], 4)], "usdthb_p_up": round(f["p_up"], 4),
+                    "usdthb_exp_log_return": round(f["mu"], 6), "asset_fx_beta_1y": round(fxb, 3) if fxb is not None else None,
+                    "fx_implied_log_return": round(fxb * f["mu"], 6) if fxb is not None else None,
+                    "direct_foreign_share": ex.get("direct_foreign") and sum(ex["direct_foreign"].values()),
+                    "hedge_ratio": ex.get("hedge_ratio"), "economic_beta_assumed": ex.get("economic_beta_assumed"),
+                    "note": "Informational FX leg: the ensemble already uses THB-denominated history, so this is NOT added on top.",
+                    "source": "frozen THB=X forecast for the same horizon (this run) + config/fx_exposure.json"}
+                if fxb is not None:
+                    method["assumptions"].append(
+                        f"FX: USD/THB {f['base']:.3f} -> median {f['median']:.3f} over {h} (80% {f['b80'][0]:.2f}-{f['b80'][1]:.2f}; up = weaker baht); "
+                        f"this asset's 1y FX beta {fxb:+.2f} implies {fxb * f['mu']:+.2%} from FX alone (already inside the price history, not added).")
             rec = {"version": MODEL_VERSION, "source": "live", "subject": subj, "subject_type": s["type"], "horizon": h, "horizon_days": hd,
                    "made_at": now.isoformat(), "as_of_date": str(as_of), "target_date": str(target_date(as_of, hd)),
                    "base_price": base, "direction": c["direction"], "p_up": round(c["p_up"], 4), "exp_return": round(c["mu"], 6),
@@ -798,7 +828,19 @@ def explain(p: dict[str, Any]) -> str:
         made = str(made)[:16]
     return (f"{p['subject']} {p['horizon']} (made {made}, target {p.get('target_date')}, frozen sha {p['payload_sha256'][:10]}): {p['direction']} "
             f"P(up) {p['p_up']:.0%}, median {p['median_price']:.4g}, 80% range {p['band80_low']:.4g}-{p['band80_high']:.4g}, "
-            f"confidence {p['confidence']:.2f}. How: " + "; ".join(parts) + ". Assumptions: " + " ".join((m.get("assumptions") or [])[:3]))
+            f"confidence {p['confidence']:.2f}. How: " + "; ".join(parts) + ". Assumptions: " + " ".join((m.get("assumptions") or [])[:3])
+            + _fx_line(m))
+
+
+def _fx_line(m: dict[str, Any]) -> str:
+    """2026-10-31: explicit FX assumption for the advisor (from method.inputs.fx, if this forecast carries one)."""
+    fx = (m.get("inputs") or {}).get("fx") or {}
+    if not fx.get("usdthb_forecast_median"):
+        return ""
+    b = fx.get("asset_fx_beta_1y")
+    return (f" FX assumption: USD/THB {fx['usdthb_spot']} -> {fx['usdthb_forecast_median']} (up = weaker baht)"
+            + (f"; FX beta {b:+.2f} -> FX alone {fx['fx_implied_log_return']:+.2%} (inside the forecast, not added)" if b is not None else "")
+            + (f"; hedge ratio {fx['hedge_ratio']}" if fx.get("hedge_ratio") is not None else "") + ".")
 
 
 async def advisor_context(pool: Any, tickers: list[str]) -> str:

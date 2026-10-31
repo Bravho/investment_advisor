@@ -48,3 +48,6 @@ data_collector/portfolio_snapshot.json
 *.json.tmp
 data/watchlists_status.json
 data_collector/.market_data_backfill_complete
+
+# FX risk cache (regenerated hourly by the portfolio engine)
+data/fx/
