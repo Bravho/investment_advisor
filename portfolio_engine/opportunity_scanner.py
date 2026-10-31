@@ -23,7 +23,7 @@ async def scan_universe(pool: Any) -> list[str]:
     Falls back to env WATCHLIST_TICKERS only if the DB read fails."""
     try:
         wl = await pool.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' ORDER BY ticker")
-        hd = await pool.fetch("SELECT ticker FROM holdings WHERE quantity > 0 ORDER BY ticker")
+        hd = await pool.fetch("SELECT ticker FROM holdings WHERE quantity > 0 AND COALESCE(asset_class, '') <> 'mutual_fund' ORDER BY ticker")
         tickers = [r["ticker"] for r in wl] + [r["ticker"] for r in hd]
         tickers = [t.strip().upper() for t in tickers
                    if t and (t.upper().endswith(".BK") or "-" not in t) and not t.upper().endswith(CRYPTO_SUFFIXES)]
