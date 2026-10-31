@@ -290,6 +290,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 fx_ctx = (await client.get(f"{ENGINE_URL}/fx/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
                 fx_ctx = "=== FX RISK ===\n  FX risk report unavailable - do not quote FX numbers."
+            try:  # 2026-10-31: key macro indicator trends (gold/oil/indices/yields/policy rates) - frozen forecasts + official rates
+                macro_ctx = (await client.get(f"{ENGINE_URL}/macro/advisor-context")).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                macro_ctx = "=== KEY MACRO INDICATOR TRENDS ===\n  Macro board unavailable - do not quote macro forecasts or policy rates."
     except Exception as exc:  # noqa: BLE001
         logger.warning("engine context unavailable: %s", exc)
         return "=== ENGINE DATA NOTE ===\n  Forecast/signal engine (8996) unreachable - do not quote forecasts.", tickers
@@ -315,6 +319,7 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
     if setup_ctx:
         lines.append(setup_ctx)
     lines.append(fx_ctx)
+    lines.append(macro_ctx)
     lines.append(owner_holds_block())
     return "\n".join(lines) + "\n\n" + fc, tickers
 
