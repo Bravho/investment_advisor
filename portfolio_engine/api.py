@@ -42,6 +42,7 @@ import attribution as attr_mod
 import momentum_base as mb_mod
 import fx_risk as fx_mod
 import news_feed as nf_mod
+import macro_trends as macro_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -229,6 +230,20 @@ async def _setup_backtest_job() -> dict[str, Any]:
     return await mb_mod.run_backtest(await db_pool.get_pool())
 
 
+async def _macro_job() -> dict[str, Any]:
+    """2026-10-31 macro trends board: freeze due forecasts after the US close, then rebuild the board cache."""
+    pool = await db_pool.get_pool()
+    r = await macro_mod.generate_macro(pool)
+    macro_mod._CACHE.pop("board", None)
+    return r
+
+
+async def _macro_policy_job() -> dict[str, Any]:
+    r = await macro_mod.refresh_policy(await db_pool.get_pool())
+    macro_mod._CACHE.pop("board", None)
+    return r
+
+
 def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["scan_opportunities", scan_opportunities, opportunity_cache], minutes=30, id="scan_opportunities", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["check_exit_signals", check_exit_signals, exit_cache], minutes=15, id="check_exit_signals", replace_existing=True)
@@ -260,6 +275,10 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["setup_backtest", _setup_backtest_job], day_of_week="sun", hour=5, minute=30, id="setup_backtest", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_validate", _predictions_validate_job], hour=8, minute=5, id="predictions_validate", replace_existing=True)
+    # 2026-10-31 macro trends board: forecasts daily after US close (05:40 ICT), policy rates checked daily (08:20 ICT);
+    # validation/scoring of these forecasts runs in predictions_validate above (same frozen tables).
+    scheduler.add_job(_safe_job, "cron", args=["macro_trends_generate", _macro_job], hour=5, minute=40, id="macro_trends_generate", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["macro_policy_rates", _macro_policy_job], hour=8, minute=20, id="macro_policy_rates", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["performance_attribution", _attribution_job], hour=18, minute=15, id="performance_attribution", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
@@ -915,6 +934,38 @@ async def fx_risk_report() -> dict[str, Any]:
 async def fx_risk_run() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
+
+
+@app.get("/macro/trends")
+async def macro_trends_board(refresh: bool = False) -> dict[str, Any]:
+    return to_jsonable(await macro_mod.build_board(await db_pool.get_pool(), max_age=0 if refresh else 1800))
+
+
+@app.get("/macro/policy-rates")
+async def macro_policy_rates() -> dict[str, Any]:
+    b = await macro_mod.build_board(await db_pool.get_pool())
+    return to_jsonable({"generated_at": b["generated_at"], "policy": b["policy"]})
+
+
+@app.post("/macro/refresh")
+async def macro_refresh(force: bool = False) -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    pol = await macro_mod.refresh_policy(pool)
+    gen = await macro_mod.generate_macro(pool, force=force)
+    macro_mod._CACHE.pop("board", None)
+    return to_jsonable({"policy": pol, "forecasts": gen})
+
+
+@app.post("/macro/backfill")
+async def macro_backfill() -> dict[str, Any]:
+    r = await macro_mod.backfill_macro(await db_pool.get_pool())
+    macro_mod._CACHE.pop("board", None)
+    return to_jsonable(r)
+
+
+@app.get("/macro/advisor-context")
+async def macro_advisor_context() -> dict[str, Any]:
+    return {"context": await macro_mod.advisor_context(await db_pool.get_pool())}
 
 
 @app.get("/fx/advisor-context")

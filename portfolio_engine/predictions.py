@@ -39,6 +39,8 @@ CADENCE = {"3d": "daily", "1m": "weekly", "3m": "monthly", "6m": "monthly", "1y"
 FACTORS = {"BZ=F": "Brent crude (USD/bbl)", "THB=X": "USD/THB (up = baht weaker)", "GC=F": "Gold (USD/oz)",
            SET_PROXY: "SET proxy TDEX.BK (THB)", "^TNX": "US 10y yield (%)", "^VIX": "VIX"}
 PROXY = {"SCBGOLDE": ("GC=F", "THB=X")}  # NAV history not free -> gold x USD/THB
+# 2026-10-31 macro board: gold in THB per troy oz (computed, same legs; not a fund)
+PROXY["XAUTHB"] = ("GC=F", "THB=X")
 MODELS = ["drift", "momentum", "meanrev", "regime", "signal", "analyst"]
 PRIOR_W = {"drift": .20, "momentum": .25, "meanrev": .25, "regime": .10, "signal": .10, "analyst": .10}
 T_DF = 5
@@ -320,9 +322,10 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
     today = datetime.now(ICT).date()
     async with pool.acquire() as conn:
         lasts = {r["horizon"]: r["d"] for r in await conn.fetch(
-            "SELECT horizon, max(as_of_date) d FROM predictions WHERE source='live' GROUP BY horizon")}
+            "SELECT horizon, max(as_of_date) d FROM predictions WHERE source='live' AND method->>'family' IS DISTINCT FROM 'macro_trends' GROUP BY horizon")}
         lastmade = {r["horizon"]: r["d"] for r in await conn.fetch(
-            "SELECT horizon, max(made_at AT TIME ZONE 'Asia/Bangkok')::date d FROM predictions WHERE source='live' GROUP BY horizon")}
+            # 2026-10-31: macro-board forecasts (method.family='macro_trends') keep their own cadence - excluded here
+            "SELECT horizon, max(made_at AT TIME ZONE 'Asia/Bangkok')::date d FROM predictions WHERE source='live' AND method->>'family' IS DISTINCT FROM 'macro_trends' GROUP BY horizon")}
     due = [h for h in HORIZONS if force or _due(h, today, lastmade.get(h))]
     if not due:
         return {"due": [], "made": 0}

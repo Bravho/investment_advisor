@@ -481,7 +481,7 @@ async def _news_factor(pool: Any, patterns: list[str]) -> dict[str, Any]:
     }
 
 
-def _bot_policy_rate() -> dict[str, Any]:
+def _bot_policy_rate(recent_n: int = 4) -> dict[str, Any]:  # recent_n added 2026-10-31 (macro board needs the last change)
     page_url = "https://www.bot.or.th/en/our-roles/monetary-policy/mpc-publication/policy-interest-rate.html"
     html_text = http_bytes(page_url).decode("utf-8", "replace")
     m = re.search(r'(/content/dam/bot/documents/en/our-roles/monetary-policy/mpc-publication/policy-interest-rate/[^"\'\\&]+\.xlsx)', html_text)
@@ -510,7 +510,7 @@ def _bot_policy_rate() -> dict[str, Any]:
             "as_of": datetime(last[0].year, last[0].month, last[0].day, tzinfo=ICT),
             "change_1d": change, "change_5d": None, "change_unit": "pp vs prior MPC",
             "trend": _trend(change, 0.01), "source": "Bank of Thailand MPC decisions table (xlsx)",
-            "source_url": page_url, "details": {"recent": [(d.isoformat(), r, g) for d, r, g in data[-4:]]}}
+            "source_url": page_url, "details": {"recent": [(d.isoformat(), r, g) for d, r, g in data[-recent_n:]]}}
 
 
 def _fred_key() -> Optional[str]:
