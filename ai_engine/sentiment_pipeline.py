@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from utils.common import configure_logging, ollama_chat, parse_json_response
 from utils.db_pool import db_pool
+from ticker_relevance import filter_tickers, mentioned
 
 logger = configure_logging("ai_engine.sentiment")
 SENTIMENT_MODEL = os.getenv(
@@ -17,6 +18,7 @@ THAI_TICKERS = {
     "KBANK": "KBANK.BK", "SCB": "SCB.BK", "CPF": "CPF.BK",
     "CPALL": "CPALL.BK", "DELTA": "DELTA.BK", "GULF": "GULF.BK",
     "TRUE": "TRUE.BK", "BDMS": "BDMS.BK", "KTB": "KTB.BK",
+    "PTTEP": "PTTEP.BK", "BBL": "BBL.BK", "TTB": "TTB.BK", "TOP": "TOP.BK", "IRPC": "IRPC.BK", "BAFS": "BAFS.BK",
 }
 KEYWORD_TICKERS = {
     "BITCOIN": "BTC-USD", "BTC": "BTC-USD", "ETHEREUM": "ETH-USD",
@@ -37,14 +39,19 @@ async def watchlist() -> set[str]:
 
 
 def extract_tickers(text: str, allowed_us: set[str]) -> list[str]:
-    upper = text.upper()
+    """Tickers explicitly mentioned in the article (tightened 2026-10-31).
+
+    Before: the text was UPPER-cased first, so the words "true", "delta", "gulf" became TRUE.BK / DELTA.BK /
+    GULF.BK. Now symbols must appear case-sensitively and ambiguous symbols need the company name
+    (see ticker_relevance.py)."""
     found: list[str] = []
     for keyword, ticker in {**THAI_TICKERS, **KEYWORD_TICKERS}.items():
-        if ticker and re.search(rf"\b{re.escape(keyword)}\b", upper):
+        if ticker and mentioned(ticker, text):
             found.append(ticker)
-    for token in re.findall(r"\b[A-Z]{2,5}(?:\.BK|-[A-Z]{3})?\b", upper):
-        if token in allowed_us or token in THAI_TICKERS:
-            found.append(THAI_TICKERS.get(token, token))
+    for token in re.findall(r"(?<![A-Za-z0-9])[A-Z]{2,5}(?:\.BK|-[A-Z]{3})?(?![A-Za-z0-9])", text):
+        t = THAI_TICKERS.get(token, token)
+        if (token in allowed_us or token in THAI_TICKERS) and mentioned(t, text):
+            found.append(t)
     return list(dict.fromkeys(found))
 
 
@@ -112,7 +119,10 @@ async def run_sentiment_pipeline() -> dict[str, Any]:
                 f"{article['title']}\n{article['content'] or ''}", allowed
             )
             result = await analyze_article(article["title"], article["content"] or "")
-            affected = list(dict.fromkeys(extracted + result["affected_tickers"])) or [None]
+            # 2026-10-31: LLM-proposed tickers are kept only if the symbol or company name is in the article;
+            # at most ticker_relevance.MAX_TICKERS per article (was unbounded: one story got 9-31 tags).
+            _text = f"{article['title']}\n{article['content'] or ''}"
+            affected = filter_tickers(extracted + result["affected_tickers"], _text) or [None]
             async with pool.acquire() as connection:
                 async with connection.transaction():
                     for ticker in affected:
