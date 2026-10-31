@@ -966,7 +966,9 @@ async def market_mood() -> dict[str, Any]:
     the 24h news tone (crypto excluded) is shown as a secondary line, never as the verdict."""
     pool = await db_pool.get_pool()
     reg = await pool.fetchrow("SELECT as_of, regime, score, inputs FROM market_regime ORDER BY as_of DESC LIMIT 1")
-    news = await pool.fetchrow("SELECT snapshot_date, overall_score, market_mood, key_themes FROM macro_sentiment ORDER BY snapshot_date DESC LIMIT 1")
+    # macro_sentiment.articles_analyzed added 2026-11-01 by the table owner (additive); readers do not run DDL
+    news = await pool.fetchrow("SELECT snapshot_date, overall_score, market_mood, key_themes, COALESCE(articles_analyzed, cardinality(source_article_ids)) AS articles_analyzed FROM macro_sentiment ORDER BY snapshot_date DESC LIMIT 1")
+    news_count = int(news["articles_analyzed"] or 0) if news else 0
     label_th = {"risk_on": "เสี่ยงได้ (risk-on)", "risk_off": "ระวัง (risk-off)", "neutral": "กลาง ๆ (neutral)"}
     inputs = reg["inputs"] if reg else None
     if isinstance(inputs, str):
@@ -975,8 +977,10 @@ async def market_mood() -> dict[str, Any]:
             "score": float(reg["score"]) if reg else None, "as_of": str(reg["as_of"]) if reg else None,
             "inputs": (inputs or {}).get("inputs") if isinstance(inputs, dict) else None,
             "source": "price regime: TDEX/SPY vs SMA200, VIX, US10y, USD/THB, gold, Brent, SET foreign flow (signals.compute_regime)",
-            "news_tone": {"mood": news["market_mood"], "score": float(news["overall_score"]) if news and news["overall_score"] is not None else None,
-                          "as_of": str(news["snapshot_date"]), "note_th": "โทนข่าว 24 ชม. (ไม่รวมคริปโต) — ข้อมูลประกอบ ไม่ใช่ตัวตัดสิน"} if news else None,
+            "news_tone": {"mood": "unknown" if news_count == 0 else news["market_mood"],
+                          "score": float(news["overall_score"]) if news_count > 0 and news["overall_score"] is not None else None,
+                          "articles_analyzed": news_count, "as_of": str(news["snapshot_date"]),
+                          "note_th": "โทนข่าว 24 ชม. (ไม่รวมคริปโต) — ข้อมูลประกอบ ไม่ใช่ตัวตัดสิน"} if news else None,
             "crypto_note_th": "คริปโตไม่ถูกนับในอารมณ์ตลาด — ดูการ์ดเหตุการณ์คริปโตสำคัญแยก"}
 
 

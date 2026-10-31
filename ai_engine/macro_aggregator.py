@@ -55,6 +55,10 @@ CRYPTO_TITLE_RE = r"bitcoin|\mbtc\M|ethereum|\meth\M|crypto|stablecoin|binance|c
 
 async def aggregate_macro_sentiment() -> dict[str, Any]:
     pool = await db_pool.get_pool()
+    try:  # additive; already applied by the table owner on 2026-11-01 - the app role may not own the table
+        await pool.execute("ALTER TABLE macro_sentiment ADD COLUMN IF NOT EXISTS articles_analyzed INTEGER")
+    except Exception:
+        pass
     rows = await pool.fetch(
         """
         SELECT DISTINCT s.id, s.article_id, s.ticker, s.score, s.confidence,
@@ -90,8 +94,13 @@ async def aggregate_macro_sentiment() -> dict[str, Any]:
         for keyword in KEYWORDS:
             if re.search(re.escape(keyword), title, re.IGNORECASE):
                 theme_counts[keyword] += 1
-    overall = round(weighted_sum / total_weight, 4) if total_weight else 0.0
-    mood = "risk-on" if overall > 0.2 else "risk-off" if overall < -0.2 else "neutral"
+    no_articles = len(article_ids) == 0
+    nullable = await pool.fetchval(
+        """SELECT is_nullable = 'YES' FROM information_schema.columns
+           WHERE table_schema=current_schema() AND table_name='macro_sentiment' AND column_name='overall_score'"""
+    )
+    overall = (None if nullable else 0.0) if no_articles else round(weighted_sum / total_weight, 4) if total_weight else 0.0
+    mood = "unknown" if no_articles else "risk-on" if overall > 0.2 else "risk-off" if overall < -0.2 else "neutral"
     sector_scores = {
         sector: round(sum(scores) / len(scores), 4)
         for sector, scores in sector_values.items()
@@ -101,17 +110,18 @@ async def aggregate_macro_sentiment() -> dict[str, Any]:
         """
         INSERT INTO macro_sentiment (
             snapshot_date, overall_score, market_mood, sector_scores,
-            key_themes, source_article_ids
-        ) VALUES (CURRENT_DATE, $1, $2, $3::jsonb, $4::text[], $5::uuid[])
+            key_themes, source_article_ids, articles_analyzed
+        ) VALUES (CURRENT_DATE, $1, $2, $3::jsonb, $4::text[], $5::uuid[], $6)
         ON CONFLICT (snapshot_date) DO UPDATE SET
             overall_score = EXCLUDED.overall_score,
             market_mood = EXCLUDED.market_mood,
             sector_scores = EXCLUDED.sector_scores,
             key_themes = EXCLUDED.key_themes,
             source_article_ids = EXCLUDED.source_article_ids,
+            articles_analyzed = EXCLUDED.articles_analyzed,
             created_at = NOW()
         """,
-        overall, mood, json.dumps(sector_scores), themes, list(article_ids),
+        overall, mood, json.dumps(sector_scores), themes, list(article_ids), len(article_ids),
     )
     result = {
         "records_saved": 1, "overall_score": overall, "market_mood": mood,

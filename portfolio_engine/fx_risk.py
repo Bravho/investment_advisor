@@ -205,6 +205,8 @@ def _compute(positions: list[dict[str, Any]], raw: Optional[pd.DataFrame], fx_fc
     port_beta = sum(l["weight_pct"] / 100 * l["beta_used"] for l in lines)
     net_direct_thb = sum(l["value_thb"] * (l["net_direct_fx_share"] or 0) for l in lines)
     unknown_direct_thb = sum(l["value_thb"] for l in lines if l["direct_foreign_share"] is None)
+    unknown_exposure_weight = sum(l["weight_pct"] / 100 for l in lines if l["beta_basis"] == "unknown -> 0")
+    unknown_direct_exposure_weight = sum(l["weight_pct"] / 100 for l in lines if l["direct_foreign_share"] is None)
     sd = float(fx_ret.iloc[-252:].std())
     fx_var = {"usdthb_daily_vol_pct": round(sd * 100, 3),
               "var95_1d_thb": round(Z95 * sd * abs(port_beta) * total), "var95_1m_thb": round(Z95 * sd * math.sqrt(21) * abs(port_beta) * total),
@@ -280,12 +282,16 @@ def _compute(positions: list[dict[str, Any]], raw: Optional[pd.DataFrame], fx_fc
                "usdthb_vol_3m_ann_pct": usd.get("vol_3m_ann_pct"), "portfolio_fx_beta": round(port_beta, 3),
                "net_direct_fx_thb": round(net_direct_thb), "net_direct_fx_pct": round(net_direct_thb / total * 100, 2),
                "unknown_direct_thb": round(unknown_direct_thb), "fx_var95_1m_thb": fx_var["var95_1m_thb"],
+               "unknown_exposure_weight": round(unknown_exposure_weight, 4),
+               "unknown_direct_exposure_weight": round(unknown_direct_exposure_weight, 4),
                "thb_plus10_pnl_thb": next(s["economic_pnl_thb"] for s in scen if s["usdthb_move_pct"] == -10.0),
                "thb_minus10_pnl_thb": next(s["economic_pnl_thb"] for s in scen if s["usdthb_move_pct"] == 10.0),
                "fx_share_of_variance_pct": (var_split.get("share_of_variance_pct") or {}).get("usdthb"),
                "open_questions": len(open_q)}
     out = {"generated_at": datetime.now(timezone.utc).isoformat(), "fx_convention": FX_CONVENTION, "spot_usdthb": spot,
            "pairs": pairs, "portfolio_value_thb": round(total), "positions": lines, "portfolio_fx_beta": round(port_beta, 3),
+           "unknown_exposure_weight": round(unknown_exposure_weight, 4),
+           "unknown_direct_exposure_weight": round(unknown_direct_exposure_weight, 4),
            "fx_var": fx_var, "variance_split": var_split, "scenarios": scen, "historical_1m_extremes": hist,
            "scbgolde_gold_vs_fx": gold_split, "forecast_fx_assumptions": fc_rows, "open_questions": open_q,
            "summary": summary, "reading": _reading(summary, lines),

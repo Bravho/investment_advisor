@@ -267,11 +267,13 @@ def look_through_currency_exposure(
                 "usd_linked_value_thb": round(value * usd_share, 2),
                 "thb_depreciation_beta": beta,
                 "confidence": assumption.get("confidence"),
+                "exposure_unknown": ticker in unmapped,
             }
         )
 
     listed_thb_pct = listed_thb / total * 100.0
     economic_usd_pct = economic_usd / total * 100.0
+    unknown_value = sum(float(values[ticker] or 0) for ticker in unmapped)
 
     result: dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -285,6 +287,8 @@ def look_through_currency_exposure(
         "economic_thb_exposure_pct": round(100.0 - economic_usd_pct, 2),
         "portfolio_thb_depreciation_beta": round(weighted_beta, 3),
         "unmapped_tickers": unmapped,
+        "unknown_exposure_weight": round(unknown_value / total, 4),
+        "unknown_exposure_pct": round(unknown_value / total * 100, 2),
     }
 
     result["headline"] = (

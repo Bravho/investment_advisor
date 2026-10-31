@@ -215,7 +215,7 @@ def _load_gold_drawdown(
         return {}
 
 
-def _parse_leading_float(value: Any, default: float = 0.0) -> float:
+def _parse_leading_float(value: Any, default: Optional[float] = None) -> Optional[float]:
     """
     Parse a leading float out of a value that may be a number or a string with
     trailing annotation (e.g. "33.22 (Jun 24, 2026)" -> 33.22). Used because some
@@ -235,19 +235,18 @@ def _parse_leading_float(value: Any, default: float = 0.0) -> float:
     return default
 
 
-def _load_scbgolde_weight(default: float = 0.25) -> float:
+def _load_scbgolde_weight() -> Optional[float]:
     """
     Estimate the SCBGOLDE (gold fund) fraction of the portfolio from the live
     portfolio snapshot, for the currency-regime THB-NAV cushion figure. The gold
     sleeve is the book's only USD-priced exposure, so its weight drives how much
-    a weak baht cushions the THB NAV. Falls back to `default` if the snapshot is
-    missing the gold value (it sometimes lacks a fund NAV price).
+    a weak baht cushions the THB NAV. Missing valuation data stays unknown.
     Added by nightly agent 2026-06-26
     """
     try:
         snap_path = PROJECT_DIR / "data_collector" / "portfolio_snapshot.json"
         if not snap_path.exists():
-            return default
+            return None
         snap = json.loads(snap_path.read_text(encoding="utf-8"))
         holdings = snap.get("holdings", {})
         total = float(snap.get("total_market_value_thb") or 0)
@@ -260,9 +259,9 @@ def _load_scbgolde_weight(default: float = 0.25) -> float:
             # total may exclude the gold leg when its price is missing; normalise
             denom = total if gold_val <= total else (total + gold_val)
             return round(gold_val / denom, 4)
-        return default
+        return None
     except Exception:
-        return default
+        return None
 
 
 def _load_currency_regime(
@@ -846,28 +845,32 @@ async def generate_daily_brief() -> dict[str, Any]:
     macro_context = watchlist_snapshot.get("macro_context", {})
 
     # PTTEP oil-price scenario analysis — Added by nightly agent 2026-06-14
-    # Reads current Brent from watchlist macro_context (falls back to 87.5).
+    # Reads current Brent from watchlist macro_context; missing stays unknown.
     try:
-        current_brent = float(macro_context.get("brent_crude_usd", 87.5))
-        oil_scenario = run_oil_scenario_report(current_brent_usd=current_brent)
+        _brent_raw = macro_context.get("brent_crude_usd")
+        current_brent = float(_brent_raw) if _brent_raw is not None else None
+        oil_scenario = (run_oil_scenario_report(current_brent_usd=current_brent) if current_brent is not None
+                        else {"status": "unknown", "reason": "Brent price unavailable"})
     except Exception:
         logger.warning("oil scenario report failed — skipping")
-        oil_scenario = {}
+        oil_scenario = {"status": "unknown", "reason": "Brent-dependent analysis unavailable"}
 
     # PTTEP position-level oil risk score — Added by nightly agent 2026-06-17
     # Surfaces the numeric oil_scenario_risk_flag output (risk_level +
     # position_risk_score) in the brief alongside the scenario table, so Tho sees
     # the position RISK LEVEL, not just the scenario narrative. Last run's queued #1.
     try:
-        _brent_now = float(macro_context.get("brent_crude_usd", 87.5))
+        _brent_raw = macro_context.get("brent_crude_usd")
+        _brent_now = float(_brent_raw) if _brent_raw is not None else None
         _deal_flag = str(macro_context.get("us_iran_status_flag", "")).lower()
         _deal_confirmed = any(
             k in _deal_flag for k in ("confirmed", "signed", "framework", "complete")
         )
-        oil_position_risk = _load_oil_position_risk(_brent_now, _deal_confirmed)
+        oil_position_risk = (_load_oil_position_risk(_brent_now, _deal_confirmed) if _brent_now is not None
+                             else {"status": "unknown", "reason": "Brent price unavailable"})
     except Exception:
         logger.warning("oil position risk flag failed — skipping")
-        oil_position_risk = {}
+        oil_position_risk = {"status": "unknown", "reason": "Brent-dependent analysis unavailable"}
 
     # Probability-weighted oil outlook — Added by nightly agent 2026-06-19
     # Collapses the named Brent scenarios into one expected-value read (expected
@@ -884,19 +887,21 @@ async def generate_daily_brief() -> dict[str, Any]:
     # driven by the realised funds rate + dot-plot bias from the watchlist macro
     # context, so the gold/currency read is data-driven. Last run's queued #2.
     try:
-        _fed_rate = float(macro_context.get("us_fed_funds_rate_pct", 3.625))
+        _fed_raw = macro_context.get("us_fed_funds_rate_pct")
+        _fed_rate = float(_fed_raw) if _fed_raw is not None else None
         _fed_bias = str(
             macro_context.get("fomc_jun17_dot_plot_bias")
-            or macro_context.get("fed_dot_plot_bias", "neutral")
+            or macro_context.get("fed_dot_plot_bias")
         )
         # Market-implied next-meeting hike odds (Added by nightly agent 2026-06-27);
         # None when absent → text-only bias (backward compatible).
         _hp_raw = macro_context.get("fed_hike_prob_next_meeting_pct")
         _fed_hike_prob = float(_hp_raw) if _hp_raw is not None else None
-        fed_policy_risk = _load_fed_policy_risk(_fed_rate, _fed_bias, hike_prob_pct=_fed_hike_prob)
+        fed_policy_risk = (_load_fed_policy_risk(_fed_rate, _fed_bias, hike_prob_pct=_fed_hike_prob)
+                           if _fed_rate is not None else {"status": "unknown", "reason": "Fed funds rate unavailable"})
     except Exception:
         logger.warning("fed policy risk flag failed — skipping")
-        fed_policy_risk = {}
+        fed_policy_risk = {"status": "unknown", "reason": "Fed-dependent analysis unavailable"}
 
     # Gold-fund drawdown classification — Added by nightly agent 2026-06-20
     # Labels a falling gold NAV as a Fed-driven dip (hold/add) vs a possible
@@ -908,14 +913,16 @@ async def generate_daily_brief() -> dict[str, Any]:
         if _nav_cur is not None and _nav_high is not None:
             _g_cur, _g_high = float(_nav_cur), float(_nav_high)
         else:
-            _g_cur = float(macro_context.get("gold_current_usd", macro_context.get("gold_spot_usd", 0)) or 0)
-            _g_high = float(
-                macro_context.get("gold_recent_high_usd", macro_context.get("gold_trailing_high_usd", _g_cur)) or _g_cur
-            )
-        gold_drawdown = _load_gold_drawdown(_g_cur, _g_high, fed_policy_risk) if _g_high > 0 else {}
+            _g_cur_raw = macro_context.get("gold_current_usd", macro_context.get("gold_spot_usd"))
+            _g_high_raw = macro_context.get("gold_recent_high_usd", macro_context.get("gold_trailing_high_usd"))
+            _g_cur = float(_g_cur_raw) if _g_cur_raw is not None else None
+            _g_high = float(_g_high_raw) if _g_high_raw is not None else None
+        gold_drawdown = (_load_gold_drawdown(_g_cur, _g_high, fed_policy_risk)
+                         if _g_cur is not None and _g_high is not None and _g_high > 0
+                         else {"status": "unknown", "reason": "gold current/high levels unavailable"})
     except Exception:
         logger.warning("gold drawdown monitor failed — skipping")
-        gold_drawdown = {}
+        gold_drawdown = {"status": "unknown", "reason": "gold drawdown inputs unavailable"}
 
     # Baht-regime FX trade-off — Added by nightly agent 2026-06-26
     # Surfaces the two-sided currency_regime_flag in Section 2: a weak baht
@@ -923,17 +930,17 @@ async def generate_daily_brief() -> dict[str, Any]:
     # Reads USD/THB + the prior 1-yr high from the watchlist and the gold-sleeve
     # weight from the live snapshot. Last run's queued #2 (baht-regime watch).
     try:
-        _usd_thb = _parse_leading_float(
-            macro_context.get("usd_thb", macro_context.get("usd_thb_rate", 0)), 0.0
-        )
-        _usd_thb_high = _parse_leading_float(macro_context.get("usd_thb_1yr_high", 0), 0.0)
+        _usd_thb = _parse_leading_float(macro_context.get("usd_thb", macro_context.get("usd_thb_rate")))
+        _usd_thb_high = _parse_leading_float(macro_context.get("usd_thb_1yr_high"))
         _scbgolde_w = _load_scbgolde_weight()
         currency_regime = (
-            _load_currency_regime(_usd_thb, _usd_thb_high, _scbgolde_w) if _usd_thb > 0 else {}
+            _load_currency_regime(_usd_thb, _usd_thb_high, _scbgolde_w)
+            if None not in (_usd_thb, _usd_thb_high, _scbgolde_w) and _usd_thb > 0
+            else {"status": "unknown", "reason": "USD/THB level, high, or gold weight unavailable"}
         )
     except Exception:
         logger.warning("currency regime flag failed — skipping")
-        currency_regime = {}
+        currency_regime = {"status": "unknown", "reason": "currency-regime inputs unavailable"}
 
     # BOJ carry-unwind risk for Section 4 (Regional) — Added by nightly agent 2026-06-29
     # Surfaces the numeric japan_policy_risk_flag (risk_level + score + priced BOJ
@@ -942,17 +949,18 @@ async def generate_daily_brief() -> dict[str, Any]:
     # implied next-meeting hike odds from the watchlist macro context. Last run's
     # queued #1 (surface japan_policy_risk_flag in the brief).
     try:
-        _boj_rate = float(macro_context.get("boj_policy_rate_pct", 1.0))
+        _boj_raw = macro_context.get("boj_policy_rate_pct")
+        _boj_rate = float(_boj_raw) if _boj_raw is not None else None
         _usd_jpy = macro_context.get("usd_jpy", macro_context.get("usd_jpy_rate"))
         _usd_jpy = float(_usd_jpy) if _usd_jpy is not None else None
         _boj_hp_raw = macro_context.get("boj_hike_prob_next_meeting_pct")
         _boj_hike_prob = float(_boj_hp_raw) if _boj_hp_raw is not None else None
-        japan_policy_risk = _load_japan_policy_risk(
+        japan_policy_risk = (_load_japan_policy_risk(
             _boj_rate, usd_jpy_rate=_usd_jpy, boj_hike_prob_pct=_boj_hike_prob
-        )
+        ) if _boj_rate is not None else {"status": "unknown", "reason": "BOJ policy rate unavailable"})
     except Exception:
         logger.warning("japan policy risk flag failed — skipping")
-        japan_policy_risk = {}
+        japan_policy_risk = {"status": "unknown", "reason": "BOJ-dependent analysis unavailable"}
 
     # Catalyst slippage / this-week watch — Added by nightly agent 2026-06-16
     # Surfaces (a) scheduled catalysts that passed without confirmation and

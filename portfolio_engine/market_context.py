@@ -44,11 +44,14 @@ def _chg(v: Any, basis: str = "%") -> str:
 
 async def mood(pool: Any) -> dict[str, Any]:
     reg = await pool.fetchrow("SELECT as_of, regime, score FROM market_regime ORDER BY as_of DESC LIMIT 1")
-    news = await pool.fetchrow("SELECT snapshot_date, overall_score, market_mood FROM macro_sentiment ORDER BY snapshot_date DESC LIMIT 1")
+    # macro_sentiment.articles_analyzed added 2026-11-01 by the table owner (additive); readers do not run DDL
+    news = await pool.fetchrow("SELECT snapshot_date, overall_score, market_mood, COALESCE(articles_analyzed, cardinality(source_article_ids)) AS articles_analyzed FROM macro_sentiment ORDER BY snapshot_date DESC LIMIT 1")
+    news_count = int(news["articles_analyzed"] or 0) if news else 0
     return {"verdict": reg["regime"] if reg else "unknown", "score": float(reg["score"]) if reg else None,
             "as_of": str(reg["as_of"]) if reg else None,
-            "news_tone": {"mood": news["market_mood"], "score": float(news["overall_score"]) if news["overall_score"] is not None else None,
-                          "as_of": str(news["snapshot_date"])} if news else None}
+            "news_tone": {"mood": "unknown" if news_count == 0 else news["market_mood"],
+                          "score": float(news["overall_score"]) if news_count > 0 and news["overall_score"] is not None else None,
+                          "articles_analyzed": news_count, "as_of": str(news["snapshot_date"])} if news else None}
 
 
 async def gather(pool: Any) -> dict[str, Any]:
@@ -82,7 +85,7 @@ def render(ctx: dict[str, Any], max_cards: int = 21) -> str:
         lines.append("\n### Macro trends board")
         for c in cards[:max_cards]:
             age = _age_days(c.get("as_of"))
-            stale = " STALE" if age is not None and age > STALE_DAYS else ""
+            stale = " UNVERIFIED DATE" if age is None else " STALE" if age > STALE_DAYS else ""
             basis = c.get("change_basis") or "%"
             hold = f" -> {', '.join(c['holdings'])}" if c.get("holdings") else ""
             lines.append(f"- {c.get('name_en') or c.get('name_th')}: {_num(c.get('value'))} {c.get('unit') or ''} "
