@@ -294,6 +294,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 macro_ctx = (await client.get(f"{ENGINE_URL}/macro/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
                 macro_ctx = "=== KEY MACRO INDICATOR TRENDS ===\n  Macro board unavailable - do not quote macro forecasts or policy rates."
+            try:  # 2026-10-31: Thai fund watch list (tax-deductible ThaiESG/RMF vs general funds) - Finnomena NAVs
+                fund_ctx = (await client.get(f"{ENGINE_URL}/funds/watchlist/advisor-context")).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                fund_ctx = "=== THAI FUND WATCH LIST ===\n  Fund watch list unavailable - do not quote fund NAVs."
     except Exception as exc:  # noqa: BLE001
         logger.warning("engine context unavailable: %s", exc)
         return "=== ENGINE DATA NOTE ===\n  Forecast/signal engine (8996) unreachable - do not quote forecasts.", tickers
@@ -320,6 +324,7 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
         lines.append(setup_ctx)
     lines.append(fx_ctx)
     lines.append(macro_ctx)
+    lines.append(fund_ctx)
     lines.append(owner_holds_block())
     return "\n".join(lines) + "\n\n" + fc, tickers
 
