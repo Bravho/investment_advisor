@@ -236,6 +236,11 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     tgt_val[glob] = rec["global_equity"] / 100 * total if "global_equity" in trade_classes else 0.0
     trades, cash_flow = [], 0.0
     lp = {SET_PROXY: float(px[SET_PROXY].dropna().iloc[-1]), glob: spy}
+    # 2026-10-31: owner holds (PTTEP.BK, SCB.BK): Tho will not sell them until he is satisfied with the project.
+    # A SELL/trim for them is never proposed; the would-be trim is reported as INFORMATIONAL only.
+    from holding_meta import load_owner_holds
+    owner_holds = load_owner_holds()
+    informational: list[dict[str, Any]] = []
     for t, tv in tgt_val.items():
         if t in locked:
             continue  # fixed weight; no trade suggested before lock_until
@@ -249,6 +254,11 @@ async def run_construction(pool: Any) -> dict[str, Any]:
         local_px = price_thb / (usdthb if not t.endswith(".BK") and t != "SCBGOLDE" else 1)
         units = math.floor(abs(d_val) / price_thb / lot) * lot * (1 if d_val > 0 else -1)
         if abs(units * price_thb) < rb["min_trade_thb"]:
+            continue
+        if units < 0 and t in owner_holds:
+            informational.append({"ticker": t, "type": "concentration_info", "would_reduce_thb": round(abs(units * price_thb), 0),
+                                  "from_pct": round(cv / total * 100, 2), "model_target_pct": round(tv / total * 100, 2),
+                                  "note": "INFORMATIONAL ONLY - owner hold (" + str(owner_holds[t].get("reason")) + "). No sell/trim suggested."})
             continue
         notional = units * price_thb
         cost = _cost(t, notional)
@@ -276,6 +286,10 @@ async def run_construction(pool: Any) -> dict[str, Any]:
         "locked_holdings": [{"ticker": t, "tax_wrapper": by_ticker[t].get("tax_wrapper"), "lock_until": by_ticker[t].get("lock_until"),
                              "value_thb": round(by_ticker[t]["value_thb"], 0), "units_status": by_ticker[t].get("units_status")}
                             for t in sorted(locked)],
+        "owner_holds": sorted(owner_holds),
+        "informational_not_actions": informational,
+        "funding_note": ("Owner-hold trims are NOT suggested, so any BUY above would need NEW money (no sale proceeds). "
+                         "A USD buy (e.g. SPY) also adds unhedged USD/THB exposure - see the FX risk panel.") if informational else None,
         "cash_after_trades_thb": round(cash_after, 0),
         "cash_yield_ref": {"bot_policy_rate_pct": float(bot) if bot is not None else None, "source": "market_factors.bot_rate"},
         "notes": ["Cash balance is not tracked in the DB; cash after trades assumes zero starting cash.",
@@ -284,7 +298,10 @@ async def run_construction(pool: Any) -> dict[str, Any]:
                   "Phase in large changes (e.g. thirds over 3 months) to limit timing risk.",
                   "Tax-locked holdings (ThaiESG) are held at their current value and never sold/switched before lock_until; "
                   "they count toward the Thai equity class, so the other Thai positions absorb any Thai trim.",
-                  "Position cap %.0f%% and sector caps from config/risk_limits.json apply." % max_pos],
+                  "Position cap %.0f%% and sector caps from config/risk_limits.json apply." % max_pos,
+                  "Owner holds (config/owner_holds.json: " + ", ".join(sorted(owner_holds)) + ") are never sold or trimmed by this engine; "
+                  "any gap to the model target is listed under informational_not_actions only.",
+                  "FX: gold and global sleeves are USD-exposed (unhedged unless the fund class says otherwise); see fx_risk for USD/THB scenarios."],
         "sources": {"prices": "yfinance", "regime": "market_regime", "views": "predictions (frozen 1y)", "policy": str(POLICY_PATH.name)},
     }
     async with pool.acquire() as conn:

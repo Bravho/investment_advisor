@@ -67,3 +67,33 @@ def lock_label(attr: Optional[dict[str, Any]]) -> Optional[str]:
     if is_pending(attr):
         s += f"; units pending confirmation (invested {float(attr.get('amount_invested_thb') or 0):,.0f} THB, allotment {attr.get('purchase_date')})"
     return s
+
+
+# --------------------------------------------------------------------------------------------
+# Owner holds (2026-10-31): positions Tho has said he will NOT sell (PTTEP.BK, SCB.BK until he is
+# satisfied with the project). Engines must never propose a sell/trim/switch for them; any
+# concentration or limit note about them is INFORMATIONAL only. Source: config/owner_holds.json.
+# --------------------------------------------------------------------------------------------
+import json as _json
+from pathlib import Path as _Path
+
+OWNER_HOLDS_PATH = _Path(__file__).resolve().parents[1] / "config" / "owner_holds.json"
+
+
+def load_owner_holds() -> dict[str, dict[str, Any]]:
+    try:
+        data = _json.loads(OWNER_HOLDS_PATH.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+    return {t: h for t, h in (data.get("holds") or {}).items() if h.get("no_sell")}
+
+
+def owner_hold_tickers() -> set[str]:
+    return set(load_owner_holds())
+
+
+def owner_hold_label(ticker: str) -> Optional[str]:
+    h = load_owner_holds().get(ticker)
+    if not h:
+        return None
+    return f"owner hold since {h.get('since')} (no sell/trim suggested; {h.get('until')})"

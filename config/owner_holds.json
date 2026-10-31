@@ -1,0 +1,17 @@
+{
+  "_note": "Owner decisions that override engine suggestions (added 2026-10-31). The advisory engine must NOT propose selling, trimming or switching these. Any concentration / limit note about them is INFORMATIONAL only, never an action. Change only on Tho's explicit instruction.",
+  "holds": {
+    "PTTEP.BK": {
+      "no_sell": true,
+      "since": "2026-10-31",
+      "until": "released by Tho",
+      "reason": "Tho (2026-10-31): will not sell PTTEP or SCB until he is completely satisfied with this project, its analysis results and structure."
+    },
+    "SCB.BK": {
+      "no_sell": true,
+      "since": "2026-10-31",
+      "until": "released by Tho",
+      "reason": "Tho (2026-10-31): will not sell PTTEP or SCB until he is completely satisfied with this project, its analysis results and structure."
+    }
+  }
+}

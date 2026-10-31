@@ -61,6 +61,10 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
     from holding_meta import is_pending, load_attrs, locked_tickers
     attrs = await load_attrs(pool)
     locked = locked_tickers(attrs)  # ThaiESG etc.: never a sell/switch/trim candidate before lock_until (2026-10-30)
+    # 2026-10-31: owner holds (PTTEP.BK, SCB.BK) - Tho will not sell until satisfied with the project -> never a sell candidate.
+    from holding_meta import owner_hold_tickers
+    owner_holds = owner_hold_tickers()
+    locked = set(locked) | owner_holds
     base_currency = snapshot.get("base_currency", os.getenv("BASE_CURRENCY", "THB"))
     values_by_class: dict[str, float] = defaultdict(float)
     positions: list[dict[str, Any]] = []
@@ -98,7 +102,7 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
                     "ticker": asset_class.upper(),
                     "action": "hold",
                     "amount_thb": 0.0,
-                    "reason": f"{asset_class} is overweight by {drift:+.1%} but every holding in it is tax-locked "
+                    "reason": f"{asset_class} is overweight by {drift:+.1%} (INFORMATIONAL) but every holding in it is tax-locked or an owner hold "
                               f"({', '.join(sorted(t for t in locked if any(p['ticker'] == t for p in positions)))}); no sell suggested",
                     "sentiment_conflict": False,
                     "validated": False,
@@ -414,4 +418,23 @@ def single_name_concentration_review(
         "Analysis only. Not licensed financial advice, and no trade is executed or scheduled "
         "by this function."
     )
+    # 2026-10-31: owner holds - Tho will not sell PTTEP/SCB until satisfied with the project.
+    # Any breach on those names is INFORMATIONAL: keep the numbers, drop the action framing.
+    try:
+        from holding_meta import load_owner_holds
+        holds = load_owner_holds()
+    except Exception:  # noqa: BLE001
+        holds = {}
+    if holds:
+        for p in proposal.get("positions") or []:
+            if p.get("ticker") in holds:
+                p["owner_hold"] = True
+                p["informational_only"] = True
+        proposal["owner_holds"] = sorted(holds)
+        actionable = [t for t in proposal.get("material_name_breaches") or [] if t not in holds]
+        if proposal.get("status") == "action_suggested" and not actionable:
+            proposal["status"] = "informational_owner_hold"
+        proposal["owner_hold_note"] = (
+            "INFORMATIONAL ONLY for " + ", ".join(sorted(holds)) + ": Tho has decided not to sell these until he is "
+            "satisfied with the project. Trim sizes are shown for context, not as a suggested action.")
     return proposal
