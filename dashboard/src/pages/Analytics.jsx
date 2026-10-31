@@ -9,7 +9,7 @@ import { usePerformance, usePortfolio, useRisk } from '../hooks/usePortfolio'
 import { money } from '../utils/format'
 
 export default function Analytics() {
-  const [days, setDays] = useState(30)
+  const [days, setDays] = useState(() => [7, 30, 90].includes(Number(new URLSearchParams(window.location.search).get('days'))) ? Number(new URLSearchParams(window.location.search).get('days')) : 30)
   const [plan, setPlan] = useState(null)
   const [planning, setPlanning] = useState(false)
   const [approving, setApproving] = useState(false)

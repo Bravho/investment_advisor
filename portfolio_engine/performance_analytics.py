@@ -77,13 +77,24 @@ async def get_performance_summary(days: int = 30, force_refresh: bool = False) -
             """,
             days,
         )
-        values = [float(row["total_value_thb"] or 0) for row in records]
-        returns = [float(row["daily_pnl_pct"] or 0) for row in records]
-        portfolio = _metrics(values, returns)
-        set_metrics, sp_metrics = await asyncio.gather(
-            _benchmark(pool, "^SET.BK", days),
-            _benchmark(pool, "^GSPC", days),
-        )
+        # 2026-10-31: the recorded totals mix purchases (e.g. +300k ThaiESG on 30 Oct) and unpriced days with
+        # performance, daily_pnl_pct is always 0 and ^SET.BK/^GSPC are not in market_prices - so the old
+        # first-vs-last-total "return" (63.8%), Sharpe 0 and flat benchmarks were wrong. Use the time-weighted,
+        # flow-neutral series (perf_series) instead; legacy recorded totals stay available as recorded_totals.
+        import perf_series
+        twr = await perf_series.build(pool, days)
+        tp = twr.get("portfolio") or {}
+        portfolio = {"return": tp.get("return_pct"), "sharpe_ratio": tp.get("sharpe"), "max_drawdown": tp.get("max_drawdown_pct"),
+                     "win_rate": tp.get("win_rate"), "best_day": tp.get("best_day_pct"), "worst_day": tp.get("worst_day_pct")}
+
+        def _bm(key: str) -> dict[str, Any]:
+            b = (twr.get("benchmarks") or {}).get(key)
+            if not b:
+                return {"return": None, "error": (twr.get("benchmark_errors") or {}).get(key, "unavailable")}
+            return {"ticker": b.get("ticker"), "label": (twr.get("benchmark_labels") or {}).get(key), "return": b.get("return_pct"),
+                    "sharpe_ratio": b.get("sharpe"), "max_drawdown": b.get("max_drawdown_pct"), "win_rate": b.get("win_rate"),
+                    "best_day": b.get("best_day_pct"), "worst_day": b.get("worst_day_pct")}
+        set_metrics, sp_metrics = _bm("SET"), _bm("SP500")
         holdings = await pool.fetch("SELECT ticker, quantity, avg_cost_price FROM holdings ORDER BY ticker")
         snapshot = load_snapshot()
         total_value = float(snapshot.get("total_market_value_thb") or 0)
@@ -155,9 +166,16 @@ async def get_performance_summary(days: int = 30, force_refresh: bool = False) -
             "max_drawdown": portfolio["max_drawdown"],
             "win_rate": portfolio["win_rate"],
             "benchmark_comparison": {
-                "SET": {**set_metrics, "alpha": round(portfolio["return"] - set_metrics["return"], 4)},
-                "SP500": {**sp_metrics, "alpha": round(portfolio["return"] - sp_metrics["return"], 4)},
+                "SET": {**set_metrics, "alpha": round(portfolio["return"] - set_metrics["return"], 2) if None not in (portfolio["return"], set_metrics.get("return")) else None},
+                "SP500": {**sp_metrics, "alpha": round(portfolio["return"] - sp_metrics["return"], 2) if None not in (portfolio["return"], sp_metrics.get("return")) else None},
             },
+            "method": twr.get("method"), "window": twr.get("window"), "series": twr.get("series", []),
+            "sharpe_note": tp.get("sharpe_note"), "mdd_note": tp.get("mdd_note"), "n_returns": tp.get("n_returns"),
+            "vol_pct": tp.get("vol_pct"), "risk_free": twr.get("risk_free"), "notes": twr.get("notes", []),
+            "provisional_note_th": twr.get("provisional_note_th"), "pending_contributions": twr.get("pending_contributions"),
+            "error": twr.get("error"),
+            "recorded_totals": [{"date": str(r["record_date"]), "total_value_thb": float(r["total_value_thb"] or 0)} for r in records],
+            "recorded_totals_note": "raw recorded totals include purchases and unpriced days - NOT a return series",
             "holdings_breakdown": breakdown,
             "best_day": portfolio["best_day"],
             "worst_day": portfolio["worst_day"],
