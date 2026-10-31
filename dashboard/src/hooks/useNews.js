@@ -16,3 +16,11 @@ export const useSectorMoves = (refreshMs = 900000) =>
 // 2026-10-31: Thai fund watch list - tax-deductible (ThaiESG/ThaiESGX/RMF/SSF) vs general funds (portfolio engine /funds/watchlist)
 export const useFundWatchlist = (refreshMs = 900000) =>
   useApi(() => portfolioClient.get('/funds/watchlist', { timeout: 60000 }), [], refreshMs)
+
+// 2026-11-01: high-impact crypto events card (display-only; not in market mood or signals)
+export const useCryptoEvents = (refreshMs = 900000) =>
+  useApi(() => portfolioClient.get('/crypto/events', { timeout: 60000 }), [], refreshMs)
+
+// 2026-11-01: single market-mood verdict = price regime; news tone (crypto excluded) is secondary
+export const useMarketMood = (refreshMs = 300000) =>
+  useApi(() => portfolioClient.get('/market/mood'), [], refreshMs)

@@ -48,6 +48,9 @@ SECTORS = {
     "BTC-USD": "crypto", "ETH-USD": "crypto", "SOL-USD": "crypto",
 }
 IMPACT = {"high": 1.5, "medium": 1.0, "low": 0.5}
+# 2026-11-01: crypto exclusion (tickers + headline words) - see portfolio_engine/crypto_events.py for the crypto card
+CRYPTO_TICKER_RE = r"^(BTC|ETH|SOL|XRP|DOGE|ADA|BNB|AVAX|DOT|LINK|LTC|TRX|TON|SHIB|MATIC|USDT|USDC)(-USD)?$|^(MSTR|COIN|IBIT|FBTC|GBTC|ETHA|MARA|RIOT)$"
+CRYPTO_TITLE_RE = r"bitcoin|\mbtc\M|ethereum|\meth\M|crypto|stablecoin|binance|coinbase|solana|\mxrp\M|dogecoin|blockchain|\mdefi\M|\mnft|tether|altcoin|memecoin|คริปโต|บิตคอยน์"
 
 
 async def aggregate_macro_sentiment() -> dict[str, Any]:
@@ -59,6 +62,8 @@ async def aggregate_macro_sentiment() -> dict[str, Any]:
         FROM sentiment_scores s
         JOIN news_articles a ON a.id = s.article_id
         WHERE s.analyzed_at >= NOW() - INTERVAL '24 hours'
+          -- 2026-11-01 (Tho): crypto stays OUT of the market-mood verdict; high-impact crypto events have their own card
+          AND NOT (COALESCE(s.ticker, '') ~* $2 OR COALESCE(a.title, '') ~* $3)
           AND (
             s.ticker IS NULL OR
             a.title ILIKE ANY($1::text[]) OR
@@ -66,6 +71,8 @@ async def aggregate_macro_sentiment() -> dict[str, Any]:
           )
         """,
         [f"%{keyword}%" for keyword in KEYWORDS],
+        CRYPTO_TICKER_RE,
+        CRYPTO_TITLE_RE,
     )
     weighted_sum = 0.0
     total_weight = 0.0

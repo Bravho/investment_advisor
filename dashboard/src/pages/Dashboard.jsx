@@ -6,6 +6,7 @@ import AdvisoryCandidatesPanel from '../components/AdvisoryCandidatesPanel'
 import StatCard from '../components/StatCard'
 import { ServiceError } from '../components/UI'
 import { useBrief } from '../hooks/useBrief'
+import { useMarketMood } from '../hooks/useNews'
 import { useOpportunities } from '../hooks/useOpportunities'
 import { useAdvisoryCandidates } from '../hooks/useAdvisoryCandidates'
 import { useFactors, useRiskReport, useWatchlist } from '../hooks/usePhase3'
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const opportunities = useOpportunities()
   const advisory = useAdvisoryCandidates()
   const brief = useBrief()
+  const mm = useMarketMood()
   const watch = useWatchlist()
   const factors = useFactors()
   const riskReport = useRiskReport()
@@ -47,8 +49,12 @@ export default function Dashboard() {
   const pnlPct = Number(valueOf(performance.data, ['daily_pnl_pct', 'total_return_pct']))
   const riskScore = normalizeRisk(valueOf(risk.data, ['portfolio_risk_score', 'risk_score'], brief.data?.portfolio_risk_score))
   const riskTone = riskScore < 33 ? 'green' : riskScore < 66 ? 'yellow' : 'red'
-  const mood = brief.data?.macro_mood || 'unknown'
-  const moodTone = mood === 'risk-on' ? 'green' : mood === 'risk-off' ? 'red' : 'gray'
+  // 2026-11-01: ONE verdict = price regime (what signals/construction use); news tone (crypto excluded) is the detail line
+  const regime = mm.data?.verdict || 'unknown'
+  const mood = regime === 'unknown' ? 'unknown' : `${regime.replace('_', '-')}${mm.data?.score != null ? ` (${number(mm.data.score, 2)})` : ''}`
+  const moodTone = regime === 'risk_on' ? 'green' : regime === 'risk_off' ? 'red' : regime === 'neutral' ? 'yellow' : 'gray'
+  const nt = mm.data?.news_tone
+  const moodDetail = `ราคา: regime ${mm.data?.as_of ? new Date(mm.data.as_of).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) : ''} · ข่าว 24 ชม. (ไม่รวมคริปโต): ${nt?.mood || 'unknown'}${nt?.score != null ? ` ${nt.score > 0 ? '+' : ''}${number(nt.score, 2)}` : ''}`
   const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k] : m), '')
   const btAsOf = Object.values(backtest.data?.universes || {}).map(u => u?.run_at).filter(Boolean).sort().pop()
   return <div className="space-y-6">
@@ -57,7 +63,7 @@ export default function Dashboard() {
       <StatCard label="มูลค่าพอร์ตรวม" sublabel="Total Portfolio Value" value={money(portfolio.data?.total_value_thb)} detail={`Base currency: ${portfolio.data?.base_currency || 'THB'}`} icon={Wallet} tone="blue" loading={portfolio.loading} />
       <StatCard label="กำไร/ขาดทุนวันนี้" sublabel="Daily P&L" value={money(pnl)} detail={`${pnlPct >= 0 ? '+' : ''}${number(pnlPct)}%`} icon={Activity} tone={pnl >= 0 ? 'green' : 'red'} loading={performance.loading} />
       <StatCard label="คะแนนความเสี่ยง" sublabel="Portfolio Risk Score" value={`${number(riskScore, 0)} / 100`} detail={riskScore < 33 ? 'Low risk' : riskScore < 66 ? 'Moderate risk' : 'High risk'} icon={CircleGauge} tone={riskTone} loading={risk.loading} />
-      <StatCard label="อารมณ์ตลาด" sublabel="Market Mood" value={mood} detail="Macro sentiment" icon={Landmark} tone={moodTone} loading={brief.loading} />
+      <StatCard label="อารมณ์ตลาด" sublabel="Market Mood" value={mood} detail={moodDetail} icon={Landmark} tone={moodTone} loading={mm.loading} />
     </div>}
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px_340px]"><HoldingsTable holdings={portfolio.data?.holdings} loading={portfolio.loading} error={portfolio.error} retry={portfolio.refetch} /><OpportunityPanel opportunities={opportunities.data} loading={opportunities.loading} error={opportunities.error} retry={opportunities.refetch} /><AdvisoryCandidatesPanel payload={advisory.data} loading={advisory.loading} error={advisory.error} retry={advisory.refetch} /></div>
     <Stamp items={[{ source: 'brief_generator', asOf: brief.data?.generated_at }]}><BriefPanel brief={brief.data} loading={brief.loading} error={brief.error} retry={brief.refetch} /></Stamp>

@@ -208,8 +208,9 @@ async def build_advisory_context(
             )
 
         if macro:
-            overall = _first(macro, "overall", "outlook", "label", default="Unknown")
-            score = _first(macro, "score", "sentiment_score", default="N/A")
+            # 2026-11-01: macro_sentiment columns are market_mood / overall_score (old keys never matched -> "Unknown")
+            overall = _first(macro, "market_mood", "overall", "outlook", "label", default="Unknown")
+            score = _first(macro, "overall_score", "score", "sentiment_score", default="N/A")
             themes = _first(macro, "key_themes", "themes", default=[])
             if isinstance(themes, str):
                 try:
@@ -219,7 +220,8 @@ async def build_advisory_context(
             if isinstance(themes, (list, tuple)):
                 themes = ", ".join(str(theme) for theme in themes)
             sections.append(
-                f"=== MACRO OUTLOOK ===\nOverall: {overall} | Score: {score}\n"
+                f"=== NEWS TONE (24h news sentiment, crypto excluded; NOT the price regime - see MARKET REGIME) ===\n"
+                f"News tone: {overall} | Score: {score} | as of {_first(macro, 'snapshot_date', default='n/a')}\n"
                 f"Key themes: {themes or 'N/A'}"
             )
 
