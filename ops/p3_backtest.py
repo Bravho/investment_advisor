@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "portfolio_engine"), str(ROOT / "ai_engine")]
 import predictions as P  # noqa: E402
 import signals as S  # noqa: E402
+from backtest_gate import gate as acceptance_gate  # noqa: E402
 from market_history import SET_PROXY, download_closes  # noqa: E402
 
 H_TEST = {"1m": 21, "3m": 63, "6m": 126}
@@ -297,6 +298,13 @@ async def main() -> int:
         "macro_segmented_regime_live_rule": walk(recs, is_macro, is_macro, base_models, prior, "regime_B"),
         "prior_weights_core": walk(recs, lambda r: False, is_core, base_models, prior),
     }
+    def gate_input(rows: dict) -> dict:
+        return {h: {"skill": values.get("skill_vs_rw"), "hit": values.get("hit")}
+                for h, values in rows.items()}
+    res["P3.1"]["core_gate_verdict"] = acceptance_gate(
+        gate_input(res["P3.1"]["core_pooled_weights"]),
+        gate_input(res["P3.1"]["core_segmented_weights"]),
+    )
     cross_subj = lambda r: r["subject"] in CROSS and r["models"].get("cross") is not None  # noqa: E731
     prior_x = {**prior, "cross": CROSS_PRIOR}
     res["P3.2"] = {"subjects": CROSS,
