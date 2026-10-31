@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 import os
 from datetime import datetime, timezone
 from typing import Any
@@ -6,12 +7,65 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from utils.common import configure_logging, latest_price, save_recommendation
+from utils.common import configure_logging
 from utils.db_pool import db_pool
+
+try:
+    from advice_policy import apply_owner_hold_policy
+except ImportError:
+    from portfolio_engine.advice_policy import apply_owner_hold_policy
 
 logger = configure_logging("portfolio_engine.opportunities")
 UTC = timezone.utc
 MODEL = os.getenv("OLLAMA_ADVISORY_MODEL", "hermes3:8b")
+
+SHADOW_DDL = """
+CREATE TABLE IF NOT EXISTS scanner_shadow_log (
+    id          BIGSERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ticker      VARCHAR(30) NOT NULL,
+    source      VARCHAR(40) NOT NULL,
+    action      VARCHAR(40) NOT NULL,
+    confidence  DOUBLE PRECISION,
+    rationale   TEXT,
+    price       DOUBLE PRECISION,
+    payload     JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_scanner_shadow_ticker_created
+    ON scanner_shadow_log (ticker, created_at DESC);
+"""
+
+
+async def _save_shadow_item(
+    pool: Any,
+    *,
+    ticker: str,
+    source: str,
+    action: str,
+    confidence: float,
+    rationale: str,
+    price: Any,
+    payload: dict[str, Any],
+) -> None:
+    """Persist unapproved scanner output outside recommendation outcomes."""
+    await pool.execute(SHADOW_DDL)
+    await pool.execute(
+        """INSERT INTO scanner_shadow_log
+               (ticker, source, action, confidence, rationale, price, payload)
+           SELECT $1,$2,$3,$4,$5,$6,$7::jsonb
+           WHERE NOT EXISTS (
+               SELECT 1 FROM scanner_shadow_log
+               WHERE ticker=$1 AND source=$2 AND action=$3 AND rationale=$5
+                 AND created_at >= NOW() - INTERVAL '30 minutes'
+           )""",
+        ticker,
+        source,
+        action,
+        confidence,
+        rationale,
+        price,
+        json.dumps(payload, default=str),
+    )
 
 
 CRYPTO_SUFFIXES = ("-USD", "-USDT", "-BTC", "-ETH")
@@ -163,19 +217,20 @@ async def scan_opportunities() -> list[dict[str, Any]]:
                 "scanned_at": datetime.now(UTC).isoformat(),
                 "price_source": price_source,
                 "backtested": False,
+                "shadow": True,
                 "note_th": "คะแนนจากข่าว+RSI+วอลุ่ม ยังไม่ผ่าน backtest — ใช้ประกอบการดู ไม่ใช่สัญญาณซื้อขาย",
             }
             results.append(item)
             if score > 60:
-                await save_recommendation(
+                await _save_shadow_item(
                     pool,
                     ticker=ticker,
+                    source="opportunity_scanner",
                     action=suggested_action,
                     confidence=item["confidence"],
                     rationale=f"{signal}: {item['sentiment_signal']}, {price_signal}, {item['volume_signal']}",
-                    sentiment_snapshot={"score": sentiment, "trend": trend},
                     price=metrics["current"],
-                    llm_model=MODEL,
+                    payload={"score": sentiment, "trend": trend, "item": item},
                 )
         except Exception:
             logger.exception("Opportunity scan failed for %s", ticker)
@@ -276,6 +331,7 @@ async def scan_advisory_candidates(
             suggested = "review_reduce"
         else:
             suggested = "monitor"
+        suggested, policy_payload = apply_owner_hold_policy(ticker, suggested, {})
         prev = prior_by_ticker.get(ticker)
         item = {
             "ticker": ticker,
@@ -309,7 +365,9 @@ async def scan_advisory_candidates(
                 else None
             ),
             "human_approval_required": True,
-            "actionable": False,
+            "actionable": policy_payload.get("actionable", False),
+            "note": policy_payload.get("note"),
+            "shadow": True,
             "scanned_at": now,
             "source": "news_sentiment_join",
         }
@@ -317,14 +375,15 @@ async def scan_advisory_candidates(
 
     ranked = sorted(candidates, key=lambda x: x["rank_score"], reverse=True)[:limit]
 
-    # Persist as advisory recommendations (deduped by save_recommendation window)
+    # Persist as shadow observations, never as evaluated recommendations.
     for item in ranked[:10]:
         if item["rank_score"] < 25:
             continue
         try:
-            await save_recommendation(
+            await _save_shadow_item(
                 pool,
                 ticker=item["ticker"],
+                source="news_advisory",
                 action=item["suggested_action"],
                 confidence=item["confidence"],
                 rationale=(
@@ -332,7 +391,7 @@ async def scan_advisory_candidates(
                     f"({item['article_count']} articles, impact={item['impact_level']}); "
                     f"headline: {item.get('latest_headline') or 'n/a'}"
                 ),
-                sentiment_snapshot={
+                payload={
                     "advisory_only": True,
                     "status": "advisory_candidate",
                     "rank_score": item["rank_score"],
@@ -345,8 +404,7 @@ async def scan_advisory_candidates(
                     "impact_level": item.get("impact_level"),
                     "source": "scan_advisory_candidates",
                 },
-                price=0.0,
-                llm_model=MODEL,
+                price=None,
             )
         except Exception:
             logger.exception("Could not persist advisory candidate for %s", item["ticker"])
@@ -494,6 +552,7 @@ async def tech_screener(top_n: int = 10) -> list[dict[str, Any]]:
                 "trend_sma20_vs_50": f"{trend * 100:+.2f}%",
                 "suggested_action": "accumulate" if score > 70 else "watch",
                 "confidence": round(min(0.85, score / 100), 4),   # cap at 0.85 (no sentiment data)
+                "shadow": True,
                 "scanned_at": now,
             })
         except Exception:
@@ -537,6 +596,7 @@ async def check_exit_signals() -> list[dict[str, Any]]:
             if len(daily) == 3 and all(float(row["score"] or 0) < -0.5 for row in daily):
                 action, reasons = "sell", ["sentiment below -0.5 for three consecutive scored days"]
             if action:
+                action, policy_payload = apply_owner_hold_policy(ticker, action, {})
                 alerts.append(
                     {
                         "ticker": ticker,
@@ -546,6 +606,8 @@ async def check_exit_signals() -> list[dict[str, Any]]:
                         "sentiment_score": round(sentiment, 4),
                         "price_change_from_cost_pct": round(loss_pct, 2),
                         "generated_at": datetime.now(UTC).isoformat(),
+                        "actionable": policy_payload.get("actionable", True),
+                        "note": policy_payload.get("note"),
                     }
                 )
         except Exception:

@@ -123,6 +123,23 @@ async def save_recommendation(
     llm_model: str,
     validated_by: Any = None,
 ) -> str:
+    # Last line of defence: no caller can persist a sell/trim-style action for
+    # an owner hold, even if it forgot to apply the presentation-layer guard.
+    try:
+        from advice_policy import apply_owner_hold_policy
+    except ImportError:
+        from portfolio_engine.advice_policy import apply_owner_hold_policy
+    action, guarded = apply_owner_hold_policy(
+        ticker,
+        action,
+        {"rationale": rationale, "sentiment_snapshot": sentiment_snapshot},
+    )
+    rationale = guarded.get("rationale", rationale)
+    sentiment_snapshot = guarded.get("sentiment_snapshot", sentiment_snapshot)
+    if guarded.get("note"):
+        rationale = f"{rationale} [{guarded['note']}]"
+        if isinstance(sentiment_snapshot, dict):
+            sentiment_snapshot = {**sentiment_snapshot, "actionable": False, "note": guarded["note"]}
     existing = await pool.fetchval(
         """
         SELECT id FROM recommendations
