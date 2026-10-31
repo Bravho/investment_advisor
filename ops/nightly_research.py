@@ -112,6 +112,20 @@ async def main() -> int:
     md.append("\n## Watch list movers (1d)")
     md += [f"- {i['ticker']} {i['metrics']['change_1d_pct']:+.1f}% last {i.get('last_price')} ({i.get('price_as_of', '')[:10]})" for i in movers] or ["- n/a"]
     md.append(f"\n## Regime\n- {sig.get('regime', {}).get('regime')} (score {sig.get('regime', {}).get('score')}, as of {sig.get('regime', {}).get('as_of')})")
+    # 2026-11-01 (P2.2): same market context as the brief / ข่าวและอารมณ์ตลาด page (engine endpoints; context only)
+    try:
+        import market_context as mc
+        ctx: dict = {"errors": {}}
+        for key, path in (("mood", "/market/mood"), ("board", "/macro/trends"), ("sectors", "/sectors/moves"),
+                          ("feed", "/news/feed?hours=24&limit=40"), ("crypto", "/crypto/events")):
+            try:
+                ctx[key] = get(path)
+            except Exception as exc:  # noqa: BLE001
+                ctx[key] = None
+                ctx["errors"][key] = type(exc).__name__
+        md.append("\n" + mc.render(ctx).replace("## Market context", "## Market context", 1))
+    except Exception as exc:  # noqa: BLE001
+        md.append(f"\n## Market context\n- unavailable ({type(exc).__name__})")
     text = "\n".join(md) + "\n"
     snap = {"as_of": now.isoformat(timespec="minutes"), "source": "engine GET /watchlist",
             "items": [{k: i.get(k) for k in ("ticker", "last_price", "price_as_of", "status", "score", "price_stale")} for i in items]}

@@ -1117,6 +1117,12 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
         facts_md = f"{facts_md}\n\n{await _sg.brief_section(await db_pool.get_pool())}"
     except Exception as _exc:  # noqa: BLE001
         logger.warning("Phase 4 signals section unavailable: %s", _exc)
+    # 2026-11-01 (P2.2): macro board, policy rates, holding-sector moves, news digest, crypto events (context only)
+    try:
+        import market_context as _mc
+        facts_md = f"{facts_md}\n\n{await _mc.render_brief_section(await db_pool.get_pool())}"
+    except Exception as _exc:  # noqa: BLE001
+        logger.warning("Market context section unavailable: %s", _exc)
     try:
         import predictions as _pr
         _pp = await db_pool.get_pool()
