@@ -17,7 +17,7 @@ export default function SignalsPanel({ payload, plans, loading, error, retry }) 
   const ri = reg.inputs?.inputs || {}
   const pmap = Object.fromEntries((plans?.plans || []).map(p => [p.ticker, p]))
   return <Card>
-    <SectionTitle title="สัญญาณการลงทุน" subtitle={`Signals · composite score & confidence · as of ${payload.as_of}`} action={<Badge tone={regimeTone(reg.regime)}>{String(reg.regime || '?').replace('_', '-')} ({number(reg.score, 2)})</Badge>} />
+    <SectionTitle title="สัญญาณการลงทุน" subtitle={`Signals · คะแนนจากองค์ประกอบที่ผ่าน walk-forward เท่านั้น (momentum / low-vol / technical) · หุ้นไทย = แสดงผลเท่านั้น (backtest อ่อน) · as of ${payload.as_of}`} action={<Badge tone={regimeTone(reg.regime)}>{String(reg.regime || '?').replace('_', '-')} ({number(reg.score, 2)})</Badge>} />
     <div className="mb-3 flex flex-wrap gap-2">{Object.entries(ri).map(([k, v]) => <span key={k} className="rounded-lg bg-[#141925] px-2 py-1 text-[10px] text-slate-400">{k} <b className="text-slate-200">{String(v)}</b></span>)}</div>
     <div className="overflow-auto"><table className="w-full text-[11px]">
       <thead className="text-[10px] uppercase text-slate-500"><tr><th className="text-left">#</th><th className="text-left">Ticker</th><th className="text-right">Score</th><th className="text-right">Conf</th>{COMPS.map(c => <th key={c} className="px-0.5 text-center font-normal">{c.replace('_', ' ').slice(0, 7)}</th>)}<th className="text-left pl-2">Proposed plan (needs approval)</th></tr></thead>

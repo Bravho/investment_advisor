@@ -1,0 +1,277 @@
+{
+ "generated_at": "2026-11-01T00:56",
+ "records": 9864,
+ "by_family": {
+  "core": 7052,
+  "macro_trends": 2812
+ },
+ "design": "monthly as-of dates over 6y, price-only models, expanding-window yearly re-learning, last 3 years out-of-sample",
+ "P3.1": {
+  "core_pooled_weights": {
+   "1m": {
+    "n": 1221,
+    "skill_vs_rw": 0.0098,
+    "hit": 0.5586
+   },
+   "3m": {
+    "n": 1174,
+    "skill_vs_rw": 0.0172,
+    "hit": 0.5605
+   },
+   "6m": {
+    "n": 1072,
+    "skill_vs_rw": 0.0889,
+    "hit": 0.6763
+   }
+  },
+  "core_segmented_weights": {
+   "1m": {
+    "n": 1221,
+    "skill_vs_rw": 0.0091,
+    "hit": 0.5545
+   },
+   "3m": {
+    "n": 1174,
+    "skill_vs_rw": 0.0734,
+    "hit": 0.6601
+   },
+   "6m": {
+    "n": 1072,
+    "skill_vs_rw": 0.0884,
+    "hit": 0.6651
+   }
+  },
+  "macro_pooled_weights": {
+   "1m": {
+    "n": 504,
+    "skill_vs_rw": 0.0096,
+    "hit": 0.5694
+   },
+   "3m": {
+    "n": 487,
+    "skill_vs_rw": 0.0054,
+    "hit": 0.614
+   },
+   "6m": {
+    "n": 445,
+    "skill_vs_rw": 0.0995,
+    "hit": 0.6899
+   }
+  },
+  "macro_segmented_weights": {
+   "1m": {
+    "n": 504,
+    "skill_vs_rw": 0.0142,
+    "hit": 0.5556
+   },
+   "3m": {
+    "n": 487,
+    "skill_vs_rw": 0.0112,
+    "hit": 0.5626
+   },
+   "6m": {
+    "n": 445,
+    "skill_vs_rw": 0.0969,
+    "hit": 0.6697
+   }
+  },
+  "core_segmented_regime_live_rule": {
+   "1m": {
+    "n": 1221,
+    "skill_vs_rw": 0.0085,
+    "hit": 0.5536
+   },
+   "3m": {
+    "n": 1174,
+    "skill_vs_rw": 0.0671,
+    "hit": 0.6593
+   },
+   "6m": {
+    "n": 1072,
+    "skill_vs_rw": 0.099,
+    "hit": 0.6959
+   }
+  },
+  "macro_segmented_regime_live_rule": {
+   "1m": {
+    "n": 504,
+    "skill_vs_rw": 0.0098,
+    "hit": 0.5675
+   },
+   "3m": {
+    "n": 487,
+    "skill_vs_rw": 0.0005,
+    "hit": 0.5873
+   },
+   "6m": {
+    "n": 445,
+    "skill_vs_rw": 0.0891,
+    "hit": 0.6652
+   }
+  },
+  "prior_weights_core": {
+   "1m": {
+    "n": 1221,
+    "skill_vs_rw": 0.006,
+    "hit": 0.5324
+   },
+   "3m": {
+    "n": 1174,
+    "skill_vs_rw": 0.0104,
+    "hit": 0.5554
+   },
+   "6m": {
+    "n": 1072,
+    "skill_vs_rw": 0.0175,
+    "hit": 0.5849
+   }
+  }
+ },
+ "P3.2": {
+  "subjects": {
+   "PTTEP.BK": "BZ=F",
+   "PTT.BK": "BZ=F",
+   "TOP.BK": "BZ=F",
+   "IRPC.BK": "BZ=F",
+   "GDX": "GC=F"
+  },
+  "without_cross": {
+   "1m": {
+    "n": 180,
+    "skill_vs_rw": 0.0063,
+    "hit": 0.5111
+   },
+   "3m": {
+    "n": 171,
+    "skill_vs_rw": 0.0181,
+    "hit": 0.5556
+   },
+   "6m": {
+    "n": 156,
+    "skill_vs_rw": 0.028,
+    "hit": 0.5385
+   }
+  },
+  "with_cross": {
+   "1m": {
+    "n": 180,
+    "skill_vs_rw": 0.0056,
+    "hit": 0.55
+   },
+   "3m": {
+    "n": 171,
+    "skill_vs_rw": 0.0131,
+    "hit": 0.538
+   },
+   "6m": {
+    "n": 156,
+    "skill_vs_rw": 0.013,
+    "hit": 0.5064
+   }
+  },
+  "cross_alone": {
+   "1m": {
+    "n": 180,
+    "skill_vs_rw": -0.0015,
+    "hit": 0.4889
+   },
+   "3m": {
+    "n": 171,
+    "skill_vs_rw": -0.0088,
+    "hit": 0.4912
+   },
+   "6m": {
+    "n": 156,
+    "skill_vs_rw": -0.0286,
+    "hit": 0.3947
+   }
+  }
+ },
+ "P3.3": {
+  "global": {
+   "cagr": 0.3072,
+   "sharpe": 1.0469,
+   "vol": 0.2987,
+   "max_drawdown": -0.3222,
+   "days": 1759,
+   "benchmark_cagr": 0.1557,
+   "excess_cagr": 0.1515,
+   "hit_rate": 0.5261,
+   "n_positions": 249,
+   "weak": false,
+   "weak_reasons": [],
+   "oos_from": "2019-10-31"
+  },
+  "thai": {
+   "cagr": 0.0444,
+   "sharpe": 0.3107,
+   "vol": 0.2173,
+   "max_drawdown": -0.5045,
+   "days": 1694,
+   "benchmark_cagr": 0.0434,
+   "excess_cagr": 0.001,
+   "hit_rate": 0.4859,
+   "n_positions": 249,
+   "weak": true,
+   "weak_reasons": [
+    "hit 49% < 50%"
+   ],
+   "oos_from": "2019-10-31"
+  }
+ },
+ "P3.4": {
+  "history_from": "2020-10-26",
+  "history_to": "2026-10-31",
+  "history_days": 2196,
+  "obs": 175,
+  "weeks_with_ic": 7,
+  "mean_weekly_ic_1m": -0.075,
+  "t_stat": -0.49,
+  "pass_rule": ">= 52 weekly ICs (1y of overlapping weeks) and t >= 2 and mean IC > 0"
+ },
+ "P3.5": {
+  "views_subjects": [
+   "TDEX.BK",
+   "GC=F",
+   "SPY",
+   "THB=X"
+  ],
+  "track": [
+   {
+    "source": "backfill",
+    "horizon": "1m",
+    "n": 612,
+    "hit": 0.5392,
+    "skill": -0.0037
+   },
+   {
+    "source": "backfill",
+    "horizon": "1y",
+    "n": 104,
+    "hit": 0.5962,
+    "skill": 0.0085
+   },
+   {
+    "source": "backfill",
+    "horizon": "3d",
+    "n": 624,
+    "hit": 0.4808,
+    "skill": 0.0007
+   },
+   {
+    "source": "backfill",
+    "horizon": "3m",
+    "n": 140,
+    "hit": 0.4571,
+    "skill": 0.0091
+   },
+   {
+    "source": "backfill",
+    "horizon": "6m",
+    "n": 128,
+    "hit": 0.625,
+    "skill": 0.0155
+   }
+  ]
+ }
+}

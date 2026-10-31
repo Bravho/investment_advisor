@@ -39,6 +39,19 @@ REGIME_TILT = {
     "neutral": {},
 }
 HOLDING_PROXY = {"SCBGOLDE": "GC=F*THB=X"}
+# 2026-11-01 (P3.3): only components with price history could be walk-forward tested (ops/p3_backtest.py,
+# data/backtests/p3_20261101_0056.json, walkforward.simulate, same costs/weak thresholds):
+#   price-only composite (momentum + low_vol + technical): global PASS (OOS Sharpe 1.05, excess CAGR +15.2%, hit 52.6%)
+#                                                         thai   WEAK (Sharpe 0.31, excess +0.1%, hit 48.6% < 50%)
+# value / quality / dividend / flows / fundamentals / sentiment have no point-in-time history -> weight 0 in the live
+# score (display-only). The previous all-component composite is kept as `score_all` for display.
+VALIDATED_COMPONENTS = {"momentum", "low_vol", "technical"}
+VALIDATION = {"global": {"status": "pass", "detail": "OOS Sharpe 1.05, excess CAGR +15.2%, hit 52.6% (2019-10..2026-10)"},
+              "thai": {"status": "weak", "detail": "OOS Sharpe 0.31, excess CAGR +0.1%, hit 48.6% < 50% (2019-10..2026-10)"}}
+
+
+def validation_for(ticker: str) -> dict[str, str]:
+    return VALIDATION["thai" if ticker.endswith(".BK") or ticker in HOLDING_PROXY else "global"]
 
 DDL = """
 CREATE TABLE IF NOT EXISTS signal_scores (
@@ -94,9 +107,12 @@ def macd_hist(close: pd.Series) -> Optional[float]:
 
 
 # ------------------------------------------------------------------ regime
-def compute_regime() -> dict[str, Any]:
-    tick = [SET_PROXY, "SPY", "^VIX", "^TNX", "THB=X", "GC=F", "BZ=F"]
-    px = download_closes(tick, None, "1y", 1800)
+REGIME_TICKERS = [SET_PROXY, "SPY", "^VIX", "^TNX", "THB=X", "GC=F", "BZ=F"]
+
+
+def regime_points(px: pd.DataFrame) -> tuple[dict[str, Any], list[int]]:
+    """2026-11-01 (P3.1): point-in-time price part of the regime rule. `px` = closes up to the as-of date.
+    Shared by the live regime (compute_regime) and the prediction backtest/learning, so both use ONE definition."""
     inputs, pts = {}, []
 
     def last(t: str) -> Optional[pd.Series]:
@@ -124,6 +140,23 @@ def compute_regime() -> dict[str, Any]:
             chg = float(s.iloc[-1] / s.iloc[-22] - 1) * 100
             inputs[key] = round(chg, 2)
         pts.append(-1 if chg > thr else (1 if chg < -thr and t in ("^TNX", "THB=X") else 0))
+    return inputs, pts
+
+
+def regime_label(score: float) -> str:
+    return "risk_on" if score >= 0.25 else "risk_off" if score <= -0.25 else "neutral"
+
+
+def regime_from_closes(px: pd.DataFrame) -> dict[str, Any]:
+    """Point-in-time regime from prices only (no SET foreign flow - no free history)."""
+    inputs, pts = regime_points(px)
+    score = float(np.mean(pts)) if pts else 0.0
+    return {"regime": regime_label(score), "score": round(score, 3), "n_inputs": len(pts), "inputs": inputs}
+
+
+def compute_regime() -> dict[str, Any]:
+    px = download_closes(REGIME_TICKERS, None, "1y", 1800)
+    inputs, pts = regime_points(px)
     try:
         from watchlists import _set_foreign_flow  # reuse the free SET investor-type fetch
         ff = _set_foreign_flow()
@@ -133,7 +166,7 @@ def compute_regime() -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         inputs["set_foreign_error"] = str(exc)[:120]
     score = float(np.mean(pts)) if pts else 0.0
-    regime = "risk_on" if score >= 0.25 else "risk_off" if score <= -0.25 else "neutral"
+    regime = regime_label(score)
     return {"regime": regime, "score": round(score, 3), "inputs": inputs, "n_inputs": len(pts),
             "source": "yfinance (TDEX, SPY, VIX, ^TNX, THB=X, GC=F, BZ=F) + SET investor-type; rule-based",
             "as_of": str(px.index[-1].date())}
@@ -383,12 +416,17 @@ async def run_signals(pool: Any, council: bool = True) -> dict[str, Any]:
         for comp in BASE_WEIGHTS:
             ps = [metric_pct[t][m] for m, (c, _) in METRIC_MAP.items() if c == comp and m in metric_pct[t]]
             comps[comp] = round(float(np.mean(ps)), 1) if ps else None
-        avail = {k: v for k, v in comps.items() if v is not None}
+        avail_all = {k: v for k, v in comps.items() if v is not None}
+        wsum_all = sum(weights[k] for k in avail_all)
+        score_all = sum(weights[k] * v for k, v in avail_all.items()) / wsum_all if wsum_all else None
+        avail = {k: v for k, v in avail_all.items() if k in VALIDATED_COMPONENTS}  # P3.3: untested parts display-only
         wsum = sum(weights[k] for k in avail)
         score = sum(weights[k] * v for k, v in avail.items()) / wsum if wsum else None
-        coverage = wsum
+        coverage = wsum / (sum(weights[k] for k in VALIDATED_COMPONENTS) or 1)
         agreement = 1 - min(1.0, float(np.std(list(avail.values()))) / 35) if len(avail) >= 2 else 0.3
         conf = round(coverage * (0.5 + 0.5 * agreement), 3)
+        raw[t]["score_all_components"] = round(score_all, 2) if score_all is not None else None
+        raw[t]["validation"] = validation_for(t)
         results.append({"ticker": t, "kind": u["kind"], "name": u.get("name"), "score": round(score, 2) if score is not None else None,
                         "confidence": conf, "components": comps,
                         "raw": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in raw[t].items()},

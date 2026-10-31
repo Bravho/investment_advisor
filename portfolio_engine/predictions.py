@@ -43,6 +43,19 @@ PROXY = {"SCBGOLDE": ("GC=F", "THB=X")}  # NAV history not free -> gold x USD/TH
 PROXY["XAUTHB"] = ("GC=F", "THB=X")
 MODELS = ["drift", "momentum", "meanrev", "regime", "signal", "analyst"]
 PRIOR_W = {"drift": .20, "momentum": .25, "meanrev": .25, "regime": .10, "signal": .10, "analyst": .10}
+# 2026-11-01 (P3.3): models with NO matured track record (signal, analyst: n=0, no point-in-time history to backtest)
+# are display-only - their outputs are still recorded in method.models so they can earn weight later:
+# activated with ACTIVATE_W only after >= MIN_N_RETIRE matured outcomes with skill > 0 and hit > 50%.
+DISPLAY_ONLY_UNTIL_VALIDATED = {"signal", "analyst"}
+ACTIVATE_W = {m: PRIOR_W[m] for m in DISPLAY_ONLY_UNTIL_VALIDATED}
+PRIOR_W = {m: (0.0 if m in DISPLAY_ONLY_UNTIL_VALIDATED else w) for m, w in PRIOR_W.items()}
+# 2026-11-01 (P3.1): learning policy per forecast family, decided by ops/p3_backtest.py
+# (data/backtests/p3_20261101_0056.json; OOS last 3y, expanding yearly re-learning):
+#   core: segmented weights + live regime rule for backfill rows  -> PASS (mean skill .0386 -> .0582, hit .599 -> .636) LIVE
+#   macro_trends: segmented -> FAIL on hit (.624 -> .596): keeps pooled weights; segmented kept as shadow
+FAMILY_POLICY = {"core": {"segmented": True, "regime_rule": "live"},
+                 "macro_trends": {"segmented": False, "regime_rule": "backfill_proxy"}}
+REGIME_COEF = {"risk_on": 0.1, "risk_off": -0.15}
 T_DF = 5
 T_SCALE = math.sqrt((T_DF - 2) / T_DF)  # unit-variance Student-t
 MIN_N_RETIRE = 30
@@ -106,6 +119,19 @@ CREATE TABLE IF NOT EXISTS prediction_model_weights (
     basis     TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (as_of, horizon, model)
+);
+CREATE TABLE IF NOT EXISTS prediction_model_weights_family (
+    id        BIGSERIAL PRIMARY KEY,
+    as_of     DATE NOT NULL,
+    family    VARCHAR(30) NOT NULL,
+    horizon   VARCHAR(3) NOT NULL,
+    model     VARCHAR(20) NOT NULL,
+    weight    DOUBLE PRECISION NOT NULL,
+    status    VARCHAR(10) NOT NULL,
+    n         INTEGER, hit_rate DOUBLE PRECISION, skill DOUBLE PRECISION,
+    basis     TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (as_of, family, horizon, model)
 );
 CREATE TABLE IF NOT EXISTS prediction_lessons (
     id         BIGSERIAL PRIMARY KEY,
@@ -282,10 +308,19 @@ async def _subjects(pool: Any) -> list[dict[str, Any]]:
     return out
 
 
-async def current_weights(pool: Any) -> dict[str, dict[str, float]]:
+async def current_weights(pool: Any, family: str = "core") -> dict[str, dict[str, float]]:
+    """core -> prediction_model_weights (core-segmented since 2026-11-01); other families -> prediction_model_weights_family."""
     async with pool.acquire() as conn:
-        rows = await conn.fetch("""SELECT DISTINCT ON (horizon, model) horizon, model, weight, status FROM prediction_model_weights
-                                   ORDER BY horizon, model, as_of DESC, created_at DESC""")
+        rows = []
+        if family != "core":
+            try:
+                rows = await conn.fetch("""SELECT DISTINCT ON (horizon, model) horizon, model, weight, status FROM prediction_model_weights_family
+                                           WHERE family = $1 ORDER BY horizon, model, as_of DESC, created_at DESC""", family)
+            except Exception:  # noqa: BLE001 - table not created yet
+                rows = []
+        if not rows:
+            rows = await conn.fetch("""SELECT DISTINCT ON (horizon, model) horizon, model, weight, status FROM prediction_model_weights
+                                       ORDER BY horizon, model, as_of DESC, created_at DESC""")
     w = {h: {**PRIOR_W, "_sigma_scale": 1.0} for h in HORIZONS}
     for r in rows:
         w[r["horizon"]][r["model"]] = 0.0 if r["status"] == "retired" else float(r["weight"])
@@ -304,6 +339,30 @@ async def _news_for(pool: Any, subj: str) -> dict[str, Any]:
             "top_headlines": [{"title": r["title"][:160], "source": r["source"], "published": r["published_at"].isoformat() if r["published_at"] else None,
                                "score": float(r["score"]) if r["score"] is not None else None} for r in rows],
             "source": "news_articles + local Ollama sentiment (14d)"}
+
+
+# 2026-11-01 (P3.2): cross-asset drivers tested in ops/p3_backtest.py -> FAILED (OOS skill with cross < without;
+# cross alone negative) -> shadow only.
+CROSS_DRIVERS = {"PTTEP.BK": "BZ=F", "PTT.BK": "BZ=F", "TOP.BK": "BZ=F", "IRPC.BK": "BZ=F", "GDX": "GC=F"}
+
+
+def _shadow_features(subj: str, closes: pd.DataFrame, h: int, news: Optional[dict]) -> dict[str, Any]:
+    out: dict[str, Any] = {"note": "shadow only - not used in this forecast (failed or not yet testable in walk-forward)"}
+    drv = CROSS_DRIVERS.get(subj)
+    if drv and drv in closes and subj in closes:
+        try:
+            j = pd.concat([np.log(closes[subj]), np.log(closes[drv])], axis=1, keys=["s", "d"]).dropna()
+            L = max(h, 21)
+            usable = len(j) - h
+            b, n = _coef((j.d - j.d.shift(L)).values[:usable], (j.s.shift(-h) - j.s).values[:usable])
+            out["cross_asset"] = {"driver": drv, "exp_log_return": round(float(b * (j.d.iloc[-1] - j.d.iloc[-1 - L])), 6),
+                                  "coef": round(float(b), 4), "n": int(n), "status": "shadow (P3.2 walk-forward FAIL)"}
+        except Exception as exc:  # noqa: BLE001
+            out["cross_asset"] = {"driver": drv, "error": type(exc).__name__}
+    if news and news.get("avg_sentiment") is not None:
+        out["news_sentiment_14d"] = {"value": news["avg_sentiment"], "n": news.get("n_14d"),
+                                     "status": "shadow (P3.4: 7 weekly ICs, mean IC -0.075, t -0.49 - insufficient history)"}
+    return out
 
 
 # ------------------------------------------------------------------ live generation
@@ -385,7 +444,7 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                 "confidence_def": "|2*P(up)-1| x (0.5+0.5*model sign agreement); <0.1 low, 0.1-0.3 medium, >0.3 high",
                 "ensemble": "weighted mean of model expected log-returns; Student-t(5) bands",
                 "models": {k: (round(v, 6) if v is not None else None) for k, v in mo["models"].items()},
-                "weights_used": c["used_weights"], "weights_source": "prediction_model_weights (learning loop) or prior",
+                "weights_used": c["used_weights"], "weights_source": "prediction_model_weights (learning loop, family=core segmented since 2026-11-01) or prior",
                 "model_diagnostics": {k: (round(v, 6) if isinstance(v, float) else v) for k, v in mo["diag"].items()},
                 "agreement": round(c["agreement"], 3),
                 "inputs": {
@@ -401,6 +460,8 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                 },
                 "assumptions": assumptions(h, subj, mo, extras),
                 "track_record_at_creation": (track.get("by_horizon") or {}).get(h),
+                # 2026-11-01 (P3.2/P3.4): SHADOW features - recorded for future validation, NOT used in the forecast
+                "shadow": _shadow_features(subj, closes, hd, news),
             }
             if subj == "THB=X":
                 fx_fc[h] = {"median": c["median"], "mu": c["mu"], "b80": c["b80"], "p_up": c["p_up"], "base": base}
@@ -573,70 +634,141 @@ async def validate_matured(pool: Any, closes: Optional[pd.DataFrame] = None) -> 
 
 
 # ------------------------------------------------------------------ learning loop
-async def learn(pool: Any) -> dict[str, Any]:
-    """Re-weight models per horizon from matured predictions (live + backfill, live counted double)."""
-    today = datetime.now(ICT).date()
-    async with pool.acquire() as conn:
-        rows = await conn.fetch("""SELECT p.horizon, p.source, p.sigma, o.actual_return, o.model_returns
-                                   FROM prediction_outcomes o JOIN predictions p ON p.id = o.prediction_id""")
-    by: dict[str, list] = {h: [] for h in HORIZONS}
-    for r in rows:
-        by[r["horizon"]].append(r)
-    out = {}
-    for h, rs in by.items():
-        stats_m = {}
-        for m in MODELS:
-            ys, es, eb, hits, wts = [], [], [], [], []
-            for r in rs:
-                mr = r["model_returns"] if isinstance(r["model_returns"], dict) else json.loads(r["model_returns"] or "{}")
-                v = mr.get(m)
-                if v is None:
-                    continue
-                a = float(r["actual_return"])
-                w = 2.0 if r["source"] == "live" else 1.0
-                s2 = float(r["sigma"]) ** 2 or 1e-9
-                es.append(w * (a - v) ** 2 / s2)
-                eb.append(w * a ** 2 / s2)  # random-walk (zero) baseline
-                if abs(v) > 1e-9:
-                    hits.append((w, (v > 0) == (a > 0)))
-                wts.append(w)
-            n = len(wts)
-            if n == 0:
-                stats_m[m] = {"n": 0}
+def _regime_live_rule_by_date(dates: list[date]) -> dict[date, Optional[str]]:
+    """Point-in-time regime with the LIVE rule (signals.regime_from_closes) for backfill as-of dates (P3.1)."""
+    if not dates:
+        return {}
+    import signals as _sg
+    px = download_closes(_sg.REGIME_TICKERS, None, "10y", 3600)
+    out: dict[date, Optional[str]] = {}
+    for d in sorted(set(dates)):
+        sub = px.loc[:pd.Timestamp(d)].iloc[-260:]
+        out[d] = _sg.regime_from_closes(sub)["regime"] if len(sub) > 200 else None
+    return out
+
+
+def _learn_weights(rs: list[dict[str, Any]], regime_override: Optional[dict[int, float]] = None) -> tuple[dict, dict, float]:
+    """Same formula as before 2026-11-01, applied to a subset of matured outcomes."""
+    stats_m: dict[str, Any] = {}
+    for m in MODELS:
+        es, eb, hits, wts = [], [], [], []
+        for r in rs:
+            mr = r["model_returns"] if isinstance(r["model_returns"], dict) else json.loads(r["model_returns"] or "{}")
+            v = mr.get(m)
+            if m == "regime" and regime_override is not None and r["id"] in regime_override:
+                v = regime_override[r["id"]]
+            if v is None:
                 continue
-            skill = 1 - sum(es) / sum(eb) if sum(eb) > 0 else 0.0
-            hit = sum(w for w, k in hits if k) / sum(w for w, _ in hits) if hits else None
-            stats_m[m] = {"n": n, "skill": skill, "hit": hit}
-        raw = {}
-        for m, st in stats_m.items():
-            if st["n"] < MIN_N_RETIRE:
-                raw[m] = (PRIOR_W[m], "prior", f"n={st['n']} < {MIN_N_RETIRE}: prior weight kept")
-            elif st["skill"] < -0.02 and (st["hit"] is None or st["hit"] < 0.5):
-                raw[m] = (0.0, "retired", f"skill {st['skill']:+.3f} vs random walk, hit {st['hit']}")
+            a = float(r["actual_return"])
+            w = 2.0 if r["source"] == "live" else 1.0
+            s2 = float(r["sigma"]) ** 2 or 1e-9
+            es.append(w * (a - v) ** 2 / s2)
+            eb.append(w * a ** 2 / s2)  # random-walk (zero) baseline
+            if abs(v) > 1e-9:
+                hits.append((w, (v > 0) == (a > 0)))
+            wts.append(w)
+        n = len(wts)
+        if n == 0:
+            stats_m[m] = {"n": 0}
+            continue
+        skill = 1 - sum(es) / sum(eb) if sum(eb) > 0 else 0.0
+        hit = sum(w for w, k in hits if k) / sum(w for w, _ in hits) if hits else None
+        stats_m[m] = {"n": n, "skill": skill, "hit": hit}
+    raw = {}
+    for m, st in stats_m.items():
+        if m in DISPLAY_ONLY_UNTIL_VALIDATED:
+            if st["n"] >= MIN_N_RETIRE and (st.get("skill") or 0) > 0 and (st.get("hit") or 0) > 0.5:
+                raw[m] = (ACTIVATE_W[m] * max(0.25, 1 + 20 * st["skill"]) * (0.5 + st["hit"]), "active",
+                          f"validated: n={st['n']}, skill {st['skill']:+.3f}, hit {st['hit']}")
             else:
-                raw[m] = (PRIOR_W[m] * max(0.25, 1 + 20 * st["skill"]) * (0.5 + (st["hit"] or 0.5)),
-                          "active", f"skill {st['skill']:+.3f}, hit {st['hit']}")
-        tot = sum(v[0] for v in raw.values()) or 1
-        # calibration: scale sigma so that the 80% band would have covered 80% of outcomes
-        async with pool.acquire() as conn:
-            zs = [abs(float(r["z"])) for r in await conn.fetch(
-                """SELECT (o.actual_return - p.exp_return) / NULLIF(p.sigma / COALESCE((p.method->>'sigma_scale')::float, 1), 0) z
-                   FROM prediction_outcomes o JOIN predictions p ON p.id=o.prediction_id WHERE p.horizon=$1""", h) if r["z"] is not None]
-        if len(zs) >= MIN_N_RETIRE:
-            sc = float(np.quantile(zs, 0.8)) / tq(0.90)
-            sc = min(2.5, max(0.8, sc))
-            stats_m["_sigma_scale"] = {"n": len(zs)}
-            raw["_sigma_scale"] = (sc * tot, "active", f"80th pct |z| / t(0.9): raw-sigma multiplier {sc:.3f} (n={len(zs)})")
-        async with pool.acquire() as conn:
-            for m, (w, status, basis) in raw.items():
-                st = stats_m[m]
+                raw[m] = (0.0, "display", f"display-only until validated (n={st['n']}, need >= {MIN_N_RETIRE} with skill > 0 and hit > 50%)")
+        elif st["n"] < MIN_N_RETIRE:
+            raw[m] = (PRIOR_W[m], "prior", f"n={st['n']} < {MIN_N_RETIRE}: prior weight kept")
+        elif st["skill"] < -0.02 and (st["hit"] is None or st["hit"] < 0.5):
+            raw[m] = (0.0, "retired", f"skill {st['skill']:+.3f} vs random walk, hit {st['hit']}")
+        else:
+            raw[m] = (PRIOR_W[m] * max(0.25, 1 + 20 * st["skill"]) * (0.5 + (st["hit"] or 0.5)),
+                      "active", f"skill {st['skill']:+.3f}, hit {st['hit']}")
+    tot = sum(v[0] for v in raw.values()) or 1
+    # calibration: scale sigma so that the 80% band would have covered 80% of outcomes
+    zs = []
+    for r in rs:
+        sc0 = r.get("sigma_scale") or 1.0
+        if r["sigma"]:
+            zs.append(abs((float(r["actual_return"]) - float(r["exp_return"])) / (float(r["sigma"]) / float(sc0))))
+    if len(zs) >= MIN_N_RETIRE:
+        sc = float(np.quantile(zs, 0.8)) / tq(0.90)
+        sc = min(2.5, max(0.8, sc))
+        stats_m["_sigma_scale"] = {"n": len(zs)}
+        raw["_sigma_scale"] = (sc * tot, "active", f"80th pct |z| / t(0.9): raw-sigma multiplier {sc:.3f} (n={len(zs)})")
+    return raw, stats_m, tot
+
+
+async def _write_weights(pool: Any, table: str, today: date, h: str, raw: dict, stats_m: dict, tot: float,
+                         family: Optional[str] = None, prefix: str = "") -> None:
+    async with pool.acquire() as conn:
+        for m, (w, status, basis) in raw.items():
+            st = stats_m[m]
+            if table == "prediction_model_weights":
                 await conn.execute(
                     """INSERT INTO prediction_model_weights (as_of, horizon, model, weight, status, n, hit_rate, skill, basis)
                        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
                        ON CONFLICT (as_of, horizon, model) DO UPDATE SET weight=EXCLUDED.weight, status=EXCLUDED.status, n=EXCLUDED.n,
                          hit_rate=EXCLUDED.hit_rate, skill=EXCLUDED.skill, basis=EXCLUDED.basis, created_at=now()""",
-                    today, h, m, w / tot, status, st.get("n"), st.get("hit"), st.get("skill"), basis)
-        out[h] = {m: {"weight": round(v[0] / tot, 3), "status": v[1]} for m, v in raw.items()}  # _sigma_scale stored as multiplier
+                    today, h, m, w / tot, status[:10], st.get("n"), st.get("hit"), st.get("skill"), prefix + basis)
+            else:
+                await conn.execute(
+                    """INSERT INTO prediction_model_weights_family (as_of, family, horizon, model, weight, status, n, hit_rate, skill, basis)
+                       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+                       ON CONFLICT (as_of, family, horizon, model) DO UPDATE SET weight=EXCLUDED.weight, status=EXCLUDED.status, n=EXCLUDED.n,
+                         hit_rate=EXCLUDED.hit_rate, skill=EXCLUDED.skill, basis=EXCLUDED.basis, created_at=now()""",
+                    today, family, h, m, w / tot, status[:10], st.get("n"), st.get("hit"), st.get("skill"), prefix + basis)
+
+
+async def learn(pool: Any) -> dict[str, Any]:
+    """Re-weight models per horizon from matured predictions (live counted double).
+
+    2026-11-01 (P3.1): weights are learned PER FAMILY according to FAMILY_POLICY (walk-forward tested):
+      * core (holdings / watch list / factors): own outcomes only; backfill rows' regime model re-evaluated with the
+        LIVE regime rule at each as-of date (same definition as live). Written to prediction_model_weights (read by
+        the core generator) and to prediction_model_weights_family (family='core').
+      * macro_trends: pooled outcomes (segmented failed the test) -> family='macro_trends';
+        segmented weights kept as family='macro_trends_shadow' (not used).
+    """
+    await ensure_tables(pool)
+    today = datetime.now(ICT).date()
+    async with pool.acquire() as conn:
+        rows = [dict(r) for r in await conn.fetch(
+            """SELECT p.id, p.horizon, p.source, p.sigma, p.exp_return, p.as_of_date, p.subject_type,
+                      COALESCE(p.method->>'family', 'core') AS family,
+                      COALESCE((p.method->>'sigma_scale')::float, 1) AS sigma_scale,
+                      o.actual_return, o.model_returns
+               FROM prediction_outcomes o JOIN predictions p ON p.id = o.prediction_id""")]
+    # live-rule regime for core backfill asset rows (factors use beta 0 -> regime model is 0 either way)
+    core_bf = [r for r in rows if r["family"] == "core" and r["source"] == "backfill" and r["subject_type"] != "factor"]
+    try:
+        reg_by_date = await asyncio.to_thread(_regime_live_rule_by_date, [r["as_of_date"] for r in core_bf])
+        override = {r["id"]: REGIME_COEF.get(reg_by_date.get(r["as_of_date"]), 0.0) * float(r["sigma"]) for r in core_bf}
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("live-rule regime for backfill failed (%s) - using stored regime model values", exc)
+        override = None
+    out: dict[str, Any] = {}
+    for h in HORIZONS:
+        hr = [r for r in rows if r["horizon"] == h]
+        core = [r for r in hr if r["family"] == "core"]
+        macro = [r for r in hr if r["family"] == "macro_trends"]
+        raw_c, st_c, tot_c = _learn_weights(core, override)
+        pre = "family=core (segmented), regime=live rule; "
+        await _write_weights(pool, "prediction_model_weights", today, h, raw_c, st_c, tot_c, prefix=pre)
+        await _write_weights(pool, "prediction_model_weights_family", today, h, raw_c, st_c, tot_c, family="core", prefix=pre)
+        raw_p, st_p, tot_p = _learn_weights(hr)
+        await _write_weights(pool, "prediction_model_weights_family", today, h, raw_p, st_p, tot_p, family="macro_trends",
+                             prefix="family=macro_trends uses POOLED weights (segmented failed walk-forward); ")
+        if macro:
+            raw_m, st_m, tot_m = _learn_weights(macro)
+            await _write_weights(pool, "prediction_model_weights_family", today, h, raw_m, st_m, tot_m, family="macro_trends_shadow",
+                                 prefix="SHADOW (not used): macro_trends-only weights; ")
+        out[h] = {m: {"weight": round(v[0] / tot_c, 3), "status": v[1]} for m, v in raw_c.items()}  # _sigma_scale stored as multiplier
     await write_lessons(pool)
     return out
 

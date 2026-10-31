@@ -418,7 +418,15 @@ async def build_checklist(pool: Any, plan: dict[str, Any], ctx: Optional[dict[st
     except Exception as exc:  # noqa: BLE001
         add("liquidity", None, f"not computed ({exc})")
     sc = ctx["scores"].get(t)
-    add("signal_score", None if sc is None else sc >= 50, f"signal score {sc}" if sc is not None else "no signal score yet", required=False)
+    try:  # 2026-11-01 (P3.3): Thai price-only composite was WEAK in walk-forward -> score is display-only there
+        from signals import validation_for
+        _val = validation_for(t)
+    except Exception:  # noqa: BLE001
+        _val = {"status": "unknown", "detail": ""}
+    if sc is not None and _val.get("status") != "pass":
+        add("signal_score", None, f"signal score {sc} - display only, not validated ({_val.get('status')}: {_val.get('detail')})", required=False)
+    else:
+        add("signal_score", None if sc is None else sc >= 50, f"signal score {sc} (validated components only)" if sc is not None else "no signal score yet", required=False)
     if ctx.get("regime"):
         add("regime", ctx["regime"] != "risk_off", f"macro regime {ctx['regime']}", required=False)
     req_ok = all(i["pass"] for i in items if i["required"] and i["pass"] is not None) and \

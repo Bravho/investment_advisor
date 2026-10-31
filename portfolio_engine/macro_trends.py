@@ -245,7 +245,7 @@ async def generate_macro(pool: Any, force: bool = False) -> dict[str, Any]:
                WHERE source='live' AND subject = ANY($1::text[]) GROUP BY 1,2""", MACRO_SUBJECTS)}
         reg = await conn.fetchrow("SELECT regime, score, as_of FROM market_regime ORDER BY as_of DESC LIMIT 1")
     closes = await asyncio.to_thread(download_closes, _price_tickers(MACRO_SUBJECTS), None, "10y", 3600)
-    weights = await P.current_weights(pool)
+    weights = await P.current_weights(pool, family="macro_trends")  # 2026-11-01 (P3.1): pooled weights per walk-forward
     track = await P.scoreboard(pool, brief=True)
     now = datetime.now(timezone.utc)
     made, skipped = 0, []

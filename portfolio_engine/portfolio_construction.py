@@ -133,6 +133,26 @@ async def _forecast_views(pool: Any) -> dict[str, Any]:
                            "made_at": r["made_at"].isoformat(), "sha": r["payload_sha256"][:12]} for r in rows}
 
 
+# 2026-11-01 (P3.5): macro-board (family macro_trends) 1y forecasts as alternative BL views - SHADOW only.
+# No matured live track record yet; backfill skill for the view subjects is ~0 (1y n=104 skill +0.009, hit 60%).
+SHADOW_VIEW_SUBJECTS = {"gold": ("XAUTHB", False), "global_equity": ("^GSPC", True)}
+
+
+async def _shadow_macro_views(pool: Any, fx_view: float) -> dict[str, Any]:
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""SELECT DISTINCT ON (subject) subject, exp_return, confidence, made_at, payload_sha256 FROM predictions
+                                   WHERE source='live' AND horizon='1y' AND method->>'family' = 'macro_trends' AND subject = ANY($1::text[])
+                                   ORDER BY subject, made_at DESC""", [v[0] for v in SHADOW_VIEW_SUBJECTS.values()])
+    by = {r["subject"]: r for r in rows}
+    out: dict[str, Any] = {"status": "shadow - not used in the allocation (P3.5: no live track record)"}
+    for k, (subj, add_fx) in SHADOW_VIEW_SUBJECTS.items():
+        r = by.get(subj)
+        out[k] = ({"view_1y_thb": round(float(r["exp_return"]) + (fx_view if add_fx else 0.0), 4), "confidence": float(r["confidence"]),
+                   "from": subj, "prediction_sha": r["payload_sha256"][:12], "made_at": r["made_at"].isoformat()}
+                  if r else {"from": subj, "view_1y_thb": "unknown"})
+    return out
+
+
 def _lot(ticker: str) -> float:
     return 100 if ticker.endswith(".BK") else (0.0001 if ticker == "SCBGOLDE" else 1)
 
@@ -191,6 +211,10 @@ async def run_construction(pool: Any) -> dict[str, Any]:
             views[i] = (q, v["confidence"])
             view_info[k] = {"view_1y_thb": round(q, 4), "confidence": v["confidence"], "from": subj, "prediction_sha": v["sha"], "made_at": v["made_at"]}
     bl = black_litterman(cov, w_eq, views, bl_cfg["risk_aversion"], bl_cfg["tau"], bl_cfg["view_confidence_floor"])
+    try:
+        shadow_views = await _shadow_macro_views(pool, fx_view)
+    except Exception as exc:  # noqa: BLE001
+        shadow_views = {"status": f"shadow unavailable ({type(exc).__name__})"}
     blw = clip_to_ranges({**{k: float(bl["w"][i] * risky_budget) for i, k in enumerate(RISKY)}, "cash_bonds": st["cash_bonds"]}, pol)
     rec = clip_to_ranges({k: (st[k] + rp[k] + blw[k]) / 3 for k in CLASSES}, pol)
 
@@ -278,7 +302,7 @@ async def run_construction(pool: Any) -> dict[str, Any]:
         "weights": {"strategic_plus_tilt": st, "risk_parity": rp, "black_litterman": blw, "recommended": rec},
         "black_litterman": {"equilibrium_returns": {k: round(float(bl["pi"][i]), 4) for i, k in enumerate(RISKY)},
                             "posterior_returns": {k: round(float(bl["mu"][i]), 4) for i, k in enumerate(RISKY)},
-                            "views": view_info, "tau": bl_cfg["tau"], "risk_aversion": bl_cfg["risk_aversion"]},
+                            "views": view_info, "shadow_macro_views": shadow_views, "tau": bl_cfg["tau"], "risk_aversion": bl_cfg["risk_aversion"]},
         "risk_parity": {"risk_contrib_pct": _rc(cov, rp_r)},
         "class_vol_pct": {k: round(float(math.sqrt(cov[i, i])) * 100, 1) for i, k in enumerate(RISKY)},
         "bands": band_rows,
