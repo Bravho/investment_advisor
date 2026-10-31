@@ -41,6 +41,7 @@ import portfolio_construction as pc_mod
 import attribution as attr_mod
 import momentum_base as mb_mod
 import fx_risk as fx_mod
+import news_feed as nf_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -166,6 +167,10 @@ async def _startup_phase3() -> None:
         await _safe_job("portfolio_construction_startup", _construction_job)
 
 
+async def _news_summary_job() -> dict[str, Any]:
+    return await nf_mod.summarize_pending(await db_pool.get_pool())
+
+
 async def _fx_job() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
@@ -243,6 +248,9 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["risk_report", _risk_job], hour=6, minute=30, id="risk_report", replace_existing=True)
     # 2026-10-31 FX layer: refresh the FX risk view hourly (free yfinance; downloads are cached 1h).
     scheduler.add_job(_safe_job, "interval", args=["fx_risk", _fx_job], minutes=60, id="fx_risk", replace_existing=True)
+    # 2026-10-31: Thai summaries for the news feed (local hermes3:8b, free); first run ~1 min after start.
+    scheduler.add_job(_safe_job, "interval", args=["news_summaries", _news_summary_job], minutes=20, id="news_summaries",
+                      replace_existing=True, next_run_time=datetime.now(ICT) + __import__("datetime").timedelta(seconds=60))
     scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
     # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation). Screen after the SET close (daily bars complete)
@@ -572,7 +580,8 @@ async def recommendation_history(ticker: Optional[str] = None, limit: int = Quer
         rows = await pool.fetch("SELECT * FROM recommendations WHERE ticker = $1 ORDER BY created_at DESC LIMIT $2", ticker.upper(), limit)
     else:
         rows = await pool.fetch("SELECT * FROM recommendations ORDER BY created_at DESC LIMIT $1", limit)
-    return to_jsonable([dict(row) for row in rows])
+    import news_feed as nf_mod  # 2026-10-31: derive bullish/bearish/neutral (old rows stored no label)
+    return to_jsonable([nf_mod.label_recommendation(dict(row)) for row in rows])
 
 
 if __name__ == "__main__":
@@ -917,3 +926,14 @@ async def fx_advisor_context() -> dict[str, Any]:
 async def owner_holds() -> dict[str, Any]:
     from holding_meta import load_owner_holds
     return {"holds": load_owner_holds(), "rule": "never suggest selling/trimming these; concentration notes are informational only"}
+
+
+# ------------------------------------------------------------------ News feed (2026-10-31)
+@app.get("/news/feed")
+async def news_feed(hours: int = Query(72, ge=6, le=336), limit: int = Query(60, ge=1, le=200), include_crypto: bool = False) -> dict[str, Any]:
+    return to_jsonable(await nf_mod.build_feed(await db_pool.get_pool(), hours=hours, limit=limit, include_crypto=include_crypto))
+
+
+@app.post("/news/summarize")
+async def news_summarize(max_items: int = Query(12, ge=1, le=40)) -> dict[str, Any]:
+    return await nf_mod.summarize_pending(await db_pool.get_pool(), max_items=max_items)

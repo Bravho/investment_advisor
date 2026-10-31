@@ -293,6 +293,12 @@ async def scan_advisory_candidates(
                     "status": "advisory_candidate",
                     "rank_score": item["rank_score"],
                     "avg_score": item["sentiment_score"],
+                    # 2026-10-31: explicit labels so the dashboard no longer shows every row as NEUTRAL
+                    "score": item["sentiment_score"],
+                    "signal": item["signal"],
+                    "sentiment": ("bullish" if "bullish" in str(item["signal"]) else "bearish" if "bearish" in str(item["signal"]) else "neutral"),
+                    "headline": item.get("latest_headline"),
+                    "impact_level": item.get("impact_level"),
                     "source": "scan_advisory_candidates",
                 },
                 price=0.0,
