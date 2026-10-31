@@ -8,3 +8,7 @@ export const useNewsFeed = (includeCrypto = false, refreshMs = 300000) =>
 // 2026-10-31: key macro indicator trends board (portfolio engine /macro/trends)
 export const useMacroTrends = (refreshMs = 900000) =>
   useApi(() => portfolioClient.get('/macro/trends', { timeout: 120000 }), [], refreshMs)
+
+// 2026-10-31: plain 1-month moves of Tho's holding sectors (portfolio engine /sectors/moves)
+export const useSectorMoves = (refreshMs = 900000) =>
+  useApi(() => portfolioClient.get('/sectors/moves', { timeout: 60000 }), [], refreshMs)
