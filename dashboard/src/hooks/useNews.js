@@ -12,3 +12,7 @@ export const useMacroTrends = (refreshMs = 900000) =>
 // 2026-10-31: plain 1-month moves of Tho's holding sectors (portfolio engine /sectors/moves)
 export const useSectorMoves = (refreshMs = 900000) =>
   useApi(() => portfolioClient.get('/sectors/moves', { timeout: 60000 }), [], refreshMs)
+
+// 2026-10-31: Thai fund watch list - tax-deductible (ThaiESG/ThaiESGX/RMF/SSF) vs general funds (portfolio engine /funds/watchlist)
+export const useFundWatchlist = (refreshMs = 900000) =>
+  useApi(() => portfolioClient.get('/funds/watchlist', { timeout: 60000 }), [], refreshMs)
