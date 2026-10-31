@@ -35,6 +35,28 @@ ALIASES: Dict[str, List[str]] = {
     "GLDM": ["GLDM"], "IAU": ["iShares Gold"], "GDX": ["gold miners"], "FXI": ["China large-cap", "FXI"],
     "VNM": ["Vietnam ETF", "VNM"], "EWJ": ["MSCI Japan"], "INDA": ["MSCI India"],
 }
+# 2026-11-01 (P2.1): Thai-language names so Thai news is attributed to Thai holdings / watch list
+THAI_ALIASES: Dict[str, List[str]] = {
+    "PTTEP.BK": ["ปตท.สผ", "ปตท.สำรวจและผลิตปิโตรเลียม"],
+    "SCB.BK": ["ไทยพาณิชย์", "เอสซีบี เอกซ์", "เอสซีบีเอกซ์", "เอสซีบี เอ็กซ์", "เอสซีบีเอ็กซ์", "ธ.ไทยพาณิชย์"],
+    "PTT.BK": ["ปตท.", "บมจ.ปตท", "บริษัท ปตท"],
+    "KBANK.BK": ["กสิกรไทย", "ธ.กสิกร", "ธนาคารกสิกร"],
+    "BBL.BK": ["ธนาคารกรุงเทพ", "แบงก์กรุงเทพ", "ธ.กรุงเทพ"],
+    "KTB.BK": ["ธนาคารกรุงไทย", "ธ.กรุงไทย", "แบงก์กรุงไทย"],
+    "TTB.BK": ["ทีทีบี", "ทหารไทยธนชาต"],
+    "ADVANC.BK": ["แอดวานซ์ อินโฟร์", "แอดวานซ์อินโฟร์", "เอไอเอส"],
+    "AOT.BK": ["ท่าอากาศยานไทย", "ทอท."],
+    "TOP.BK": ["ไทยออยล์"],
+    "IRPC.BK": ["ไออาร์พีซี"],
+    "BAFS.BK": ["บริการเชื้อเพลิงการบินกรุงเทพ", "บาฟส์"],
+    "SCBGOLDE": ["กองทุนทองคำ SCB"],
+    "GC=F": ["ราคาทองคำ", "ทองคำโลก"],
+}
+for _t, _names in THAI_ALIASES.items():
+    ALIASES.setdefault(_t, []).extend(n for n in _names if n not in ALIASES.get(_t, []))
+# phrases removed from the text before matching a ticker (Thai has no word boundaries: "ปตท." is inside "ปตท.สผ.")
+NEGATIVE: Dict[str, List[str]] = {"PTT.BK": ["ปตท.สผ", "ปตท.สำรวจ", "ปตท.เคมิคอล", "ปตท.น้ำมัน"]}
+
 # symbols that are also ordinary words: bare-symbol matching is never enough
 AMBIGUOUS = {"TRUE", "DELTA", "GULF", "AOT", "MU", "ON", "IT", "ALL", "NOW", "META", "COIN", "HOOD", "TOP", "AIS"}
 # LLM shorthand -> canonical symbol
@@ -54,6 +76,8 @@ def _phrase(text: str, phrase: str) -> bool:
 def mentioned(ticker: str, text: str, extra_aliases: Optional[Dict[str, Iterable[str]]] = None) -> bool:
     """True if the ticker's symbol (case-sensitive token) or a known company name appears in text."""
     t = canonical(ticker)
+    for neg in NEGATIVE.get(t, []):
+        text = text.replace(neg, " ")
     base = t.split(".")[0].split("-")[0].split("=")[0]
     names = list(ALIASES.get(t, [])) + list((extra_aliases or {}).get(t, []))
     if base and base not in AMBIGUOUS and len(base) >= 2:

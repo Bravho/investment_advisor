@@ -8,6 +8,7 @@ import random
 import signal
 import sys
 import threading
+import re
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -42,6 +43,27 @@ YAHOO_RSS = (
     "?s={ticker}&region=US&lang=en-US"
 )
 INVESTING_NEWS_URL = "https://www.investing.com/news/stock-market-news"
+
+# 2026-11-01 (P2.1): free Thai-language sources (RSS) - Thai holdings/watch list had ~0 scored articles.
+THAI_FINANCE_FEEDS = [  # finance-focused: keep all entries
+    ("https://www.kaohoon.com/feed", "Kaohoon"),
+    ("https://www.infoquest.co.th/feed", "InfoQuest"),
+]
+THAI_GENERAL_FEEDS = [  # general news: keep only entries that look market-related
+    ("https://www.prachachat.net/feed", "Prachachat"),
+]
+THAI_MARKET_RE = (
+    r"หุ้น|ตลาดหลักทรัพย์|ดัชนี|SET|กองทุน|ธนาคาร|แบงก์|น้ำมัน|ทองคำ|ค่าเงินบาท|ดอกเบี้ย|กนง|"
+    r"เศรษฐกิจ|ปตท|ไทยพาณิชย์|เอสซีบี|กสิกร|กรุงไทย|กรุงเทพ|ทีทีบี|เอไอเอส|ท่าอากาศยาน|ไทยออยล์|ไออาร์พีซี|บาฟส์|ESG"
+)
+# Google News (Thai edition) search per Thai holding / watch-list name; override with THAI_NEWS_QUERIES="q1|q2"
+THAI_GNEWS_QUERIES = [
+    '"ปตท.สผ" OR PTTEP', '"ไทยพาณิชย์" OR "เอสซีบี เอกซ์" OR SCBX', '"ปตท." หุ้น', '"กสิกรไทย" หุ้น',
+    '"ธนาคารกรุงเทพ" หุ้น', '"กรุงไทย" หุ้น KTB', '"ทีทีบี" หุ้น', '"เอไอเอส" OR ADVANC หุ้น',
+    '"ท่าอากาศยานไทย" OR "ทอท." หุ้น', '"ไทยออยล์" หุ้น', '"ไออาร์พีซี" หุ้น', '"บาฟส์" OR BAFS',
+    'ตลาดหุ้นไทย SET วันนี้', 'กองทุน ThaiESG',
+]
+GNEWS_TH_RSS = "https://news.google.com/rss/search?q={q}&hl=th&gl=TH&ceid=TH:th"
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -299,7 +321,31 @@ class NewsScraper:
             if index < len(self.settings.watchlist_tickers) - 1:
                 time.sleep(delay)
 
-    def scrape_rss(self, feed_url: str, source: str) -> None:
+    def scrape_thai_news(self) -> None:
+        """Thai-language finance RSS + Google News (TH) per Thai name. Free sources only."""
+        delay = float(os.getenv("THAI_NEWS_DELAY_SECONDS", "3"))
+        for url, src in THAI_FINANCE_FEEDS:
+            try:
+                self.scrape_rss(url, src)
+            except Exception:
+                LOGGER.exception("Thai feed failed: %s", src)
+            time.sleep(delay)
+        for url, src in THAI_GENERAL_FEEDS:
+            try:
+                self.scrape_rss(url, src, keep_re=THAI_MARKET_RE)
+            except Exception:
+                LOGGER.exception("Thai feed failed: %s", src)
+            time.sleep(delay)
+        queries = [q for q in os.getenv("THAI_NEWS_QUERIES", "").split("|") if q.strip()] or THAI_GNEWS_QUERIES
+        for q in queries:
+            try:
+                self.scrape_rss(GNEWS_TH_RSS.format(q=quote(q + " when:3d")), "Google News TH", max_entries=15)
+            except Exception:
+                LOGGER.exception("Google News TH failed for %s", q)
+            time.sleep(delay)
+
+    def scrape_rss(self, feed_url: str, source: str, keep_re: Optional[str] = None,
+                   max_entries: Optional[int] = None) -> None:
         LOGGER.info("Scraping RSS source: %s", source)
         response = self.fetch(feed_url)
         feed = feedparser.parse(response.content)
@@ -308,7 +354,10 @@ class NewsScraper:
         LOGGER.info("%s feed returned %s entries", source, len(feed.entries))
 
         inserted = 0
-        for entry in feed.entries:
+        entries = feed.entries[:max_entries] if max_entries else feed.entries
+        for entry in entries:
+            if keep_re and not re.search(keep_re, f"{entry.get('title', '')} {entry.get('summary', '')}"):
+                continue
             url = self._normalize_url(entry.get("link", ""))
             if not url:
                 continue
@@ -487,6 +536,13 @@ def build_scheduler(scraper: NewsScraper) -> BackgroundScheduler:
         minutes=15,
         next_run_time=now,
         id="yahoo_watchlist",
+    )
+    scheduler.add_job(
+        guarded_job("Thai news", scraper.scrape_thai_news),
+        "interval",
+        minutes=60,
+        next_run_time=now,
+        id="thai_news",
     )
     scheduler.add_job(
         guarded_job("Bangkok Post", scraper.scrape_bangkok_post),
