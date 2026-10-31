@@ -60,10 +60,12 @@ CREATE TABLE IF NOT EXISTS trade_plans (
     checklist      JSONB DEFAULT '[]'::jsonb,
     checklist_pass BOOLEAN,
     review_note    TEXT,
+    override_reason TEXT,
     reviewed_at    TIMESTAMPTZ,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE trade_plans ADD COLUMN IF NOT EXISTS override_reason TEXT;
 CREATE INDEX IF NOT EXISTS idx_trade_plans_ticker_status ON trade_plans (ticker, status);
 CREATE TABLE IF NOT EXISTS paper_trades (
     id           SERIAL PRIMARY KEY,
@@ -479,7 +481,9 @@ PLAN_EDITABLE = {"entry_low", "entry_high", "stop", "target", "catalyst", "expir
 
 
 async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[str, Any]:
+    await ensure_tables(pool)
     status = fields.get("status")
+    override_reason = str(fields.get("override_reason") or "").strip()
     async with pool.acquire() as conn:
         plan = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
         if not plan:
@@ -495,23 +499,60 @@ async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[s
             mid = (el + eh) / 2
             rr = (tg - mid) / (mid - st) if mid > st else 0
             await conn.execute("UPDATE trade_plans SET rr=$2, viable=$3 WHERE id=$1", plan_id, rr, rr >= MIN_RR)
-        if status:
-            allowed = {"approved", "rejected", "cancelled", "open", "closed", "expired"}
-            if status not in allowed:
-                raise ValueError(f"status must be one of {sorted(allowed)}")
-            await conn.execute("UPDATE trade_plans SET status=$2, reviewed_at=now(), updated_at=now() WHERE id=$1", plan_id, status)
-            if status == "approved":
-                # Only an APPROVED plan drives watch-list entry-zone alerts.
-                await conn.execute(
-                    """UPDATE investment_watchlist SET entry_low=$2, entry_high=$3, stop_price=$4, target_price=$5,
-                           status_note=$6, updated_at=now() WHERE ticker=$1""",
-                    plan["ticker"], plan["entry_low"], plan["entry_high"], plan["stop"], plan["target"],
-                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone(timedelta(hours=7))):%Y-%m-%d} ICT)")
         row = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
+
+    allowed = {"approved", "rejected", "cancelled", "open", "closed", "expired"}
+    if status and status not in allowed:
+        raise ValueError(f"status must be one of {sorted(allowed)}")
+
+    # Always rebuild before approval.  No status/watch-list mutation happens
+    # until viability, required checks, and price freshness are known.
     cl = await build_checklist(pool, dict(row))
     async with pool.acquire() as conn:
         await conn.execute("UPDATE trade_plans SET checklist=$2::jsonb, checklist_pass=$3, size=$4::jsonb WHERE id=$1",
                            plan_id, json.dumps(cl["items"], default=str), cl["pass"], json.dumps(cl["size"], default=str))
+    if status == "approved":
+        current = dict(row)
+        price_check = next((item for item in cl["items"] if item.get("check") == "price_fresh"), None)
+        price_fresh = bool(price_check and price_check.get("pass") is True)
+        viable = bool(current.get("viable"))
+        if (not viable or not cl["pass"] or not price_fresh) and not override_reason:
+            problems = []
+            if not viable:
+                problems.append("plan is not viable")
+            if not price_fresh:
+                problems.append("price is missing or older than 7 calendar days")
+            if not cl["pass"]:
+                failed = [item.get("check") for item in cl["items"] if item.get("required") and item.get("pass") is not True]
+                problems.append("required checklist failed: " + ", ".join(str(key) for key in failed))
+            raise ValueError(
+                "cannot approve trade plan: " + "; ".join(problems)
+                + "; provide a non-empty override_reason to override"
+            )
+        async with pool.acquire() as conn:
+            async with conn.transaction():
+                await conn.execute(
+                    """UPDATE trade_plans SET status='approved', override_reason=$2,
+                              reviewed_at=now(), updated_at=now() WHERE id=$1""",
+                    plan_id,
+                    override_reason or None,
+                )
+                # Only an APPROVED plan drives watch-list entry-zone alerts.
+                await conn.execute(
+                    """UPDATE investment_watchlist SET entry_low=$2, entry_high=$3, stop_price=$4, target_price=$5,
+                           status_note=$6, updated_at=now() WHERE ticker=$1""",
+                    current["ticker"], current["entry_low"], current["entry_high"], current["stop"], current["target"],
+                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone(timedelta(hours=7))):%Y-%m-%d} ICT)")
+        if override_reason:
+            LOGGER.warning("trade plan %s approval override: %s", plan_id, override_reason)
+    elif status:
+        async with pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE trade_plans SET status=$2, reviewed_at=now(), updated_at=now() WHERE id=$1",
+                plan_id,
+                status,
+            )
+    async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
     return _row(row)
 

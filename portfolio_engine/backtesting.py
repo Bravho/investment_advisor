@@ -1,11 +1,22 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
-from utils.common import configure_logging, json_dumps, latest_price
+from utils.common import configure_logging, json_dumps
 from utils.db_pool import db_pool
 
 logger = configure_logging("portfolio_engine.backtesting")
 UTC = timezone.utc
+
+
+def first_close_on_or_after(rows: list[Any], target: date) -> Any:
+    """Return the earliest valid close row on/after a calendar target date."""
+    eligible = []
+    for row in rows:
+        row_date = row["price_date"]
+        row_date = row_date if isinstance(row_date, date) else date.fromisoformat(str(row_date)[:10])
+        if row_date >= target and row["close_price"] is not None and float(row["close_price"]) > 0:
+            eligible.append((row_date, row))
+    return min(eligible, key=lambda item: item[0])[1] if eligible else None
 
 
 async def record_recommendation_outcome(recommendation_id: str, days_later: int = 7) -> dict[str, Any]:
@@ -14,20 +25,37 @@ async def record_recommendation_outcome(recommendation_id: str, days_later: int 
     if not recommendation:
         raise ValueError(f"Recommendation {recommendation_id} not found")
     entry = float(recommendation["price_at_recommendation"] or 0)
-    current = await latest_price(pool, recommendation["ticker"])
+    if entry <= 0:
+        raise ValueError(f"Recommendation {recommendation_id} has no valid entry price")
+    created_at = recommendation["created_at"]
+    target = created_at.date() + timedelta(days=days_later)
+    prices = await pool.fetch(
+        """SELECT price_date, close_price FROM market_prices
+           WHERE ticker=$1 AND price_date >= $2 ORDER BY price_date ASC LIMIT 10""",
+        recommendation["ticker"],
+        target,
+    )
+    target_row = first_close_on_or_after(list(prices), target)
+    if target_row is None:
+        raise ValueError(f"No close for {recommendation['ticker']} on or after {target}")
+    current = float(target_row["close_price"])
     actual_return = ((current - entry) / entry * 100) if entry else 0.0
     action = str(recommendation["action"] or "").lower()
-    was_correct = (
-        (action in {"buy", "accumulate", "watch"} and actual_return > 0)
+    was_correct = None if action == "watch" else (
+        (action in {"buy", "accumulate"} and actual_return > 0)
         or (action in {"sell", "reduce", "stop_loss"} and actual_return < 0)
         or (action == "hold" and abs(actual_return) < 2)
     )
-    created_at = recommendation["created_at"]
-    days_held = max(0, (datetime.now(UTC).date() - created_at.date()).days) if created_at else days_later
+    actual_date = target_row["price_date"]
+    actual_date = actual_date if isinstance(actual_date, date) else date.fromisoformat(str(actual_date)[:10])
+    days_held = max(0, (actual_date - created_at.date()).days)
     outcome = {
         "price_at_review": current,
+        "price_at_review_date": str(actual_date),
+        "target_date": str(target),
         "actual_return_pct": round(actual_return, 4),
         "was_correct": was_correct,
+        "evaluation_status": "excluded_neutral" if action == "watch" else "directional",
         "days_held": days_held,
         "reviewed_at": datetime.now(UTC).isoformat(),
     }
@@ -66,7 +94,10 @@ async def get_accuracy_report() -> dict[str, Any]:
         SELECT ticker, action, llm_model,
                (actual_outcome->>'was_correct')::boolean AS was_correct,
                (actual_outcome->>'actual_return_pct')::double precision AS actual_return_pct
-        FROM recommendations WHERE actual_outcome IS NOT NULL
+        FROM recommendations
+        WHERE actual_outcome IS NOT NULL
+          AND action <> 'watch'
+          AND actual_outcome->>'was_correct' IS NOT NULL
         """
     )
     total = len(rows)
