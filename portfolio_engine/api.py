@@ -44,6 +44,7 @@ import fx_risk as fx_mod
 import news_feed as nf_mod
 import macro_trends as macro_mod
 import sector_moves as sm_mod
+import fund_watchlist as fw_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -245,6 +246,11 @@ async def _macro_policy_job() -> dict[str, Any]:
     return r
 
 
+async def _fund_watch_job() -> dict[str, Any]:
+    """2026-10-31: Thai fund watch list NAV/fee refresh (Finnomena public API, free)."""
+    return await fw_mod.refresh(await db_pool.get_pool())
+
+
 def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "interval", args=["scan_opportunities", scan_opportunities, opportunity_cache], minutes=30, id="scan_opportunities", replace_existing=True)
     scheduler.add_job(_safe_job, "interval", args=["check_exit_signals", check_exit_signals, exit_cache], minutes=15, id="check_exit_signals", replace_existing=True)
@@ -280,6 +286,9 @@ def configure_schedules() -> None:
     # validation/scoring of these forecasts runs in predictions_validate above (same frozen tables).
     scheduler.add_job(_safe_job, "cron", args=["macro_trends_generate", _macro_job], hour=5, minute=40, id="macro_trends_generate", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["macro_policy_rates", _macro_policy_job], hour=8, minute=20, id="macro_policy_rates", replace_existing=True)
+    # 2026-10-31 Thai fund watch list: NAVs are published in the evening (T) -> refresh 21:30 and 08:30 ICT
+    scheduler.add_job(_safe_job, "cron", args=["fund_watchlist_nav", _fund_watch_job], hour=21, minute=30, id="fund_watchlist_nav", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["fund_watchlist_nav_am", _fund_watch_job], hour=8, minute=30, id="fund_watchlist_nav_am", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["performance_attribution", _attribution_job], hour=18, minute=15, id="performance_attribution", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
@@ -935,6 +944,21 @@ async def fx_risk_report() -> dict[str, Any]:
 async def fx_risk_run() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
+
+
+@app.get("/funds/watchlist")
+async def fund_watchlist() -> dict[str, Any]:
+    return to_jsonable(await fw_mod.get_list(await db_pool.get_pool()))
+
+
+@app.post("/funds/watchlist/refresh")
+async def fund_watchlist_refresh() -> dict[str, Any]:
+    return to_jsonable(await fw_mod.refresh(await db_pool.get_pool()))
+
+
+@app.get("/funds/watchlist/advisor-context")
+async def fund_watchlist_advisor_context() -> dict[str, Any]:
+    return {"context": await fw_mod.advisor_context(await db_pool.get_pool())}
 
 
 @app.get("/sectors/moves")
