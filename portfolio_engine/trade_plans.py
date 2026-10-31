@@ -87,6 +87,18 @@ CREATE TABLE IF NOT EXISTS paper_trades (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (plan_id)
 );
+CREATE TABLE IF NOT EXISTS trade_plan_audit (
+    id              BIGSERIAL PRIMARY KEY,
+    plan_id         INTEGER NOT NULL,
+    ticker          VARCHAR(30),
+    action          VARCHAR(30) NOT NULL,
+    by_override     BOOLEAN NOT NULL DEFAULT false,
+    override_reason TEXT,
+    checklist_pass  BOOLEAN,
+    note            TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_trade_plan_audit_plan ON trade_plan_audit (plan_id, created_at DESC);
 CREATE TABLE IF NOT EXISTS trade_journal (
     id               SERIAL PRIMARY KEY,
     plan_id          INTEGER REFERENCES trade_plans(id),
@@ -464,6 +476,10 @@ def _row(r: Any) -> dict[str, Any]:
             d[k] = v.isoformat()
         elif v.__class__.__name__ == "Decimal":
             d[k] = float(v)
+    # 2026-11-01 (Tho t27u): a plan approved via override is always visibly labelled with its reason.
+    reason = (d.get("override_reason") or "").strip() if isinstance(d.get("override_reason"), str) else ""
+    d["approved_by_override"] = bool(reason) and d.get("status") in ("approved", "open", "closed")
+    d["override_badge_th"] = f"อนุมัติแบบ override: {reason}" if d["approved_by_override"] else None
     return d
 
 
@@ -516,6 +532,15 @@ async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[s
         price_check = next((item for item in cl["items"] if item.get("check") == "price_fresh"), None)
         price_fresh = bool(price_check and price_check.get("pass") is True)
         viable = bool(current.get("viable"))
+        problems_found = []
+        if not viable:
+            problems_found.append("not viable")
+        if not price_fresh:
+            problems_found.append("price missing/stale")
+        if not cl["pass"]:
+            problems_found.append("checklist failed")
+        if not problems_found:
+            override_reason = ""  # nothing to override -> a plain approval, never labelled as override
         if (not viable or not cl["pass"] or not price_fresh) and not override_reason:
             problems = []
             if not viable:
@@ -542,7 +567,17 @@ async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[s
                     """UPDATE investment_watchlist SET entry_low=$2, entry_high=$3, stop_price=$4, target_price=$5,
                            status_note=$6, updated_at=now() WHERE ticker=$1""",
                     current["ticker"], current["entry_low"], current["entry_high"], current["stop"], current["target"],
-                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone(timedelta(hours=7))):%Y-%m-%d} ICT)")
+                    f"zone from approved trade plan #{plan_id} ({datetime.now(timezone(timedelta(hours=7))):%Y-%m-%d} ICT)"
+                    + (f" - APPROVED BY OVERRIDE (อนุมัติแบบ override): {override_reason}" if override_reason else ""))
+                if override_reason:
+                    await conn.execute(
+                        """UPDATE trade_plans SET review_note = trim(both ' ' from coalesce(review_note, '') || ' [APPROVED BY OVERRIDE: ' || $2 || ']')
+                           WHERE id=$1""", plan_id, override_reason)
+                await conn.execute(
+                    """INSERT INTO trade_plan_audit (plan_id, ticker, action, by_override, override_reason, checklist_pass, note)
+                       VALUES ($1,$2,'approved',$3,$4,$5,$6)""",
+                    plan_id, current["ticker"], bool(override_reason), override_reason or None, cl["pass"],
+                    "; ".join(problems_found) if problems_found else None)
         if override_reason:
             LOGGER.warning("trade plan %s approval override: %s", plan_id, override_reason)
     elif status:
@@ -552,9 +587,22 @@ async def update_plan(pool: Any, plan_id: int, fields: dict[str, Any]) -> dict[s
                 plan_id,
                 status,
             )
+            await conn.execute("INSERT INTO trade_plan_audit (plan_id, ticker, action, checklist_pass) VALUES ($1,$2,$3,$4)",
+                               plan_id, row["ticker"], status, cl["pass"])
     async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT * FROM trade_plans WHERE id=$1", plan_id)
     return _row(row)
+
+
+async def plan_audit(pool: Any, limit: int = 50) -> list[dict[str, Any]]:
+    await ensure_tables(pool)
+    rows = await pool.fetch("SELECT * FROM trade_plan_audit ORDER BY created_at DESC LIMIT $1", limit)
+    out = []
+    for r in rows:
+        d = {k: (v.isoformat() if hasattr(v, "isoformat") else v) for k, v in dict(r).items()}
+        d["badge_th"] = f"อนุมัติแบบ override: {d['override_reason']}" if d.get("by_override") else None
+        out.append(d)
+    return out
 
 
 async def create_manual_plan(pool: Any, body: dict[str, Any]) -> dict[str, Any]:
