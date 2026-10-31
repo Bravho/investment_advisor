@@ -23,6 +23,7 @@ from typing import Any, Optional
 import numpy as np
 import pandas as pd
 
+import proxy_tracking
 from market_history import SET_PROXY, download_closes
 
 LOGGER = logging.getLogger("portfolio_engine.risk_engine")
@@ -75,9 +76,10 @@ def _is_usd_listed(t: str) -> bool:
     return not t.endswith(".BK") and t not in PROXIES and t not in FACTOR_TICKERS.values()
 
 
-def _thb_prices(raw: pd.DataFrame, tickers: list[str]) -> tuple[pd.DataFrame, dict[str, str]]:
+def _thb_prices(raw: pd.DataFrame, tickers: list[str], navs: Optional[dict[str, pd.Series]] = None) -> tuple[pd.DataFrame, dict[str, str]]:
     fx = raw["THB=X"].ffill()
     out, notes = {}, {}
+    navs = navs or {}
     for t in tickers:
         if t in PROXIES and PROXIES[t]["kind"] == "set_proxy":
             out[t] = raw[SET_PROXY].ffill()
@@ -85,6 +87,12 @@ def _thb_prices(raw: pd.DataFrame, tickers: list[str]) -> tuple[pd.DataFrame, di
         elif t in PROXIES:
             out[t] = raw["GC=F"].ffill() * fx
             notes[t] = PROXIES[t]["note"]
+            # 2026-11-01 (P2.3): anchor to the official NAV where fund_nav_daily has it
+            if proxy_tracking.usable(navs.get(t)):
+                nav = navs[t]
+                out[t] = proxy_tracking.nav_anchored_series(out[t], nav)
+                notes[t] = (f"official NAV {nav.index[0]:%Y-%m-%d}..{nav.index[-1]:%Y-%m-%d} (fund_nav_daily); "
+                            f"{PROXIES[t]['note']} returns chained before/after that window")
         elif t in raw.columns:
             s = raw[t]
             out[t] = s * fx if _is_usd_listed(t) else s
@@ -152,7 +160,15 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
     real = [t for t in held + watch if t not in PROXIES]
     raw = download_closes(sorted(set(real) | set(FACTOR_TICKERS.values())), start="2019-06-01", ttl=3600)
     raw = raw.replace([np.inf, -np.inf], np.nan).where(raw > 0).ffill(limit=5)
-    prices, notes = _thb_prices(raw, list(dict.fromkeys(held + watch)))
+    navs = cfg.get("_navs") or {}
+    prices, notes = _thb_prices(raw, list(dict.fromkeys(held + watch)), navs)
+    _tracking = {}
+    for t, nav in navs.items():
+        if t in PROXIES and PROXIES[t]["kind"] == "gold_thb":
+            try:
+                _tracking[t] = {"proxy": PROXIES[t]["note"], **proxy_tracking.tracking(raw["GC=F"].ffill() * raw["THB=X"].ffill(), nav)}
+            except Exception as exc:  # noqa: BLE001
+                _tracking[t] = {"status": f"error {type(exc).__name__}"}
     total = sum(p["value_thb"] for p in positions)
     weights = pd.Series({p["ticker"]: p["value_thb"] / total for p in positions}) if total else pd.Series(dtype=float)
     hp = prices[[t for t in held if t in prices.columns]]
@@ -273,6 +289,7 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
 
     return {"portfolio": portfolio, "var": var, "per_holding": per_holding, "correlation": corr_out,
             "factor_exposures": exposures, "stress": stress, "missing_history": missing,
+            "proxy_tracking": _tracking,
             "data_notes": {**notes, "SET": f"{SET_PROXY} (SET50 ETF) used as SET proxy - yfinance has no ^SET.BK history"},
             "price_as_of": str(prices.dropna(how="all").index[-1].date())}
 
@@ -327,6 +344,10 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
         except Exception:  # noqa: BLE001
             watch = []
     cfg = load_config()
+    try:  # 2026-11-01 (P2.3): official NAVs for proxied funds
+        cfg["_navs"] = await proxy_tracking.load_navs(pool, [t for t, v in PROXIES.items() if v["kind"] == "gold_thb"])
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("fund NAV load failed (%s) - pure proxy", exc)
     positions = await _positions(pool)
     if not positions:
         raise RuntimeError("no holdings with quantity > 0")
