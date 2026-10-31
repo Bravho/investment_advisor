@@ -43,6 +43,7 @@ import momentum_base as mb_mod
 import fx_risk as fx_mod
 import news_feed as nf_mod
 import macro_trends as macro_mod
+import sector_moves as sm_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -934,6 +935,12 @@ async def fx_risk_report() -> dict[str, Any]:
 async def fx_risk_run() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
+
+
+@app.get("/sectors/moves")
+async def sector_moves(refresh: bool = False) -> dict[str, Any]:
+    """2026-10-31: plain 1-month moves of real proxies for Tho's holding sectors + related news (replaces fake bars)."""
+    return to_jsonable(await sm_mod.build(await db_pool.get_pool(), max_age=0 if refresh else 1800))
 
 
 @app.get("/macro/trends")
