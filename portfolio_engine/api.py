@@ -216,12 +216,26 @@ async def _backtest_job() -> dict[str, Any]:
     return await wf_mod.run_backtest(await db_pool.get_pool())
 
 
+_SIGNALS_LOCK: Optional[asyncio.Lock] = None  # 2026-11-01: proposals wait for a running signals job
+
+
+def _signals_lock() -> asyncio.Lock:
+    global _SIGNALS_LOCK
+    if _SIGNALS_LOCK is None:
+        _SIGNALS_LOCK = asyncio.Lock()
+    return _SIGNALS_LOCK
+
+
 async def _signals_job() -> dict[str, Any]:
-    return await signals_mod.run_signals(await db_pool.get_pool(), council=True)
+    async with _signals_lock():
+        return await signals_mod.run_signals(await db_pool.get_pool(), council=True)
 
 
 async def _proposals_job() -> dict[str, Any]:
-    return await plans_mod.generate_proposals(await db_pool.get_pool())
+    # 2026-11-01: runs at 06:52 (after signals 06:50) and waits for the signals job if still running,
+    # so trade-plan proposals use TODAY's signals instead of yesterday's.
+    async with _signals_lock():
+        return await plans_mod.generate_proposals(await db_pool.get_pool())
 
 
 async def _setup_screen_job() -> dict[str, Any]:
@@ -273,7 +287,7 @@ def configure_schedules() -> None:
     # 2026-10-31: Thai summaries for the news feed (local hermes3:8b, free); first run ~1 min after start.
     scheduler.add_job(_safe_job, "interval", args=["news_summaries", _news_summary_job], minutes=20, id="news_summaries",
                       replace_existing=True, next_run_time=datetime.now(ICT) + __import__("datetime").timedelta(seconds=60))
-    scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=45, id="trade_plan_proposals", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["trade_plan_proposals", _proposals_job], hour=6, minute=52, id="trade_plan_proposals", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["signals", _signals_job], hour=6, minute=50, id="signals", replace_existing=True)
     # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation). Screen after the SET close (daily bars complete)
     # and again pre-brief; weekly walk-forward backtest. Proposals only - no order code exists.
@@ -944,6 +958,39 @@ async def fx_risk_report() -> dict[str, Any]:
 async def fx_risk_run() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
+
+
+@app.get("/market/mood")
+async def market_mood() -> dict[str, Any]:
+    """2026-11-01: one market-mood verdict = the PRICE regime (signals.compute_regime, used by signals/construction);
+    the 24h news tone (crypto excluded) is shown as a secondary line, never as the verdict."""
+    pool = await db_pool.get_pool()
+    reg = await pool.fetchrow("SELECT as_of, regime, score, inputs FROM market_regime ORDER BY as_of DESC LIMIT 1")
+    news = await pool.fetchrow("SELECT snapshot_date, overall_score, market_mood, key_themes FROM macro_sentiment ORDER BY snapshot_date DESC LIMIT 1")
+    label_th = {"risk_on": "เสี่ยงได้ (risk-on)", "risk_off": "ระวัง (risk-off)", "neutral": "กลาง ๆ (neutral)"}
+    inputs = reg["inputs"] if reg else None
+    if isinstance(inputs, str):
+        inputs = json.loads(inputs)
+    return {"verdict": reg["regime"] if reg else "unknown", "verdict_th": label_th.get(reg["regime"], "unknown") if reg else "unknown",
+            "score": float(reg["score"]) if reg else None, "as_of": str(reg["as_of"]) if reg else None,
+            "inputs": (inputs or {}).get("inputs") if isinstance(inputs, dict) else None,
+            "source": "price regime: TDEX/SPY vs SMA200, VIX, US10y, USD/THB, gold, Brent, SET foreign flow (signals.compute_regime)",
+            "news_tone": {"mood": news["market_mood"], "score": float(news["overall_score"]) if news and news["overall_score"] is not None else None,
+                          "as_of": str(news["snapshot_date"]), "note_th": "โทนข่าว 24 ชม. (ไม่รวมคริปโต) — ข้อมูลประกอบ ไม่ใช่ตัวตัดสิน"} if news else None,
+            "crypto_note_th": "คริปโตไม่ถูกนับในอารมณ์ตลาด — ดูการ์ดเหตุการณ์คริปโตสำคัญแยก"}
+
+
+@app.get("/crypto/events")
+async def crypto_events_ep(hours: int = Query(72, ge=24, le=720)) -> dict[str, Any]:
+    """Display-only high-impact crypto events card (not used by signals or the market mood)."""
+    import crypto_events as ce_mod
+    return to_jsonable(await ce_mod.current(await db_pool.get_pool(), hours))
+
+
+@app.post("/crypto/events/replay")
+async def crypto_events_replay() -> dict[str, Any]:
+    import crypto_events as ce_mod
+    return to_jsonable(await ce_mod.replay(await db_pool.get_pool(), save=True))
 
 
 @app.get("/funds/watchlist")

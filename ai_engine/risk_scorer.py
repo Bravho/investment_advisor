@@ -58,6 +58,8 @@ def concentration_flag(values: dict[str, float], threshold: float = 0.30) -> lis
 
 
 # ---------------------------------------------------------------------------
+NARRATIVE_MAX_AGE_DAYS = 30  # 2026-11-01: free-text macro flags older than this are UNKNOWN
+
 # THB currency-regime monitor — Added by nightly agent 2026-06-25
 # ---------------------------------------------------------------------------
 # currency_risk_score() (2026-06-08) is just a linear 0-1 scale and never framed
@@ -312,6 +314,27 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         weighted_portfolio_risk += score * position_weight
     portfolio_score = round(weighted_portfolio_risk, 4)
 
+    # --- 2026-11-01: narrative-freshness guard for data/watchlist.json ---
+    # Only numeric LEVELS (Brent, gold, USD/THB, Fed/BoT rate) are refreshed live by
+    # watchlists.sync_legacy_watchlist; free-text flags (Iran deal, Lebanon/Hormuz, dot-plot bias,
+    # BOJ narrative, estimated SCBGOLDE NAV) stopped updating when the nightly agent paused.
+    # Flags older than NARRATIVE_MAX_AGE_DAYS are treated as UNKNOWN, never as current facts.
+    _stale_inputs: dict[str, str] = {}
+    try:
+        import json as _jsonf
+        _wlf_path = PROJECT_DIR / "data" / "watchlist.json"
+        _wlf = _jsonf.loads(_wlf_path.read_text(encoding="utf-8")) if _wlf_path.exists() else {}
+        # The narrative date is macro_context.last_updated_macro (the flags' own date); _meta.last_updated
+        # is bumped by research/sync runs that do NOT rewrite the flags, so it is not used here.
+        _lu = str((_wlf.get("macro_context") or {}).get("last_updated_macro") or _wlf.get("last_updated") or "")[:10]
+        _narr_age = (datetime.now(UTC).date() - datetime.fromisoformat(_lu).date()).days if _lu else 9999
+    except Exception:
+        _lu, _narr_age = "", 9999
+    _narr_stale = _narr_age > NARRATIVE_MAX_AGE_DAYS
+    if _narr_stale:
+        for _k in ("us_iran_status_flag", "lebanon_hormuz_status", "fed_dot_plot_bias", "boj_policy_rate_pct", "scbgolde_estimated_nav_thb"):
+            _stale_inputs[_k] = f"unknown - narrative last updated {_lu or 'never'} ({_narr_age} days > {NARRATIVE_MAX_AGE_DAYS})"
+
     # --- Japan carry-trade risk (Added by nightly agent 2026-06-13) ---
     # Reads BOJ rate from watchlist.json macro_context; USD/JPY if available.
     try:
@@ -330,9 +353,12 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         _usd_jpy = None
         _boj_prob = None
 
-    japan_risk = japan_policy_risk_flag(
-        boj_rate=_boj_rate, usd_jpy_rate=_usd_jpy, boj_hike_prob_pct=_boj_prob
-    )
+    if _narr_stale:  # 2026-11-01: stale BOJ narrative -> do not score; level unknown
+        japan_risk = {"status": "unknown", "risk_level": "unknown", "note": _stale_inputs["boj_policy_rate_pct"]}
+    else:
+        japan_risk = japan_policy_risk_flag(
+            boj_rate=_boj_rate, usd_jpy_rate=_usd_jpy, boj_hike_prob_pct=_boj_prob
+        )
 
     # --- PTTEP oil-scenario commodity risk (Added by nightly agent 2026-06-16) ---
     # Reads current Brent + Iran-deal status from watchlist macro_context and
@@ -346,8 +372,12 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         _brent = float(_mc.get("brent_crude_usd", 87.5))
         _deal_flag = str(_mc.get("us_iran_status_flag", "")).lower()
         _deal_confirmed = any(k in _deal_flag for k in ("confirmed", "signed", "framework", "complete"))
+        if _narr_stale:  # 2026-11-01: deal status unknown -> do not assume a signed deal (Brent level stays live)
+            _deal_confirmed = False
         _pttep_weight = (values.get("PTTEP.BK", 0.0) / total_value) if total_value else 0.0
         oil_risk = oil_scenario_risk_flag(_brent, pttep_weight=_pttep_weight, deal_confirmed=_deal_confirmed)
+        if _narr_stale and isinstance(oil_risk, dict):
+            oil_risk["deal_status"] = _stale_inputs["us_iran_status_flag"]
     except Exception:
         logger.warning("oil scenario risk flag failed — skipping", exc_info=True)
         oil_risk = {}
@@ -368,8 +398,10 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         _leb_status = str(_mc5.get("lebanon_hormuz_status", "walked_back"))
         _brent5 = float(_mc5.get("brent_crude_usd", 77.0))
         _pttep_w5 = (values.get("PTTEP.BK", 0.0) / total_value) if total_value else 0.0
-        lebanon_spillover = lebanon_spillover_flag(
-            status=_leb_status, current_brent_usd=_brent5, pttep_weight=_pttep_w5
+        lebanon_spillover = (
+            {"status": "unknown", "risk_level": "unknown", "note": _stale_inputs["lebanon_hormuz_status"]}
+            if _narr_stale else
+            lebanon_spillover_flag(status=_leb_status, current_brent_usd=_brent5, pttep_weight=_pttep_w5)
         )
     except Exception:
         logger.warning("lebanon spillover flag failed — skipping", exc_info=True)
@@ -387,11 +419,15 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         _mc3 = _wl3.get("macro_context", {})
         _fed_rate = float(_mc3.get("us_fed_funds_rate_pct", 3.625))
         _dot_bias = str(_mc3.get("fomc_jun17_dot_plot_bias", _mc3.get("fed_dot_plot_bias", "neutral")))
+        if _narr_stale:  # 2026-11-01: June dot-plot text is not current -> neutral read, flagged unknown
+            _dot_bias = "neutral"
         # Market-implied next-meeting hike odds (Added by nightly agent 2026-06-27);
         # None when absent → text-only bias (backward compatible).
         _hike_prob_raw = _mc3.get("fed_hike_prob_next_meeting_pct")
-        _hike_prob = float(_hike_prob_raw) if _hike_prob_raw is not None else None
+        _hike_prob = float(_hike_prob_raw) if _hike_prob_raw is not None and not _narr_stale else None
         fed_risk = fed_policy_risk_flag(_fed_rate, dot_plot_bias=_dot_bias, hike_prob_pct=_hike_prob)
+        if _narr_stale and isinstance(fed_risk, dict):
+            fed_risk["dot_plot_bias_status"] = _stale_inputs["fed_dot_plot_bias"]
     except Exception:
         logger.warning("fed policy risk flag failed — skipping", exc_info=True)
         fed_risk = {}
@@ -408,7 +444,7 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         _mc4 = _wl4.get("macro_context", {})
         _nav_cur = _mc4.get("scbgolde_estimated_nav_thb")
         _nav_high = _mc4.get("scbgolde_trailing_high_nav_thb")
-        if _nav_cur is not None and _nav_high is not None:
+        if _nav_cur is not None and _nav_high is not None and not _narr_stale:
             _gold_cur, _gold_high = float(_nav_cur), float(_nav_high)
         else:
             _gold_cur = float(_mc4.get("gold_current_usd", _mc4.get("gold_spot_usd", 0)) or 0)
@@ -443,6 +479,7 @@ async def calculate_portfolio_risk() -> dict[str, Any]:
         "fed_policy_risk": fed_risk,                     # Added 2026-06-18
         "gold_drawdown": gold_drawdown,                  # Added 2026-06-20
         "lebanon_spillover": lebanon_spillover,          # Added 2026-06-24
+        "stale_narrative_inputs": _stale_inputs,         # Added 2026-11-01 (treated as unknown)
         "calculated_at": datetime.now(UTC).isoformat(),
     }
 

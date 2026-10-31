@@ -14,6 +14,26 @@ UTC = timezone.utc
 MODEL = os.getenv("OLLAMA_ADVISORY_MODEL", "hermes3:8b")
 
 
+CRYPTO_SUFFIXES = ("-USD", "-USDT", "-BTC", "-ETH")
+
+
+async def scan_universe(pool: Any) -> list[str]:
+    """2026-11-01: the scanner universe is Tho's investment_watchlist (not dropped) + listed holdings.
+    Crypto is excluded (display-only card elsewhere); mutual funds have no daily volume/RSI feed here.
+    Falls back to env WATCHLIST_TICKERS only if the DB read fails."""
+    try:
+        wl = await pool.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' ORDER BY ticker")
+        hd = await pool.fetch("SELECT ticker FROM holdings WHERE quantity > 0 ORDER BY ticker")
+        tickers = [r["ticker"] for r in wl] + [r["ticker"] for r in hd]
+        tickers = [t.strip().upper() for t in tickers
+                   if t and (t.upper().endswith(".BK") or "-" not in t) and not t.upper().endswith(CRYPTO_SUFFIXES)]
+        if tickers:
+            return list(dict.fromkeys(tickers))
+    except Exception:
+        logger.exception("scan_universe DB read failed - falling back to WATCHLIST_TICKERS env")
+    return [t for t in watchlist() if not t.endswith(CRYPTO_SUFFIXES)]
+
+
 def watchlist() -> list[str]:
     return list(
         dict.fromkeys(
@@ -92,16 +112,37 @@ async def _price_metrics(pool: Any, ticker: str) -> dict[str, float]:
         "price_vs_sma20": ((current - sma20) / sma20 * 100) if sma20 else 0.0,
         "rsi": calculate_rsi(prices),
         "volume_ratio": (volumes[-1] / average_volume) if volumes and average_volume else 0.0,
+        "n": len(prices),
     }
 
 
 async def scan_opportunities() -> list[dict[str, Any]]:
     pool = await db_pool.get_pool()
     results = []
-    for ticker in watchlist():
+    universe = await scan_universe(pool)
+    # Price fallback (free yfinance, cached) for tickers the collector does not store in market_prices.
+    try:
+        import market_history as _mh
+        _closes = _mh.download_closes(universe, period="3mo", ttl=3600)
+    except Exception:
+        logger.exception("opportunity price fallback download failed")
+        _closes = None
+    for ticker in universe:
         try:
             sentiment, trend = await _sentiment_metrics(pool, ticker)
             metrics = await _price_metrics(pool, ticker)
+            price_source = "market_prices"
+            if (metrics["current"] == 0.0 or metrics.get("n", 99) < 15) and _closes is not None and ticker in getattr(_closes, "columns", []):
+                ser = _closes[ticker].dropna().tail(20)
+                if len(ser) >= 15:
+                    px = [float(v) for v in ser]
+                    metrics = {"current": px[-1], "sma20": float(np.mean(px)),
+                               "price_vs_sma20": (px[-1] / float(np.mean(px)) - 1) * 100,
+                               "rsi": calculate_rsi(px), "volume_ratio": 0.0, "n": len(px)}
+                    price_source = "yfinance (no volume - volume component neutral)"
+            if metrics["current"] == 0.0:
+                logger.info("opportunity scan: no price for %s - skipped (unknown)", ticker)
+                continue
             rsi = metrics["rsi"]
             score = composite_score(sentiment, rsi, metrics["volume_ratio"], trend)
             signal = "strong_opportunity" if score > 70 else "opportunity" if score > 50 else "avoid" if score < 30 else "neutral"
@@ -120,6 +161,9 @@ async def scan_opportunities() -> list[dict[str, Any]]:
                 "suggested_action": suggested_action,
                 "confidence": round(min(0.95, score / 100), 4),
                 "scanned_at": datetime.now(UTC).isoformat(),
+                "price_source": price_source,
+                "backtested": False,
+                "note_th": "คะแนนจากข่าว+RSI+วอลุ่ม ยังไม่ผ่าน backtest — ใช้ประกอบการดู ไม่ใช่สัญญาณซื้อขาย",
             }
             results.append(item)
             if score > 60:

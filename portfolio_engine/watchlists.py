@@ -655,7 +655,7 @@ FACTORS: list[dict[str, Any]] = [
      "threshold_text": "|1d| >= 0.8% or |5d| >= 2%"},
     {"key": "gold", "name": "Gold (COMEX front month)", "category": "commodities", "yf": "GC=F", "unit": "USD/oz", "flat": 0.5,
      "affected": ["SCBGOLDE (+)"], "threshold": {"abs_1d": 2.0, "abs_5d": 5.0}, "threshold_text": "|1d| >= 2% or |5d| >= 5%"},
-    {"key": "set_index", "name": "SET index (SET50 ETF TDEX for trend)", "category": "equity", "yf": SET_PROXY, "unit": "TDEX THB", "flat": 0.5,
+    {"key": "set_index", "name": "TDEX (SET50 ETF proxy) - reading is the ETF price, SET level in text", "category": "equity", "yf": SET_PROXY, "unit": "TDEX THB", "flat": 0.5,
      "affected": ["PTTEP.BK (+)", "SCB.BK (+)", "Thai watch list (+)"], "threshold": {"abs_1d": 1.5, "abs_5d": 4.0},
      "threshold_text": "|1d| >= 1.5% or |5d| >= 4%"},
     {"key": "set_foreign_flow", "name": "SET foreign investor net flow", "category": "flows", "fn": "set_flow",
