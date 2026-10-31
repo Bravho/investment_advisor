@@ -24,3 +24,7 @@ export const useCryptoEvents = (refreshMs = 900000) =>
 // 2026-11-01: single market-mood verdict = price regime; news tone (crypto excluded) is secondary
 export const useMarketMood = (refreshMs = 300000) =>
   useApi(() => portfolioClient.get('/market/mood'), [], refreshMs)
+
+// 2026-11-01: geopolitical / war-risk monitor (context/display only; probabilities are judgment)
+export const useGeoRisk = (refreshMs = 1800000) =>
+  useApi(() => portfolioClient.get('/geo/risk', { timeout: 180000 }), [], refreshMs)

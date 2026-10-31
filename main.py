@@ -294,6 +294,14 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 macro_ctx = (await client.get(f"{ENGINE_URL}/macro/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
                 macro_ctx = "=== KEY MACRO INDICATOR TRENDS ===\n  Macro board unavailable - do not quote macro forecasts or policy rates."
+            try:  # 2026-11-01: geopolitical / war-risk layer (context only, judgment probabilities labelled)
+                geo_ctx = (await client.get(f"{ENGINE_URL}/geo/advisor-context")).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                geo_ctx = "=== GEOPOLITICAL / WAR RISK ===\n  Geo risk monitor unavailable - do not quote geo-risk numbers."
+            try:  # 2026-11-01 (Tho t27u): approved plans, override approvals always labelled
+                approved = (await client.get(f"{ENGINE_URL}/trade-plans", params={"status": "approved"})).json().get("plans", [])
+            except Exception:  # noqa: BLE001
+                approved = []
             try:  # 2026-10-31: Thai fund watch list (tax-deductible ThaiESG/RMF vs general funds) - Finnomena NAVs
                 fund_ctx = (await client.get(f"{ENGINE_URL}/funds/watchlist/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
@@ -320,9 +328,15 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
             lines.append(f"  - {p['ticker']}{' [setup ' + p['setup'] + ']' if p.get('setup') else ''}: entry {p['entry_low']:.4g}-{p['entry_high']:.4g}, "
                          f"stop {p['stop']:.4g}, target {p['target']:.4g}, "
                          f"R:R {p['rr']:.2f}, checklist {'pass' if p.get('checklist_pass') else 'FAIL'}; {p.get('rationale', '')[:300]}")
+    if approved:
+        lines.append("=== APPROVED TRADE PLANS (by Tho; alerts only, no orders) ===")
+        for p in approved:
+            badge = f" [APPROVED BY OVERRIDE - อนุมัติแบบ override: {p.get('override_reason')}]" if p.get("approved_by_override") else ""
+            lines.append(f"  - #{p['id']} {p['ticker']}: entry {p['entry_low']:.4g}-{p['entry_high']:.4g}, stop {p['stop']:.4g}, target {p['target']:.4g}{badge}")
     if setup_ctx:
         lines.append(setup_ctx)
     lines.append(fx_ctx)
+    lines.append(geo_ctx)
     lines.append(macro_ctx)
     lines.append(fund_ctx)
     lines.append(owner_holds_block())

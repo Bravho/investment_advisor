@@ -45,6 +45,7 @@ import news_feed as nf_mod
 import macro_trends as macro_mod
 import sector_moves as sm_mod
 import fund_watchlist as fw_mod
+import geo_risk as geo_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -189,6 +190,12 @@ async def _construction_job() -> dict[str, Any]:
     return {"recommended": r["weights"]["recommended"], "trades": len(r["trades"])}
 
 
+async def _geo_job() -> dict[str, Any]:
+    # 2026-11-01: geopolitical/war-risk monitor (context/display only)
+    r = await geo_mod.run(await db_pool.get_pool())
+    return {"level": r.get("level"), "flags": len(r.get("stress_flags") or [])}
+
+
 async def _predictions_job() -> dict[str, Any]:
     return await pred_mod.generate_live(await db_pool.get_pool())
 
@@ -304,6 +311,8 @@ def configure_schedules() -> None:
     scheduler.add_job(_safe_job, "cron", args=["fund_watchlist_nav", _fund_watch_job], hour=21, minute=30, id="fund_watchlist_nav", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["fund_watchlist_nav_am", _fund_watch_job], hour=8, minute=30, id="fund_watchlist_nav_am", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["portfolio_construction", _construction_job], hour=7, minute=10, id="portfolio_construction", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["geo_risk", _geo_job], hour=6, minute=35, id="geo_risk", replace_existing=True)
+    scheduler.add_job(_safe_job, "cron", args=["geo_risk_evening", _geo_job], hour=18, minute=30, id="geo_risk_evening", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["performance_attribution", _attribution_job], hour=18, minute=15, id="performance_attribution", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_monthly_summary", _predictions_monthly_job], day=1, hour=9, minute=0, id="predictions_monthly_summary", replace_existing=True)
 
@@ -696,6 +705,12 @@ async def risk_position_size(ticker: str, entry: float, stop: float, sector: Opt
 # --------------------------------------------------------------------------
 # Phase 4 (2026-10-30): trade plans (engine proposals need Tho's approval)
 # --------------------------------------------------------------------------
+@app.get("/trade-plans/audit")
+async def trade_plans_audit(limit: int = 50) -> dict[str, Any]:
+    """Approval history; plans approved via override carry badge_th 'อนุมัติแบบ override: <reason>'."""
+    return {"items": await plans_mod.plan_audit(await db_pool.get_pool(), limit)}
+
+
 @app.get("/trade-plans")
 async def trade_plans_list(status: Optional[str] = None) -> dict[str, Any]:
     plans = await plans_mod.list_plans(await db_pool.get_pool(), status)
@@ -958,6 +973,29 @@ async def fx_risk_report() -> dict[str, Any]:
 async def fx_risk_run() -> dict[str, Any]:
     rep = await fx_mod.run_fx_risk(await db_pool.get_pool())
     return rep.get("summary", {})
+
+
+# 2026-11-01: geopolitical / war-risk layer (context/display only - not used in signals/forecasts)
+@app.get("/geo/risk")
+async def geo_risk() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    r = await geo_mod.latest(pool)
+    return r if r else await geo_mod.run(pool)
+
+
+@app.post("/geo/run")
+async def geo_run() -> dict[str, Any]:
+    r = await geo_mod.run(await db_pool.get_pool())
+    return {"as_of": r["as_of"], "level": r["level"], "flags": r["stress_flags"]}
+
+
+@app.get("/geo/advisor-context")
+async def geo_advisor_context() -> dict[str, Any]:
+    pool = await db_pool.get_pool()
+    r = await geo_mod.latest(pool)
+    if not r:
+        return {"context": "=== GEOPOLITICAL / WAR RISK ===\n  Geo risk monitor has not run yet - do not quote geo-risk numbers."}
+    return {"context": geo_mod.render_text(r), "as_of": r.get("as_of")}
 
 
 @app.get("/market/mood")

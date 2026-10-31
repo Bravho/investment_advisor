@@ -1129,6 +1129,11 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
     try:
         import market_context as _mc
         facts_md = f"{facts_md}\n\n{await _mc.render_brief_section(await db_pool.get_pool())}"
+        try:  # 2026-11-01: geopolitical/war-risk (context only)
+            import geo_risk as _geo
+            facts_md = f"{facts_md}\n\n{_geo.render_brief(await _geo.latest(await db_pool.get_pool()))}"
+        except Exception:  # noqa: BLE001
+            logger.warning("geo risk brief section unavailable")
     except Exception as _exc:  # noqa: BLE001
         logger.warning("Market context section unavailable: %s", _exc)
     try:

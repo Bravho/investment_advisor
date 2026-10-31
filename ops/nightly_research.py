@@ -126,6 +126,10 @@ async def main() -> int:
         md.append("\n" + mc.render(ctx).replace("## Market context", "## Market context", 1))
     except Exception as exc:  # noqa: BLE001
         md.append(f"\n## Market context\n- unavailable ({type(exc).__name__})")
+    try:  # 2026-11-01: geopolitical/war-risk layer (context only)
+        md.append("\n## Geopolitical / war risk\n" + get("/geo/advisor-context").get("context", "unknown"))
+    except Exception as exc:  # noqa: BLE001
+        md.append(f"\n## Geopolitical / war risk\n- unavailable ({type(exc).__name__})")
     text = "\n".join(md) + "\n"
     snap = {"as_of": now.isoformat(timespec="minutes"), "source": "engine GET /watchlist",
             "items": [{k: i.get(k) for k in ("ticker", "last_price", "price_as_of", "status", "score", "price_stale")} for i in items]}

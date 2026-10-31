@@ -1,0 +1,131 @@
+{
+  "_note": "Geopolitical/war-risk assessment registry (added 2026-11-01 by FinBot). Status lines cite public news with dates. Scenario probabilities are JUDGMENT (analyst opinion), NOT model outputs and NOT backtested; horizon 3 months unless stated. Review at least every 14 days; geo_risk.py marks this file STALE after 14 days. Context/display only - never used inside signals, forecasts or rebalance math.",
+  "assessed_at": "2026-11-01",
+  "assessed_by": "FinBot (judgment)",
+  "horizon": "3 months (to ~2027-02-01)",
+  "conflicts": [
+    {
+      "key": "us_iran",
+      "name_en": "US/Israel vs Iran (Gulf, Strait of Hormuz)",
+      "name_th": "สหรัฐฯ/อิสราเอล vs อิหร่าน (ช่องแคบฮอร์มุซ)",
+      "status_en": "Active war since 28 Feb 2026 (US-Israeli strikes). Hormuz restricted since early Mar; April ceasefire and June MoU collapsed; US naval blockade of Iranian ports since 13-14 Jul. 31 Oct: Iranian envoys in Doha with Qatari/Pakistani mediators; Iran says it has a 2-day Hormuz reopening proposal but no plan to meet US officials; Rubio: Trump has not decided on new strikes after the 3 Nov midterms. 30 Oct: tanker hit by projectile leaving the strait (UKMTO); Iran says 4 tankers struck mines; Houthis claim missile strikes on Saudi Arabia.",
+      "status_th": "สงครามยังไม่จบ (เริ่ม 28 ก.พ. 2569) ช่องแคบฮอร์มุซถูกจำกัด สหรัฐฯ ปิดล้อมท่าเรืออิหร่านตั้งแต่ ก.ค. ล่าสุด 31 ต.ค. มีการเจรจาผ่านกาตาร์ แต่สหรัฐฯ ยังไม่ตัดสินใจว่าจะโจมตีรอบใหม่หลังเลือกตั้งกลางเทอม 3 พ.ย. หรือไม่",
+      "escalation_indicators": ["US decision on strikes after 3 Nov midterms", "tanker/mine incidents in Hormuz (UKMTO)", "Brent > 120 USD or OVX spike", "Houthi strikes on Saudi energy", "direct US-Iran talks start (de-escalation)"],
+      "scenarios": [
+        {"tier": "de_escalation", "label_th": "คลี่คลาย: เปิดฮอร์มุซ/ข้อตกลงเบื้องต้น", "p": 0.30},
+        {"tier": "status_quo", "label_th": "ทรงตัว: ฮอร์มุซจำกัด ปะทะเป็นระยะ", "p": 0.40},
+        {"tier": "regional_escalation", "label_th": "ยกระดับในภูมิภาค: สหรัฐฯ โจมตีรอบใหม่ อิหร่านตอบโต้อ่าวเปอร์เซีย", "p": 0.25},
+        {"tier": "major_power", "label_th": "มหาอำนาจอื่นเข้าร่วมโดยตรง", "p": 0.05}
+      ],
+      "sources": [
+        {"title": "Al Jazeera: Iran FM says US outreach a 'positive step' as delegation in Qatar for talks", "url": "https://www.aljazeera.com/news/2026/10/31/iran-fm-says-us-outreach-a-positive-step-as-delegation-in-qatar-for-talks", "date": "2026-10-31"},
+        {"title": "Reuters via Al-Monitor: Iranian envoys meet Qatari mediators as threat looms of US strikes after midterms", "url": "https://www.al-monitor.com/originals/2026/10/iranian-envoys-meet-qatari-mediators-threat-looms-us-strikes-after-midterms", "date": "2026-10-31"},
+        {"title": "CNBC: Qatar in talks with Iran to restart U.S. negotiations", "url": "https://www.cnbc.com/2026/10/31/qatar-iran-us-talks-mediation.html", "date": "2026-10-31"},
+        {"title": "AP: A timeline of the Iran war and talks aimed at ending it", "url": "https://apnews.com/article/iran-us-timeline-trump-hormuz-war-ceasefire-04da58cbae991183f8b52ef5bf615963", "date": "2026"}
+      ],
+      "news_re": "iran|tehran|hormuz|houthi|irgc|khamenei|persian gulf|อิหร่าน|ฮอร์มุซ|เตหะราน|ฮูตี"
+    },
+    {
+      "key": "russia_ukraine_nato",
+      "name_en": "Russia vs Ukraine / Europe-NATO",
+      "name_th": "รัสเซีย vs ยูเครน / ยุโรป-NATO",
+      "status_en": "Full-scale war in year 5. US-brokered local truce in Oleshky (Kherson) held from 27 Oct; trilateral talks planned in Abu Dhabi in November (no date fixed); Kremlin rejects a ceasefire that gives Ukraine a respite; territory and security guarantees unresolved. Hybrid pressure on Europe: alleged Russian sabotage campaign, drone incidents and NATO fighter scrambles in the Baltics (Oct 2026). UK Be Ready campaign (22 Oct) cites 'state-sponsored terrorism' by Russia or other hostile powers.",
+      "status_th": "สงครามยังดำเนินอยู่ มีหยุดยิงเฉพาะจุดที่ Oleshky และมีแผนเจรจาสามฝ่ายที่อาบูดาบีเดือน พ.ย. แต่รัสเซียปฏิเสธหยุดยิงทั่วไป ยุโรปเจอการก่อวินาศกรรม/โดรนแบบ hybrid เพิ่มขึ้น",
+      "escalation_indicators": ["Abu Dhabi talks held or cancelled", "drone/airspace incidents in NATO states", "undersea cable/pipeline sabotage", "Article 4/5 consultations", "European gas price spike"],
+      "scenarios": [
+        {"tier": "de_escalation", "label_th": "หยุดยิงกรอบกว้าง", "p": 0.15},
+        {"tier": "status_quo", "label_th": "ทรงตัว: สู้รบต่อ + hybrid ในยุโรป", "p": 0.65},
+        {"tier": "regional_escalation", "label_th": "ยกระดับ: เหตุปะทะ/วินาศกรรมรุนแรงในประเทศ NATO", "p": 0.17},
+        {"tier": "major_power", "label_th": "NATO-รัสเซียสู้รบโดยตรง", "p": 0.03}
+      ],
+      "sources": [
+        {"title": "AP: Oleshky residents begin evacuation journey as local Ukraine-Russia truce holds", "url": "https://apnews.com/article/russia-ukraine-oleshky-ceasefire-1eb633aee4d33b3845a72053d7f6346c", "date": "2026-10-30"},
+        {"title": "CGTN/RIA: Russia, Ukraine discuss trilateral talks amid continued fighting", "url": "https://news.cgtn.com/news/2026-10-31/Russia-Ukraine-discuss-trilateral-talks-amid-continued-fighting-1RGwD9LzDd6/p.html", "date": "2026-10-31"},
+        {"title": "Al Jazeera: Russia's alleged sabotage campaign in Europe raises fears of escalation", "url": "https://www.aljazeera.com/news/2026/10/29/russias-alleged-sabotage-campaign-in-europe-raises-fears-of-escalation", "date": "2026-10-29"},
+        {"title": "Latvian armed forces: drone likely detonated in Lithuania near the Latvian border", "url": "https://www.mil.lv/lv/zinas/lietuva-netalu-no-latvijas-robezas-iespejams-detonejis-drons", "date": "2026-10"}
+      ],
+      "news_re": "ukrain|russia|kremlin|putin|zelensk|nato|baltic|sabotage|รัสเซีย|ยูเครน|ปูติน|นาโต"
+    },
+    {
+      "key": "us_china_taiwan",
+      "name_en": "US vs China (incl. Taiwan)",
+      "name_th": "สหรัฐฯ vs จีน (รวมไต้หวัน)",
+      "status_en": "Military pressure, no war. Late Oct 2026: PLA joint combat readiness patrols and carrier transits around the first island chain (Taiwan MND reported 27 sorties on 20 Oct, 22 on 31 Oct); US-Japan Keen Sword 27 rehearsed anti-ship strikes. US officials have assessed an invasion before 2028 as unlikely (reported via ISW).",
+      "status_th": "ตึงเครียดทางทหารแต่ยังไม่มีสงคราม จีนซ้อมรบรอบไต้หวันต่อเนื่อง สหรัฐฯ-ญี่ปุ่นซ้อมรบตอบ",
+      "escalation_indicators": ["large-scale named PLA exercise or quarantine/blockade drill", "new US export controls/tariffs or Chinese rare-earth curbs", "incidents in the South China Sea", "TSM/semiconductor sell-off vs SPY"],
+      "scenarios": [
+        {"tier": "status_quo", "label_th": "ทรงตัว: กดดันทางทหาร/การค้า", "p": 0.70},
+        {"tier": "regional_escalation", "label_th": "ยกระดับ: มาตรการการค้า/ซ้อมปิดล้อมใหญ่", "p": 0.25},
+        {"tier": "blockade", "label_th": "ปิดล้อม/กักกันไต้หวันจริง", "p": 0.04},
+        {"tier": "major_power", "label_th": "สหรัฐฯ-จีนสู้รบ", "p": 0.01}
+      ],
+      "sources": [
+        {"title": "ISW: China & Taiwan Update, October 30, 2026", "url": "https://understandingwar.org/research/china-taiwan/china-taiwan-update-october-30-2026/", "date": "2026-10-30"},
+        {"title": "Taiwan MND press release on PLA joint combat readiness patrol", "url": "https://www.mnd.gov.tw/en/Publication/88100", "date": "2026-10"},
+        {"title": "SCMP: US, Japan rehearse coordinated strikes near Taiwan", "url": "https://www.scmp.com/news/china/military/article/3372314/us-japan-rehearse-coordinated-strikes-challenge-pla-control-waters-near-taiwan", "date": "2026-10"}
+      ],
+      "news_re": "taiwan|south china sea|pla |beijing|xi jinping|export control|rare earth|ไต้หวัน|ทะเลจีนใต้|สีจิ้นผิง"
+    },
+    {
+      "key": "israel_levant",
+      "name_en": "Israel - Gaza / Lebanon",
+      "name_th": "อิสราเอล - กาซา / เลบานอน",
+      "status_en": "Ongoing Israeli strikes in Gaza and southern Lebanon reported on 31 Oct 2026 despite the June ceasefire framework; linked to the Iran war (Hezbollah rebuilding with Iranian support, per Critical Threats).",
+      "status_th": "ยังมีการโจมตีในกาซาและเลบานอนใต้ ผูกกับสงครามอิหร่าน",
+      "escalation_indicators": ["Hezbollah enters the Iran war", "Israeli strikes on Beirut", "Red Sea shipping attacks"],
+      "scenarios": [
+        {"tier": "status_quo", "label_th": "ทรงตัว: โจมตีเป็นระยะ", "p": 0.70},
+        {"tier": "regional_escalation", "label_th": "ยกระดับ: Hezbollah เข้าร่วมเต็มรูปแบบ", "p": 0.25},
+        {"tier": "major_power", "label_th": "ขยายเป็นสงครามภูมิภาคกว้าง", "p": 0.05}
+      ],
+      "sources": [
+        {"title": "Conflict Tracker: Israel, Gaza and Lebanon daily update, 31 Oct 2026", "url": "https://conflict-tracker.com/conflicts/israel-gaza-lebanon", "date": "2026-10-31"},
+        {"title": "Critical Threats: Iran Update, October 26, 2026", "url": "https://www.criticalthreats.org/analysis/iran-update-october-26-2026", "date": "2026-10-26"}
+      ],
+      "news_re": "israel|gaza|hezbollah|lebanon|beirut|hamas|red sea|อิสราเอล|กาซา|เลบานอน|ฮามาส"
+    },
+    {
+      "key": "korea",
+      "name_en": "Korean Peninsula",
+      "name_th": "คาบสมุทรเกาหลี",
+      "status_en": "Elevated provocations: IRBM launch 3 Oct, submarine-launched cruise missiles 14 Oct, barrage of about 10 short-range ballistic missiles toward the East Sea on 29 Oct 2026 (Seoul/AP).",
+      "status_th": "เกาหลีเหนือยิงขีปนาวุธถี่ขึ้น (29 ต.ค. ยิงราว 10 ลูก) แต่ยังเป็นการยั่วยุ ไม่ใช่สงคราม",
+      "escalation_indicators": ["nuclear test", "border clash/artillery exchange", "ICBM test"],
+      "scenarios": [
+        {"tier": "status_quo", "label_th": "ทรงตัว: ยิงทดสอบ/ยั่วยุ", "p": 0.90},
+        {"tier": "regional_escalation", "label_th": "ปะทะจำกัดหรือทดลองนิวเคลียร์", "p": 0.09},
+        {"tier": "major_power", "label_th": "สงครามบนคาบสมุทร", "p": 0.01}
+      ],
+      "sources": [
+        {"title": "AP: North Korea fires missile barrage as tensions rise", "url": "https://apnews.com/article/north-korea-projectile-launch-b1a2feff5944a71c716ed37fd94e8aa5", "date": "2026-10-29"},
+        {"title": "USNI News: North Korea tests first submarine-launched cruise missile in nearly 3 years", "url": "https://news.usni.org/2026/10/15/north-korea-tests-first-submarine-launched-cruise-missile-in-nearly-3-years", "date": "2026-10-15"}
+      ],
+      "news_re": "north korea|pyongyang|kim jong|dprk|เกาหลีเหนือ|เปียงยาง|คิม จอง"
+    }
+  ],
+  "ww3": {
+    "label_th": "สงครามโลก/มหาอำนาจหลายแนวรบพร้อมกัน",
+    "p_12m": "1-3%",
+    "note_en": "Judgment only. Several fronts are active at once (Gulf war, Russia hybrid pressure on NATO, PLA pressure on Taiwan, Korean launches) which raises tail risk vs. 2019, but no verified source reports intelligence of imminent great-power war. Civil-preparedness campaigns (EU 72h, UK Be Ready) are framed as all-hazards resilience.",
+    "note_th": "เป็นการประเมินเชิงดุลยพินิจ ความเสี่ยงหางสูงกว่าปกติเพราะมีหลายแนวรบพร้อมกัน แต่ยังไม่พบแหล่งข่าวที่ยืนยันว่ามีข่าวกรองบ่งชี้สงครามใหญ่ใกล้เกิด"
+  },
+  "eu_preparedness_facts": [
+    {"issuer": "European Commission", "date": "2025-03-26", "what": "Preparedness Union Strategy: encourage the public to keep essential supplies for a minimum of 72 hours; the Commission will propose guidelines for population self-sufficiency of at least 72 hours. All-hazards: natural disasters, pandemics, cyber/hybrid attacks and armed conflict.", "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/qanda_25_857/QANDA_25_857_EN.pdf"},
+    {"issuer": "UK Cabinet Office 'Be Ready' (UK is not in the EU)", "date": "2026-10-22", "what": "Every household urged to store 3 days of food and up to 9 litres of water per person, plus cash, torch, radio, first aid. Ministers cited weather, cyber and 'state-sponsored terrorism' by hostile states; reported as not triggered by a particular piece of intelligence.", "url": "https://www.theguardian.com/politics/2026/oct/22/britain-prepare-infrastructure-attacks-hostile-states-wes-streeting"},
+    {"issuer": "National advice (examples)", "date": "ongoing", "what": "France, Netherlands, Ireland, Finland, Luxembourg: 72 hours; Germany (federal civil protection): up to 10 days.", "url": "https://inews.co.uk/inews-lifestyle/stockpiling-european-countries-preparing-emergencies-4801824"}
+  ],
+  "holding_impacts": {
+    "PTTEP.BK": {"de_escalation": "ลบ: น้ำมันมีโอกาสลง (รายได้อิงราคาน้ำมันดอลลาร์)", "status_quo": "บวก/ทรงตัว: น้ำมันสูงหนุนกำไร", "regional_escalation": "บวกต่อกำไร แต่หุ้นไทยทั้งตลาดอาจถูกขาย", "major_power": "ไม่แน่นอน: น้ำมันพุ่งแต่ตลาดหุ้นทั่วโลกร่วง", "note": "Owner hold - ไม่มีคำแนะนำขาย/ลด"},
+    "SCB.BK": {"de_escalation": "บวก: ต่างชาติกลับเข้าหุ้นไทย", "status_quo": "ทรงตัว", "regional_escalation": "ลบ: ต่างชาติขายหุ้นไทย/บาทอ่อน", "major_power": "ลบ: risk-off รุนแรง", "note": "Owner hold - ไม่มีคำแนะนำขาย/ลด"},
+    "SCBGOLDE": {"de_escalation": "ลบเล็กน้อย: แรงซื้อหลุมหลบภัยลด", "status_quo": "ผสม: ทองถูกกดจาก Fed/ดอลลาร์แข็งในช่วงนี้", "regional_escalation": "บวก: ทองมักขึ้นช่วงวิกฤต + ไม่ป้องกันค่าเงินจึงได้ประโยชน์ถ้าบาทอ่อน", "major_power": "บวก (หลุมหลบภัย) แต่ระยะสั้นอาจถูกขายเพื่อถือเงินสด", "note": "ไม่ป้องกันความเสี่ยงค่าเงิน (unhedged)"},
+    "ThaiESG funds": {"de_escalation": "บวก", "status_quo": "ทรงตัว", "regional_escalation": "ลบ: หุ้นไทยถูกขายตามตลาดเกิดใหม่", "major_power": "ลบมาก", "note": "ล็อกตามเงื่อนไขภาษี - ไม่มีคำแนะนำซื้อขาย"},
+    "THB": {"de_escalation": "บาทแข็งได้", "status_quo": "ทรงตัว", "regional_escalation": "บาทอ่อน (น้ำมันแพง + เงินไหลออก)", "major_power": "บาทอ่อนแรง", "note": "ไทยนำเข้าน้ำมันสุทธิ"}
+  },
+  "hedge_ideas_th": [
+    "ทองคำเป็นตัวกันชนวิกฤตที่ถืออยู่แล้ว (SCBGOLDE) - พิจารณาเทียบกับกองทองแบบป้องกันค่าเงิน (SCBGOLDHE) ถ้ากังวลว่าบาทจะแข็งเมื่อสถานการณ์คลี่คลาย",
+    "เงินสดสำรองไว้สำหรับซื้อเมื่อตลาดลงแรง (ขนาดตามแผนของ Tho เอง)",
+    "PTTEP เป็นตัวกันชนน้ำมันโดยธรรมชาติอยู่แล้วในพอร์ต",
+    "หุ้นกลาโหม (เช่น ETF ITA/XAR) เป็นเพียงตัวเลือกให้ศึกษา ไม่ใช่คำแนะนำ และยังไม่ผ่าน backtest",
+    "ไม่มีคำแนะนำขาย/ลด PTTEP หรือ SCB - เป็นเพียงข้อมูลประกอบการตัดสินใจ"
+  ]
+}
