@@ -34,6 +34,18 @@ H_TEST = {"1m": 21, "3m": 63, "6m": 126}
 YEARS = 6
 CROSS = {"PTTEP.BK": "BZ=F", "PTT.BK": "BZ=F", "TOP.BK": "BZ=F", "IRPC.BK": "BZ=F", "GDX": "GC=F"}
 CROSS_PRIOR = 0.10
+P33_UNIVERSES = {
+    "global": {
+        "benchmark": "SPY",
+        "tickers": ["SPY", "QQQ", "NVDA", "MSFT", "GOOGL", "TSM", "AVGO", "MU", "VNM", "EWJ", "INDA", "FXI",
+                    "GLDM", "IAU", "GDX"],
+    },
+    "thai": {
+        "benchmark": SET_PROXY,
+        "tickers": ["KBANK.BK", "BBL.BK", "KTB.BK", "TTB.BK", "SCB.BK", "PTT.BK", "PTTEP.BK", "TOP.BK",
+                    "IRPC.BK", "AOT.BK", "BAFS.BK", "ADVANC.BK", SET_PROXY],
+    },
+}
 
 
 def regime_proxy(px: pd.DataFrame, d, equity_ref: str) -> str | None:
@@ -171,37 +183,41 @@ def walk(recs: list[dict], train_filter, test_filter, models: list[str], prior: 
     return out
 
 
-def p33_signals(closes_g: pd.DataFrame, closes_t: pd.DataFrame) -> dict:
+def p33_composite_weights(h: pd.DataFrame, bench_col: str) -> pd.Series:
+    """Frozen P3.3 baseline, exposed so F3 compares against the exact formula."""
     import walkforward as wf
     BW = S.BASE_WEIGHTS
     wm, wl, wt = BW["momentum"], BW["low_vol"], BW["technical"]
+    if len(h) <= 260:
+        return pd.Series(dtype=float)
+    hh = h.drop(columns=[bench_col], errors="ignore")
+    r = hh.pct_change(fill_method=None)
+    bench = h[bench_col] if bench_col in h else None
+    mom = pd.concat([(hh.iloc[-22] / hh.iloc[-252] - 1).rank(pct=True),
+                     (hh.iloc[-1] / hh.iloc[-126] - 1).rank(pct=True)], axis=1).mean(axis=1)
+    vol = (r.iloc[-252:].std()).rank(pct=True, ascending=False)
+    if bench is not None:
+        br = bench.pct_change(fill_method=None).iloc[-252:]
+        beta = r.iloc[-252:].apply(lambda c: c.cov(br) / br.var() if br.var() > 0 else np.nan)
+        vol = pd.concat([vol, beta.rank(pct=True, ascending=False)], axis=1).mean(axis=1)
+    trend = hh.iloc[-1] / hh.iloc[-200:].mean() - 1
+    rs3 = (hh.iloc[-1] / hh.iloc[-63] - 1) - ((bench.iloc[-1] / bench.iloc[-63] - 1) if bench is not None else 0)
+    rsi = wf._rsi_frame(hh.iloc[-120:]).iloc[-1]
+    rsi_sc = rsi.apply(lambda x: S._rsi_score(float(x)) if pd.notna(x) else np.nan)
+    tech = pd.concat([trend.rank(pct=True), rs3.rank(pct=True), rsi_sc.rank(pct=True)], axis=1).mean(axis=1)
+    score = (wm * mom + wl * vol + wt * tech) / (wm + wl + wt)
+    ok = hh.iloc[-252:].notna().sum() >= 230
+    return wf._top(score[ok].dropna())
 
-    def composite(h: pd.DataFrame, bench_col) -> pd.Series:
-        if len(h) <= 260:
-            return pd.Series(dtype=float)
-        hh = h.drop(columns=[bench_col], errors="ignore")
-        r = hh.pct_change(fill_method=None)
-        bench = h[bench_col] if bench_col in h else None
-        mom = pd.concat([(hh.iloc[-22] / hh.iloc[-252] - 1).rank(pct=True), (hh.iloc[-1] / hh.iloc[-126] - 1).rank(pct=True)], axis=1).mean(axis=1)
-        vol = (r.iloc[-252:].std()).rank(pct=True, ascending=False)
-        if bench is not None:
-            br = bench.pct_change(fill_method=None).iloc[-252:]
-            beta = r.iloc[-252:].apply(lambda c: c.cov(br) / br.var() if br.var() > 0 else np.nan)
-            vol = pd.concat([vol, beta.rank(pct=True, ascending=False)], axis=1).mean(axis=1)
-        trend = (hh.iloc[-1] / hh.iloc[-200:].mean() - 1)
-        rs3 = (hh.iloc[-1] / hh.iloc[-63] - 1) - ((bench.iloc[-1] / bench.iloc[-63] - 1) if bench is not None else 0)
-        rsi = wf._rsi_frame(hh.iloc[-120:]).iloc[-1]
-        rsi_sc = rsi.apply(lambda x: S._rsi_score(float(x)) if pd.notna(x) else np.nan)
-        tech = pd.concat([trend.rank(pct=True), rs3.rank(pct=True), rsi_sc.rank(pct=True)], axis=1).mean(axis=1)
-        sc = (wm * mom + wl * vol + wt * tech) / (wm + wl + wt)
-        ok = hh.iloc[-252:].notna().sum() >= 230
-        return wf._top(sc[ok].dropna())
+
+def p33_signals(closes_g: pd.DataFrame, closes_t: pd.DataFrame) -> dict:
+    import walkforward as wf
 
     out = {}
     for name, px, bench in (("global", closes_g, "SPY"), ("thai", closes_t, SET_PROXY)):
         cols = [c for c in px.columns if c != bench]
         sim_px = px[cols]
-        fn = lambda h, _p, b=bench, full=px: composite(full.loc[: h.index[-1]], b)  # noqa: E731
+        fn = lambda h, _p, b=bench, full=px: p33_composite_weights(full.loc[: h.index[-1]], b)  # noqa: E731
         sim = wf.simulate(sim_px, fn, None)
         start = px.index[0] + pd.DateOffset(months=12 + wf.TRAIN_M)
         oos = sim["daily"].loc[start:]
@@ -311,8 +327,8 @@ async def main() -> int:
                    "without_cross": walk(recs, is_core, cross_subj, base_models, prior),
                    "with_cross": walk(recs, is_core, cross_subj, base_models + ["cross"], prior_x),
                    "cross_alone": walk(recs, cross_subj, cross_subj, ["cross"], {"cross": 1.0})}
-    g_t = ["SPY", "QQQ", "NVDA", "MSFT", "GOOGL", "TSM", "AVGO", "MU", "VNM", "EWJ", "INDA", "FXI", "GLDM", "IAU", "GDX"]
-    t_t = ["KBANK.BK", "BBL.BK", "KTB.BK", "TTB.BK", "SCB.BK", "PTT.BK", "PTTEP.BK", "TOP.BK", "IRPC.BK", "AOT.BK", "BAFS.BK", "ADVANC.BK", SET_PROXY]
+    g_t = P33_UNIVERSES["global"]["tickers"]
+    t_t = P33_UNIVERSES["thai"]["tickers"]
     pxg = await asyncio.to_thread(download_closes, g_t, None, "10y", 3600)
     pxt = await asyncio.to_thread(download_closes, t_t, None, "10y", 3600)
     res["P3.3"] = await asyncio.to_thread(p33_signals, pxg, pxt)

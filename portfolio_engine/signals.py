@@ -27,17 +27,15 @@ import pandas as pd
 
 from market_history import SET_PROXY, download_closes, download_ohlc, http_json
 from fundamentals import get_fundamentals
+from signal_score import (BASE_WEIGHTS, PRICE_METRIC_MAP, REGIME_TILT, composite_score, price_components,
+                          rsi_score as shared_rsi_score)
 
 LOGGER = logging.getLogger("portfolio_engine.signals")
 ICT = ZoneInfo("Asia/Bangkok")
 COUNCIL_MODEL = "hermes3:8b"
-BASE_WEIGHTS = {"value": .15, "quality": .15, "momentum": .15, "low_vol": .10, "dividend": .10,
-                "technical": .15, "flows": .05, "fundamentals": .10, "sentiment": .05}
-REGIME_TILT = {
-    "risk_on": {"momentum": +.05, "technical": +.05, "low_vol": -.05, "dividend": -.05},
-    "risk_off": {"low_vol": +.05, "quality": +.05, "dividend": +.05, "momentum": -.05, "technical": -.05, "value": -.05},
-    "neutral": {},
-}
+# F3 shadow switch: the shared scorer is recorded on every run, but changing the
+# score/rank used by the live API remains opt-in until its exact backtest passes.
+UNIFIED_SCORE_LIVE = False
 HOLDING_PROXY = {"SCBGOLDE": "GC=F*THB=X"}
 # 2026-11-01 (P3.3): only components with price history could be walk-forward tested (ops/p3_backtest.py,
 # data/backtests/p3_20261101_0056.json, walkforward.simulate, same costs/weak thresholds):
@@ -213,36 +211,9 @@ def nvdr_flows(symbols: list[str], sessions: int = 5) -> dict[str, Any]:
 
 # ------------------------------------------------------------------ raw metrics
 def _price_metrics(close: pd.Series, vol: Optional[pd.Series], bench: Optional[pd.Series]) -> dict[str, Any]:
+    """Compatibility wrapper around the shared point-in-time implementation."""
     c = close.dropna()
-    m: dict[str, Any] = {"as_of": str(c.index[-1].date()), "price": float(c.iloc[-1])}
-    r = c.pct_change().dropna()
-    if len(c) >= 252:
-        m["mom_12_1"] = float(c.iloc[-22] / c.iloc[-252] - 1)
-    if len(c) >= 126:
-        m["mom_6m"] = float(c.iloc[-1] / c.iloc[-126] - 1)
-    if len(r) >= 120:
-        m["vol_1y"] = float(r.iloc[-252:].std() * np.sqrt(252))
-    if bench is not None:
-        b = bench.dropna()
-        j = pd.concat([r, b.pct_change()], axis=1, join="inner").dropna().iloc[-252:]
-        if len(j) > 60 and j.iloc[:, 1].var() > 0:
-            m["beta"] = float(j.iloc[:, 0].cov(j.iloc[:, 1]) / j.iloc[:, 1].var())
-        cb = pd.concat([c, b], axis=1, join="inner").dropna()
-        if len(cb) > 63:
-            m["rs_3m"] = float((cb.iloc[-1, 0] / cb.iloc[-63, 0]) / (cb.iloc[-1, 1] / cb.iloc[-63, 1]) - 1)
-    sma50 = c.iloc[-50:].mean() if len(c) >= 50 else None
-    sma200 = c.iloc[-200:].mean() if len(c) >= 200 else None
-    if sma50 is not None and sma200 is not None:
-        m["trend"] = (1 if c.iloc[-1] > sma50 else -1) + (1 if sma50 > sma200 else -1) + (1 if c.iloc[-1] > sma200 else -1)
-    m["rsi14"] = rsi(c)
-    m["macd_hist_pct"] = macd_hist(c)
-    if vol is not None and vol.dropna().size > 60:
-        v = vol.dropna()
-        ratio = float(v.iloc[-20:].mean() / v.iloc[-60:].mean()) if v.iloc[-60:].mean() > 0 else None
-        up = float(c.iloc[-1] / c.iloc[-21] - 1) if len(c) > 21 else 0
-        m["volume_ratio_20_60"] = ratio
-        m["volume_confirm"] = (ratio - 1) * (1 if up >= 0 else -1) if ratio else None
-    return m
+    return price_components(close, vol, bench, c.index[-1]) if not c.empty else {}
 
 
 def _fund_metrics(f: dict[str, Any]) -> dict[str, Any]:
@@ -289,11 +260,8 @@ def _fund_metrics(f: dict[str, Any]) -> dict[str, Any]:
 METRIC_MAP = {
     "earnings_yield": ("value", True), "book_yield": ("value", True), "yield_vs_5y": ("value", True),
     "roe": ("quality", True), "margin": ("quality", True), "neg_leverage": ("quality", True),
-    "mom_12_1": ("momentum", True), "mom_6m": ("momentum", True),
-    "vol_1y": ("low_vol", False), "beta": ("low_vol", False),
     "div_safety": ("dividend", True),
-    "trend": ("technical", True), "rs_3m": ("technical", True), "rsi_score": ("technical", True),
-    "macd_hist_pct": ("technical", True), "volume_confirm": ("technical", True),
+    **PRICE_METRIC_MAP,
     "nvdr_net_pct": ("flows", True),
     "revision_breadth": ("fundamentals", True), "avg_surprise": ("fundamentals", True), "analyst_upside": ("fundamentals", True),
     "sentiment": ("sentiment", True),
@@ -301,10 +269,22 @@ METRIC_MAP = {
 
 
 def _rsi_score(r: Optional[float]) -> Optional[float]:
-    if r is None:
-        return None
-    # best in the 45-65 healthy-trend band; overbought >75 and oversold <25 penalised
-    return -abs(r - 55)
+    return shared_rsi_score(r)
+
+
+def _legacy_live_score(components: dict[str, Optional[float]], weights: dict[str, float]) -> Optional[float]:
+    """Frozen pre-F3 arithmetic used while ``UNIFIED_SCORE_LIVE`` is false."""
+    available = {k: v for k, v in components.items() if v is not None and k in VALIDATED_COMPONENTS}
+    weight_sum = sum(weights[k] for k in available)
+    return sum(weights[k] * v for k, v in available.items()) / weight_sum if weight_sum else None
+
+
+def _live_composite_score(components: dict[str, Optional[float]], regime: Optional[str],
+                          weights: dict[str, float]) -> Optional[float]:
+    """Select the frozen live calculation or the opt-in shared calculation."""
+    if UNIFIED_SCORE_LIVE:
+        return composite_score(components, regime, VALIDATED_COMPONENTS)
+    return _legacy_live_score(components, weights)
 
 
 async def _sentiment(pool: Any, tickers: list[str]) -> dict[str, dict[str, Any]]:
@@ -381,8 +361,7 @@ async def run_signals(pool: Any, council: bool = True) -> dict[str, Any]:
         bench = closes.get(SET_PROXY) if (t.endswith(".BK") or t in HOLDING_PROXY) else closes.get("SPY")
         m: dict[str, Any] = {}
         if c is not None and c.dropna().size > 60:
-            m.update(_price_metrics(c, v, bench))
-            m["rsi_score"] = _rsi_score(m.get("rsi14"))
+            m.update(price_components(c, v, bench, c.dropna().index[-1]))
         m.update(_fund_metrics(funds.get(t) or {}))
         sym = t.replace(".BK", "")
         if sym in nvdr and nvdr[sym]["sessions"]:
@@ -421,11 +400,13 @@ async def run_signals(pool: Any, council: bool = True) -> dict[str, Any]:
         score_all = sum(weights[k] * v for k, v in avail_all.items()) / wsum_all if wsum_all else None
         avail = {k: v for k, v in avail_all.items() if k in VALIDATED_COMPONENTS}  # P3.3: untested parts display-only
         wsum = sum(weights[k] for k in avail)
-        score = sum(weights[k] * v for k, v in avail.items()) / wsum if wsum else None
+        score_unified = composite_score(comps, regime["regime"], VALIDATED_COMPONENTS)
+        score = _live_composite_score(comps, regime["regime"], weights)
         coverage = wsum / (sum(weights[k] for k in VALIDATED_COMPONENTS) or 1)
         agreement = 1 - min(1.0, float(np.std(list(avail.values()))) / 35) if len(avail) >= 2 else 0.3
         conf = round(coverage * (0.5 + 0.5 * agreement), 3)
         raw[t]["score_all_components"] = round(score_all, 2) if score_all is not None else None
+        raw[t]["score_unified_shadow"] = round(score_unified, 2) if score_unified is not None else None
         raw[t]["validation"] = validation_for(t)
         results.append({"ticker": t, "kind": u["kind"], "name": u.get("name"), "score": round(score, 2) if score is not None else None,
                         "confidence": conf, "components": comps,
@@ -535,7 +516,7 @@ async def latest_signals(pool: Any) -> dict[str, Any]:
 
 
 def render_brief_section(sig: dict[str, Any], plans: list[dict[str, Any]], weak: Optional[list[str]] = None,
-                         paper: Optional[dict[str, Any]] = None) -> str:
+                         paper: Optional[dict[str, Any]] = None, approved: Optional[list[dict[str, Any]]] = None) -> str:
     if not sig or not sig.get("items"):
         return "**Signals**\n- No signal run yet."
     reg = sig.get("regime") or {}
@@ -563,6 +544,11 @@ def render_brief_section(sig: dict[str, Any], plans: list[dict[str, Any]], weak:
         lines.append(f"- Paper ledger: {cnt.get('waiting', 0)} waiting, {cnt.get('open', 0)} open, {cnt.get('closed', 0)} closed"
                      + (f", hit rate {paper['hit_rate']:.0%}, avg {paper['avg_r']:+.2f}R" if paper.get("hit_rate") is not None else ""))
     lines.append("- All plans are PROPOSED (engine) - they need Tho's approval before they drive alerts.")
+    if approved:
+        lines.append("- Approved plans (drive watch-list alerts; no order is ever placed): " + "; ".join(
+            f"#{p['id']} {p['ticker']} entry {p['entry_low']:.4g}-{p['entry_high']:.4g} stop {p['stop']:.4g} target {p['target']:.4g}"
+            + (f" [อนุมัติแบบ override: {p.get('override_reason')}]" if p.get("approved_by_override") else "")
+            for p in approved if p.get("entry_low") is not None))
     return "\n".join(lines)
 
 
@@ -581,4 +567,8 @@ async def brief_section(pool: Any) -> str:
         paper = await tp.paper_summary(pool)
     except Exception:  # noqa: BLE001
         pass
-    return render_brief_section(sig, plans, weak, paper)
+    try:
+        approved = await tp.list_plans(pool, "approved")
+    except Exception:  # noqa: BLE001
+        approved = None
+    return render_brief_section(sig, plans, weak, paper, approved)

@@ -1,0 +1,383 @@
+{
+  "generated_at": "2026-11-01T02:03:10",
+  "config": {
+    "baseline": "frozen p33 composite from ops/p3_backtest.py",
+    "candidate": "portfolio_engine.signal_score exact live price composite",
+    "components_allowed": [
+      "low_vol",
+      "momentum",
+      "technical"
+    ],
+    "rebalance": "monthly signal at month-end close; execute next trading close",
+    "top_k": 3,
+    "costs": "walkforward.simulate conventions",
+    "oos_start": "first data date + 12-month warm-up + 24 training months",
+    "gate_folds": "calendar-year OOS; skill=net portfolio total return minus benchmark total return; hit=share of positive net portfolio months",
+    "regime": "signals.regime_from_closes using only data <= rebalance date; missing series are omitted by regime_points, and neutral is used if no points exist; historical SET foreign flow is unavailable",
+    "volume": "market_history.download_ohlc; missing ticker volume leaves volume_confirm missing and shared live missing-data normalization applies",
+    "scope": "research scores only; no database writes, advice, owner-hold sell/trim output, or orders"
+  },
+  "universes": {
+    "global": {
+      "benchmark": "SPY",
+      "tickers": [
+        "QQQ",
+        "NVDA",
+        "MSFT",
+        "GOOGL",
+        "TSM",
+        "AVGO",
+        "MU",
+        "VNM",
+        "EWJ",
+        "INDA",
+        "FXI",
+        "GLDM",
+        "IAU",
+        "GDX"
+      ],
+      "data_from": "2016-10-31",
+      "data_to": "2026-10-30",
+      "baseline": {
+        "cagr": 0.3232,
+        "sharpe": 1.084,
+        "vol": 0.3,
+        "max_drawdown": -0.3222,
+        "days": 1759,
+        "benchmark_cagr": 0.1557,
+        "excess_cagr": 0.1674,
+        "hit_rate": 0.6706,
+        "n_months": 85,
+        "oos_from": "2019-10-31",
+        "oos_to": "2026-10-30",
+        "folds": {
+          "2019": {
+            "skill": 0.01762189007861048,
+            "hit": 0.6666666666666666,
+            "return": 0.08108737538754762,
+            "benchmark_return": 0.06346548530893714,
+            "n_months": 3
+          },
+          "2020": {
+            "skill": 0.27969458383398527,
+            "hit": 0.6666666666666666,
+            "return": 0.4630107529468155,
+            "benchmark_return": 0.18331616911283022,
+            "n_months": 12
+          },
+          "2021": {
+            "skill": 0.34456576379053394,
+            "hit": 0.8333333333333334,
+            "return": 0.6318532993947725,
+            "benchmark_return": 0.2872875356042386,
+            "n_months": 12
+          },
+          "2022": {
+            "skill": -0.061078645546100985,
+            "hit": 0.4166666666666667,
+            "return": -0.24283233464272758,
+            "benchmark_return": -0.1817536890966266,
+            "n_months": 12
+          },
+          "2023": {
+            "skill": 0.1910755296611748,
+            "hit": 0.6666666666666666,
+            "return": 0.45283353856025,
+            "benchmark_return": 0.2617580088990752,
+            "n_months": 12
+          },
+          "2024": {
+            "skill": 0.07050824921014986,
+            "hit": 0.5833333333333334,
+            "return": 0.31937287866811936,
+            "benchmark_return": 0.2488646294579695,
+            "n_months": 12
+          },
+          "2025": {
+            "skill": 0.2097044066547904,
+            "hit": 0.8333333333333334,
+            "return": 0.3868950444218189,
+            "benchmark_return": 0.17719063776702848,
+            "n_months": 12
+          },
+          "2026": {
+            "skill": 0.24230433448733169,
+            "hit": 0.7,
+            "return": 0.35918412905322805,
+            "benchmark_return": 0.11687979456589637,
+            "n_months": 10
+          }
+        }
+      },
+      "candidate": {
+        "cagr": 0.2383,
+        "sharpe": 0.903,
+        "vol": 0.2803,
+        "max_drawdown": -0.3153,
+        "days": 1759,
+        "benchmark_cagr": 0.1557,
+        "excess_cagr": 0.0826,
+        "hit_rate": 0.6118,
+        "n_months": 85,
+        "oos_from": "2019-10-31",
+        "oos_to": "2026-10-30",
+        "folds": {
+          "2019": {
+            "skill": -0.005883051242814963,
+            "hit": 0.3333333333333333,
+            "return": 0.05758243406612218,
+            "benchmark_return": 0.06346548530893714,
+            "n_months": 3
+          },
+          "2020": {
+            "skill": 0.028732184696360408,
+            "hit": 0.4166666666666667,
+            "return": 0.21204835380919063,
+            "benchmark_return": 0.18331616911283022,
+            "n_months": 12
+          },
+          "2021": {
+            "skill": 0.055868463930416556,
+            "hit": 0.6666666666666666,
+            "return": 0.34315599953465514,
+            "benchmark_return": 0.2872875356042386,
+            "n_months": 12
+          },
+          "2022": {
+            "skill": -0.028150108739936508,
+            "hit": 0.3333333333333333,
+            "return": -0.2099037978365631,
+            "benchmark_return": -0.1817536890966266,
+            "n_months": 12
+          },
+          "2023": {
+            "skill": -0.00932667742241522,
+            "hit": 0.6666666666666666,
+            "return": 0.25243133147665997,
+            "benchmark_return": 0.2617580088990752,
+            "n_months": 12
+          },
+          "2024": {
+            "skill": 0.05209151649356736,
+            "hit": 0.75,
+            "return": 0.30095614595153686,
+            "benchmark_return": 0.2488646294579695,
+            "n_months": 12
+          },
+          "2025": {
+            "skill": 0.30984719544123007,
+            "hit": 0.9166666666666666,
+            "return": 0.48703783320825855,
+            "benchmark_return": 0.17719063776702848,
+            "n_months": 12
+          },
+          "2026": {
+            "skill": 0.2321279645788754,
+            "hit": 0.6,
+            "return": 0.3490077591447718,
+            "benchmark_return": 0.11687979456589637,
+            "n_months": 10
+          }
+        }
+      },
+      "regime_diagnostics": {
+        "rebalance_dates": 120,
+        "labels": {
+          "neutral": 51,
+          "risk_on": 51,
+          "risk_off": 18
+        },
+        "min_available_inputs": 0,
+        "max_available_inputs": 7
+      },
+      "verdict": {
+        "pass": false,
+        "mean_skill_base": 0.16179951402130943,
+        "mean_skill_cand": 0.07941343596691039,
+        "mean_hit_base": 0.6708333333333333,
+        "mean_hit_cand": 0.5854166666666666,
+        "reason": "candidate mean skill did not improve and mean hit fell below the allowed floor"
+      }
+    },
+    "thai": {
+      "benchmark": "TDEX.BK",
+      "tickers": [
+        "KBANK.BK",
+        "BBL.BK",
+        "KTB.BK",
+        "TTB.BK",
+        "SCB.BK",
+        "PTT.BK",
+        "PTTEP.BK",
+        "TOP.BK",
+        "IRPC.BK",
+        "AOT.BK",
+        "BAFS.BK",
+        "ADVANC.BK"
+      ],
+      "data_from": "2016-10-31",
+      "data_to": "2026-10-30",
+      "baseline": {
+        "cagr": 0.0444,
+        "sharpe": 0.3107,
+        "vol": 0.2173,
+        "max_drawdown": -0.5045,
+        "days": 1694,
+        "benchmark_cagr": 0.0467,
+        "excess_cagr": -0.0023,
+        "hit_rate": 0.5176,
+        "n_months": 85,
+        "oos_from": "2019-10-31",
+        "oos_to": "2026-10-30",
+        "folds": {
+          "2019": {
+            "skill": -0.08980273321050947,
+            "hit": 0.0,
+            "return": -0.09167365664957727,
+            "benchmark_return": -0.0018709234390678064,
+            "n_months": 3
+          },
+          "2020": {
+            "skill": -0.25538337554865687,
+            "hit": 0.25,
+            "return": -0.3652286083341324,
+            "benchmark_return": -0.10984523278547553,
+            "n_months": 12
+          },
+          "2021": {
+            "skill": -0.079902530481055,
+            "hit": 0.5,
+            "return": 0.054299814480990305,
+            "benchmark_return": 0.1342023449620453,
+            "n_months": 12
+          },
+          "2022": {
+            "skill": 0.1604097083774414,
+            "hit": 0.75,
+            "return": 0.2506587035078429,
+            "benchmark_return": 0.09024899513040152,
+            "n_months": 12
+          },
+          "2023": {
+            "skill": 0.14565484746941337,
+            "hit": 0.4166666666666667,
+            "return": 0.061995923627791605,
+            "benchmark_return": -0.08365892384162177,
+            "n_months": 12
+          },
+          "2024": {
+            "skill": 0.06647892012770029,
+            "hit": 0.75,
+            "return": 0.15738174614807,
+            "benchmark_return": 0.0909028260203697,
+            "n_months": 12
+          },
+          "2025": {
+            "skill": 0.2226852298437092,
+            "hit": 0.6666666666666666,
+            "return": 0.18113680913825614,
+            "benchmark_return": -0.04154842070545306,
+            "n_months": 12
+          },
+          "2026": {
+            "skill": -0.07754194100820366,
+            "hit": 0.4,
+            "return": 0.2132888635948762,
+            "benchmark_return": 0.29083080460307986,
+            "n_months": 10
+          }
+        }
+      },
+      "candidate": {
+        "cagr": 0.0192,
+        "sharpe": 0.1964,
+        "vol": 0.2096,
+        "max_drawdown": -0.4394,
+        "days": 1694,
+        "benchmark_cagr": 0.0467,
+        "excess_cagr": -0.0275,
+        "hit_rate": 0.4941,
+        "n_months": 85,
+        "oos_from": "2019-10-31",
+        "oos_to": "2026-10-30",
+        "folds": {
+          "2019": {
+            "skill": -0.06743886266550247,
+            "hit": 0.3333333333333333,
+            "return": -0.06930978610457028,
+            "benchmark_return": -0.0018709234390678064,
+            "n_months": 3
+          },
+          "2020": {
+            "skill": -0.13164522802222167,
+            "hit": 0.25,
+            "return": -0.2414904608076972,
+            "benchmark_return": -0.10984523278547553,
+            "n_months": 12
+          },
+          "2021": {
+            "skill": -0.07680368485470779,
+            "hit": 0.4166666666666667,
+            "return": 0.05739866010733752,
+            "benchmark_return": 0.1342023449620453,
+            "n_months": 12
+          },
+          "2022": {
+            "skill": 0.05539252158998664,
+            "hit": 0.6666666666666666,
+            "return": 0.14564151672038816,
+            "benchmark_return": 0.09024899513040152,
+            "n_months": 12
+          },
+          "2023": {
+            "skill": -0.02719302235943044,
+            "hit": 0.3333333333333333,
+            "return": -0.11085194620105221,
+            "benchmark_return": -0.08365892384162177,
+            "n_months": 12
+          },
+          "2024": {
+            "skill": 0.04589632394062981,
+            "hit": 0.75,
+            "return": 0.1367991499609995,
+            "benchmark_return": 0.0909028260203697,
+            "n_months": 12
+          },
+          "2025": {
+            "skill": 0.25708738818807575,
+            "hit": 0.75,
+            "return": 0.2155389674826227,
+            "benchmark_return": -0.04154842070545306,
+            "n_months": 12
+          },
+          "2026": {
+            "skill": -0.2093466629980325,
+            "hit": 0.3,
+            "return": 0.08148414160504736,
+            "benchmark_return": 0.29083080460307986,
+            "n_months": 10
+          }
+        }
+      },
+      "regime_diagnostics": {
+        "rebalance_dates": 120,
+        "labels": {
+          "neutral": 52,
+          "risk_on": 50,
+          "risk_off": 18
+        },
+        "min_available_inputs": 0,
+        "max_available_inputs": 7
+      },
+      "verdict": {
+        "pass": false,
+        "mean_skill_base": 0.011574765696229908,
+        "mean_skill_cand": -0.019256403397650335,
+        "mean_hit_base": 0.4666666666666667,
+        "mean_hit_cand": 0.475,
+        "reason": "candidate mean skill did not improve"
+      }
+    }
+  },
+  "pass": false
+}
