@@ -262,7 +262,7 @@ async def current(pool: Any, hours: int = 72) -> dict[str, Any]:
     return {"checked_at": datetime.now(ICT).isoformat(timespec="minutes"), "window_hours": hours, "cards": [_jsonable(c) for c in cards],
             "empty_text_th": "ไม่มีเหตุการณ์สำคัญ" if not cards else None, "thresholds": th,
             "rule_th": "แสดงเฉพาะเหตุการณ์คริปโตที่กระทบแนวโน้มแรง: ข่าวหมวดกฎหมาย/ETF/exchange ถูกแฮ็ก/stablecoin/ทุนสำรองรัฐ/liquidation ที่ผลกระทบสูง"
-                       f" และ |sentiment| ≥ {th['min_abs_score']} จาก ≥ {th['min_sources']} แหล่ง หรือ BTC เคลื่อน ≥ {th['k_sigma']}×SD ใน 1 วัน / ≥ {th['pct_7d']:.0f}% ใน 7 วัน / ตัดเส้น 200 วัน"
+                       f" และ |sentiment| ≥ {th['min_abs_score']} จาก ≥ {th['min_sources']} สำนักข่าว (นับตามโดเมนของลิงก์) หรือ BTC เคลื่อน ≥ {th['k_sigma']}×SD ใน 1 วัน / ≥ {th['pct_7d']:.0f}% ใน 7 วัน / ตัดเส้น 200 วัน"
                        f" · รวมข่าวเรื่องเดียวกันเป็น 1 การ์ด · ไม่เกิน {th['max_cards']} การ์ดใน 72 ชม. · ไม่นับในอารมณ์ตลาดหลักและไม่เข้า signals",
             "display_only": True}
 

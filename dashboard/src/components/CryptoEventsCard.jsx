@@ -18,10 +18,10 @@ export default function CryptoEventsCard({ data, loading, error, retry }) {
         {c.type === 'news' ? <>
           <div className="flex items-baseline justify-between gap-2">
             <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[11px] text-violet-200">{c.category_th}</span>
-            <span className={`text-xs font-semibold ${c.direction === 'ลบ' ? 'text-red-300' : 'text-emerald-300'}`}>โทน{c.direction} · {c.n_sources} แหล่ง</span>
+            <span className={`text-xs font-semibold ${c.direction === 'ลบ' ? 'text-red-300' : 'text-emerald-300'}`}>โทน{c.direction} · {c.n_sources} สำนักข่าว</span>
           </div>
           <a href={c.url} target="_blank" rel="noreferrer" className="mt-1.5 block text-sm font-medium text-white hover:underline">{c.headline}</a>
-          <p className="mt-1 text-[10px] text-slate-500">{thDT(c.at)} · {(c.headlines || []).map(h => h.source).filter((v, j, a) => a.indexOf(v) === j).join(', ')}</p>
+          <p className="mt-1 text-[10px] text-slate-500">{thDT(c.at)} · {(c.headlines || []).map(h => { try { return new URL(h.url).hostname.replace(/^(www|uk|finance|news)\./, '') } catch { return h.source } }).filter((v, j, a) => a.indexOf(v) === j).join(', ')}</p>
         </> : <>
           <div className="flex items-baseline justify-between gap-2">
             <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] text-amber-200">ราคา BTC</span>
