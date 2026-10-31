@@ -33,6 +33,11 @@ import numpy as np
 import pandas as pd
 
 import predictions as P
+
+# SHADOW ONLY. Keep separate from the core switch so operations can compare
+# macro-family backfills independently; default OFF means no live change.
+ZERO_BETA_FIX = False
+SHADOW_LIVE_REGIME_BACKFILL = False
 from market_history import UA, download_closes, http_bytes, http_json
 
 LOGGER = logging.getLogger("portfolio_engine.macro_trends")
@@ -257,7 +262,8 @@ async def generate_macro(pool: Any, force: bool = False) -> dict[str, Any]:
             await _log(pool, f"forecast:{subj}", False, f"insufficient history ({0 if ser is None else len(ser)} rows)")
             continue
         beta = _beta(ser, closes.get("SPY")) if ind.get("equity") else 0.0
-        extras = {"regime": reg["regime"] if reg else None, "beta": beta if beta is not None else 1.0, "signal_score": None, "analyst_target": None}
+        extras = {"regime": reg["regime"] if reg else None, "beta": beta if beta is not None else 1.0,
+                  "_zero_beta_fix": ZERO_BETA_FIX, "signal_score": None, "analyst_target": None}
         base = float(ser.iloc[-1])
         as_of = ser.index[-1].date()
         for h, hd in P.HORIZONS.items():
@@ -318,10 +324,11 @@ def _backfill_sync(closes: pd.DataFrame, subjects: list[str], years: int = 3) ->
                 if len(lp) < 400:
                     continue
                 reg = None
-                if spy is not None and ind.get("equity"):
+                if spy is not None and (ind.get("equity") or SHADOW_LIVE_REGIME_BACKFILL):
                     ss = spy.loc[:d].dropna()
                     reg = ("risk_on" if ss.iloc[-1] > ss.iloc[-200:].mean() else "risk_off") if len(ss) > 200 else None
-                mo = P.model_outputs(lp, hd, {"regime": reg, "beta": 1.0 if ind.get("equity") else 0.0})
+                mo = P.model_outputs(lp, hd, {"regime": reg, "beta": 1.0 if ind.get("equity") else 0.0,
+                                              "_zero_beta_fix": ZERO_BETA_FIX})
                 if "error" in mo:
                     continue
                 base = float(np.exp(lp.iloc[-1]))

@@ -55,6 +55,9 @@ PRIOR_W = {m: (0.0 if m in DISPLAY_ONLY_UNTIL_VALIDATED else w) for m, w in PRIO
 #   macro_trends: segmented -> FAIL on hit (.624 -> .596): keeps pooled weights; segmented kept as shadow
 FAMILY_POLICY = {"core": {"segmented": True, "regime_rule": "live"},
                  "macro_trends": {"segmented": False, "regime_rule": "backfill_proxy"}}
+# SHADOW ONLY.  Default-off preserves all live forecast numbers.  Backtests may
+# enable it to distinguish missing beta (use 1.0) from an intentional 0.0 beta.
+ZERO_BETA_FIX = False
 REGIME_COEF = {"risk_on": 0.1, "risk_off": -0.15}
 T_DF = 5
 T_SCALE = math.sqrt((T_DF - 2) / T_DF)  # unit-variance Student-t
@@ -232,7 +235,11 @@ def model_outputs(lp: pd.Series, h: int, extras: dict[str, Any]) -> dict[str, An
     b_r, n_r = _coef(dev[:usable], fwd[:usable])
     out["meanrev"] = b_r * float(dev[-1]) if np.isfinite(dev[-1]) else 0.0
     reg = extras.get("regime")
-    beta = extras.get("beta", 1.0) or 1.0
+    beta = extras.get("beta")
+    if extras.get("_zero_beta_fix", ZERO_BETA_FIX):
+        beta = 1.0 if beta is None else float(beta)
+    else:
+        beta = beta or 1.0
     out["regime"] = (0.1 if reg == "risk_on" else -0.15 if reg == "risk_off" else 0.0) * sigma * max(min(beta, 2), -1)
     sc = extras.get("signal_score")
     out["signal"] = 0.1 * sigma * (sc - 50) / 25 if sc is not None and h >= 21 else None
@@ -380,8 +387,10 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
     await ensure_tables(pool)
     today = datetime.now(ICT).date()
     async with pool.acquire() as conn:
-        lasts = {r["horizon"]: r["d"] for r in await conn.fetch(
-            "SELECT horizon, max(as_of_date) d FROM predictions WHERE source='live' AND method->>'family' IS DISTINCT FROM 'macro_trends' GROUP BY horizon")}
+        lasts = {(r["subject"], r["horizon"]): r["d"] for r in await conn.fetch(
+            """SELECT subject, horizon, max(as_of_date) d FROM predictions
+               WHERE source='live' AND method->>'family' IS DISTINCT FROM 'macro_trends'
+               GROUP BY subject, horizon""")}
         lastmade = {r["horizon"]: r["d"] for r in await conn.fetch(
             # 2026-10-31: macro-board forecasts (method.family='macro_trends') keep their own cadence - excluded here
             "SELECT horizon, max(made_at AT TIME ZONE 'Asia/Bangkok')::date d FROM predictions WHERE source='live' AND method->>'family' IS DISTINCT FROM 'macro_trends' GROUP BY horizon")}
@@ -402,6 +411,7 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                 for r in await conn.fetch("SELECT key, reading, as_of FROM market_factors")}
     track = await scoreboard(pool, brief=True)
     made = 0
+    unchanged = 0
     now = datetime.now(timezone.utc)
     # 2026-10-31 FX layer: forecast USD/THB first so every other subject can carry an explicit FX assumption
     # (informational: the models already see FX inside THB price history; the FX leg is NOT added on top).
@@ -433,6 +443,12 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
         base = float(ser.iloc[-1])
         as_of = ser.index[-1].date()
         for h in due:
+            # Even a forced run must not freeze a second forecast from the same
+            # underlying close for this subject/horizon.
+            last_as_of = lasts.get((subj, h))
+            if last_as_of is not None and as_of <= last_as_of:
+                unchanged += 1
+                continue
             hd = HORIZONS[h]
             mo = model_outputs(np.log(ser), hd, extras)
             if "error" in mo:
@@ -490,7 +506,7 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                    "confidence": c["confidence"], "method": method}
             if await _insert(pool, rec):
                 made += 1
-    return {"due": due, "made": made}
+    return {"due": due, "made": made, "unchanged_close_skipped": unchanged}
 
 
 async def _insert(pool: Any, rec: dict[str, Any]) -> bool:

@@ -3,7 +3,7 @@ import json
 import os
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -52,6 +52,29 @@ def _snapshot_value(snapshot: dict[str, Any], ticker: str) -> float:
     return float(item.get("market_value_thb") or 0) if isinstance(item, dict) else 0.0
 
 
+def _as_of_date(value: Any) -> Any:
+    try:
+        return value if isinstance(value, date) else date.fromisoformat(str(value)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+async def _holding_mark(pool: Any, snapshot: dict[str, Any], ticker: str) -> tuple[float, Any, str]:
+    item = snapshot.get("holdings", {}).get(ticker, {})
+    if isinstance(item, dict):
+        price = _snapshot_price(snapshot, ticker)
+        as_of = _as_of_date(item.get("price_as_of") or item.get("as_of"))
+        if price and as_of:
+            return price, as_of, str(item.get("price_source") or "portfolio snapshot")
+    row = await pool.fetchrow(
+        "SELECT close_price, price_date FROM market_prices WHERE ticker=$1 ORDER BY price_date DESC LIMIT 1",
+        ticker,
+    )
+    if row and row["close_price"] is not None and float(row["close_price"]) != 0:
+        return float(row["close_price"]), _as_of_date(row["price_date"]), "market_prices"
+    return _snapshot_price(snapshot, ticker), None, "unknown"
+
+
 async def generate_rebalancing_plan() -> dict[str, Any]:
     pool = await db_pool.get_pool()
     holdings = await pool.fetch(
@@ -68,16 +91,24 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
     base_currency = snapshot.get("base_currency", os.getenv("BASE_CURRENCY", "THB"))
     values_by_class: dict[str, float] = defaultdict(float)
     positions: list[dict[str, Any]] = []
+    stale_marks: list[dict[str, Any]] = []
 
     for row in holdings:
         ticker = row["ticker"]
-        price = _snapshot_price(snapshot, ticker) or await latest_price(pool, ticker)
+        price, price_as_of, price_source = await _holding_mark(pool, snapshot, ticker)
+        mark_age = (date.today() - price_as_of).days if price_as_of is not None else None
+        mark_fresh = bool(price > 0 and mark_age is not None and mark_age <= 7)
         value = _snapshot_value(snapshot, ticker) or float(row["quantity"] or 0) * price
         if not value and is_pending(attrs.get(ticker)):
             value = float(attrs[ticker].get("amount_invested_thb") or 0)  # units pending -> amount invested
         asset_class = str(row["asset_class"] or "other").lower()
         values_by_class[asset_class] += value
-        positions.append({**dict(row), "price": price, "value_thb": value, "asset_class": asset_class})
+        positions.append({**dict(row), "price": price, "value_thb": value, "asset_class": asset_class,
+                          "price_as_of": str(price_as_of) if price_as_of else None,
+                          "price_source": price_source, "mark_fresh": mark_fresh})
+        if not mark_fresh:
+            stale_marks.append({"ticker": ticker, "status": "unknown", "price_as_of": str(price_as_of) if price_as_of else None,
+                                "reason": "mark is older than 7 calendar days" if mark_age is not None else "mark date is unknown"})
 
     total_value = sum(values_by_class.values())
     targets = target_allocations()
@@ -94,8 +125,13 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
             continue
         action = "sell" if drift > 0 else "buy"
         amount = abs(drift) * total_value
-        candidates = [position for position in positions if position["asset_class"] == asset_class
+        candidates = [position for position in positions if position["asset_class"] == asset_class and position["mark_fresh"]
                       and not (action == "sell" and position["ticker"] in locked)]
+        class_positions = [position for position in positions if position["asset_class"] == asset_class]
+        if not candidates and class_positions and any(not position["mark_fresh"] for position in class_positions):
+            # The drift can still be displayed, but no amount is sized from an
+            # unknown/stale mark for the holding that would implement it.
+            continue
         if not candidates and action == "sell" and any(p["asset_class"] == asset_class for p in positions):
             trades.append(
                 {
@@ -156,6 +192,7 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
         "target_allocations": targets,
         "trades": trades,
         "locked_holdings": sorted(locked),
+        "stale_marks": stale_marks,
     }
     narrative = "No rebalancing is required."
     if trades:
@@ -212,6 +249,7 @@ async def generate_rebalancing_plan() -> dict[str, Any]:
         "current_allocations": current,
         "target_allocations": targets,
         "trades": trades,
+        "stale_marks": stale_marks,
         "llm_narrative": narrative,
         "generated_at": datetime.now(UTC).isoformat(),
     }

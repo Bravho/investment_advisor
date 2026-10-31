@@ -124,13 +124,38 @@ def black_litterman(cov: np.ndarray, w_eq: np.ndarray, views: dict[int, tuple[fl
     return {"pi": pi, "mu": mu, "w": w / w.sum() if w.sum() > 0 else w_eq}
 
 
-async def _forecast_views(pool: Any) -> dict[str, Any]:
+# 1y views are re-made monthly (predictions.CADENCE['1y']); a view is stale once it is older than one
+# cadence period + 7 days. (Codex suggested 7 days - rejected: it would drop every view ~3 weeks per month.)
+VIEW_MAX_AGE_DAYS = 38
+
+
+def _partition_forecast_views(rows: list[Any], today: Optional[date] = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    today = today or date.today()
+    fresh: dict[str, Any] = {}
+    stale: list[dict[str, Any]] = []
+    for row in rows:
+        as_of = row["as_of_date"]
+        as_of_date = as_of if isinstance(as_of, date) else date.fromisoformat(str(as_of)[:10])
+        if (today - as_of_date).days > VIEW_MAX_AGE_DAYS:
+            stale.append({"subject": row["subject"], "as_of_date": str(as_of_date), "status": "unknown",
+                          "view_1y_thb": "unknown", "reason": f"1y view older than {VIEW_MAX_AGE_DAYS} days (monthly cadence + 7)"})
+            continue
+        fresh[row["subject"]] = {
+            "exp_log_return": float(row["exp_return"]),
+            "confidence": float(row["confidence"]),
+            "made_at": row["made_at"].isoformat(),
+            "as_of_date": str(as_of_date),
+            "sha": row["payload_sha256"][:12],
+        }
+    return fresh, stale
+
+
+async def _forecast_views(pool: Any) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     async with pool.acquire() as conn:
-        rows = await conn.fetch("""SELECT DISTINCT ON (subject) subject, exp_return, confidence, made_at, payload_sha256 FROM predictions
+        rows = await conn.fetch("""SELECT DISTINCT ON (subject) subject, exp_return, confidence, made_at, as_of_date, payload_sha256 FROM predictions
                                    WHERE source='live' AND horizon='1y' AND subject = ANY($1::text[]) ORDER BY subject, made_at DESC""",
                                 [SET_PROXY, "GC=F", "SPY", "THB=X"])
-    return {r["subject"]: {"exp_log_return": float(r["exp_return"]), "confidence": float(r["confidence"]),
-                           "made_at": r["made_at"].isoformat(), "sha": r["payload_sha256"][:12]} for r in rows}
+    return _partition_forecast_views(list(rows))
 
 
 # 2026-11-01 (P3.5): macro-board (family macro_trends) 1y forecasts as alternative BL views - SHADOW only.
@@ -138,19 +163,35 @@ async def _forecast_views(pool: Any) -> dict[str, Any]:
 SHADOW_VIEW_SUBJECTS = {"gold": ("XAUTHB", False), "global_equity": ("^GSPC", True)}
 
 
-async def _shadow_macro_views(pool: Any, fx_view: float) -> dict[str, Any]:
+async def _shadow_macro_views(pool: Any, fx_view: Optional[float]) -> dict[str, Any]:
     async with pool.acquire() as conn:
-        rows = await conn.fetch("""SELECT DISTINCT ON (subject) subject, exp_return, confidence, made_at, payload_sha256 FROM predictions
+        rows = await conn.fetch("""SELECT DISTINCT ON (subject) subject, exp_return, confidence, made_at, as_of_date, payload_sha256 FROM predictions
                                    WHERE source='live' AND horizon='1y' AND method->>'family' = 'macro_trends' AND subject = ANY($1::text[])
                                    ORDER BY subject, made_at DESC""", [v[0] for v in SHADOW_VIEW_SUBJECTS.values()])
     by = {r["subject"]: r for r in rows}
     out: dict[str, Any] = {"status": "shadow - not used in the allocation (P3.5: no live track record)"}
     for k, (subj, add_fx) in SHADOW_VIEW_SUBJECTS.items():
         r = by.get(subj)
+        fresh = r is not None and (date.today() - r["as_of_date"]).days <= VIEW_MAX_AGE_DAYS
         out[k] = ({"view_1y_thb": round(float(r["exp_return"]) + (fx_view if add_fx else 0.0), 4), "confidence": float(r["confidence"]),
-                   "from": subj, "prediction_sha": r["payload_sha256"][:12], "made_at": r["made_at"].isoformat()}
-                  if r else {"from": subj, "view_1y_thb": "unknown"})
+                   "from": subj, "prediction_sha": r["payload_sha256"][:12], "made_at": r["made_at"].isoformat(),
+                   "as_of_date": str(r["as_of_date"])}
+                  if fresh and (not add_fx or fx_view is not None)
+                  else {"from": subj, "view_1y_thb": "unknown", "reason": "missing/stale view or FX input"})
     return out
+
+
+def _core_proxy_target_value(
+    core_proxy: str,
+    recommended_pct: float,
+    total_value: float,
+    trade_classes: list[str],
+    by_ticker: dict[str, dict[str, Any]],
+) -> float:
+    """Preserve the current core-proxy value while its class is in-band."""
+    if "global_equity" in trade_classes:
+        return recommended_pct / 100 * total_value
+    return float(by_ticker.get(core_proxy, {}).get("value_thb", 0.0))
 
 
 def _lot(ticker: str) -> float:
@@ -201,15 +242,19 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     bl_cfg = pol["black_litterman"]
     w_eq = np.array([pol["asset_classes"][k]["target"] for k in RISKY], dtype=float)
     w_eq = w_eq / w_eq.sum()
-    fv = await _forecast_views(pool)
-    fx_view = (fv.get("THB=X") or {}).get("exp_log_return", 0.0)
+    fv, stale_views = await _forecast_views(pool)
+    fx_view = (fv.get("THB=X") or {}).get("exp_log_return")
     views, view_info = {}, {}
     for i, (k, subj, add_fx) in enumerate([("thai_equity", SET_PROXY, False), ("gold", "GC=F", True), ("global_equity", "SPY", True)]):
         v = fv.get(subj)
-        if v:
+        if v and (not add_fx or fx_view is not None):
             q = v["exp_log_return"] + (fx_view if add_fx else 0.0)
             views[i] = (q, v["confidence"])
-            view_info[k] = {"view_1y_thb": round(q, 4), "confidence": v["confidence"], "from": subj, "prediction_sha": v["sha"], "made_at": v["made_at"]}
+            view_info[k] = {"view_1y_thb": round(q, 4), "confidence": v["confidence"], "from": subj,
+                            "prediction_sha": v["sha"], "made_at": v["made_at"], "as_of_date": v["as_of_date"]}
+        elif v and add_fx:
+            stale_views.append({"subject": subj, "as_of_date": v["as_of_date"], "status": "unknown", "view_1y_thb": "unknown",
+                                "reason": "fresh USD/THB 1y view is unavailable"})
     bl = black_litterman(cov, w_eq, views, bl_cfg["risk_aversion"], bl_cfg["tau"], bl_cfg["view_confidence_floor"])
     try:
         shadow_views = await _shadow_macro_views(pool, fx_view)
@@ -257,7 +302,7 @@ async def run_construction(pool: Any) -> dict[str, Any]:
     for t in gold_hold:
         tgt_val[t] = rec["gold"] / 100 * total / len(gold_hold) if "gold" in trade_classes else by_ticker.get(t, {}).get("value_thb", 0)
     glob = pol["implementation"]["global_equity"]["core_proxy"]
-    tgt_val[glob] = rec["global_equity"] / 100 * total if "global_equity" in trade_classes else 0.0
+    tgt_val[glob] = _core_proxy_target_value(glob, rec["global_equity"], total, trade_classes, by_ticker)
     trades, cash_flow = [], 0.0
     lp = {SET_PROXY: float(px[SET_PROXY].dropna().iloc[-1]), glob: spy}
     # 2026-10-31: owner holds (PTTEP.BK, SCB.BK): Tho will not sell them until he is satisfied with the project.
@@ -306,6 +351,7 @@ async def run_construction(pool: Any) -> dict[str, Any]:
         "risk_parity": {"risk_contrib_pct": _rc(cov, rp_r)},
         "class_vol_pct": {k: round(float(math.sqrt(cov[i, i])) * 100, 1) for i, k in enumerate(RISKY)},
         "bands": band_rows,
+        "stale_views": stale_views,
         "trades": trades,
         "locked_holdings": [{"ticker": t, "tax_wrapper": by_ticker[t].get("tax_wrapper"), "lock_until": by_ticker[t].get("lock_until"),
                              "value_thb": round(by_ticker[t]["value_thb"], 0), "units_status": by_ticker[t].get("units_status")}

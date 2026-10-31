@@ -159,6 +159,7 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
     held = [p["ticker"] for p in positions]
     real = [t for t in held + watch if t not in PROXIES]
     raw = download_closes(sorted(set(real) | set(FACTOR_TICKERS.values())), start="2019-06-01", ttl=3600)
+    raw_actual = raw.copy()
     raw = raw.replace([np.inf, -np.inf], np.nan).where(raw > 0).ffill(limit=5)
     navs = cfg.get("_navs") or {}
     prices, notes = _thb_prices(raw, list(dict.fromkeys(held + watch)), navs)
@@ -177,6 +178,7 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
     missing = [t for t in held if t not in hp.columns or hp[t].dropna().empty]
     rets_full = rets.dropna()
     w = weights.reindex(rets_full.columns).fillna(0.0)
+    risk_coverage_weight = float(w.sum())
     port = rets_full @ w
     port_1y, port_2y = port.iloc[-n_cov:], port.iloc[-n_hist:]
 
@@ -287,11 +289,42 @@ def _compute_inner(positions: list[dict[str, Any]], watch: list[str], cfg: dict[
                        "positions": rows, "pnl_thb": round(tot), "pnl_pct": round(tot / total * 100, 2) if total else None,
                        "no_history": gaps}
 
+    def last_date(column: str) -> Optional[date]:
+        if column not in raw_actual.columns:
+            return None
+        series = raw_actual[column].replace([np.inf, -np.inf], np.nan).where(raw_actual[column] > 0).dropna()
+        return series.index[-1].date() if not series.empty else None
+
+    price_dates: dict[str, Optional[date]] = {}
+    for ticker in held:
+        proxy = PROXIES.get(ticker) or {}
+        if proxy.get("kind") == "set_proxy":
+            sources = [last_date(SET_PROXY)]
+        elif proxy.get("kind") == "gold_thb":
+            sources = [last_date("GC=F"), last_date("THB=X")]
+        elif _is_usd_listed(ticker):
+            sources = [last_date(ticker), last_date("THB=X")]
+        else:
+            sources = [last_date(ticker)]
+        price_dates[ticker] = min(sources) if sources and all(sources) else None
+    dated = [value for value in price_dates.values() if value is not None]
+    price_as_of_by_ticker = {ticker: (str(value) if value is not None else None) for ticker, value in price_dates.items()}
+    price_as_of_min = str(min(dated)) if dated else None
+    stale_price_tickers = sorted(
+        ticker for ticker, value in price_dates.items()
+        if value is not None and (date.today() - value).days > 7
+    )
+
     return {"portfolio": portfolio, "var": var, "per_holding": per_holding, "correlation": corr_out,
             "factor_exposures": exposures, "stress": stress, "missing_history": missing,
+            "risk_coverage_weight": round(risk_coverage_weight, 6),
+            "var_coverage_incomplete": risk_coverage_weight < 0.95,
             "proxy_tracking": _tracking,
             "data_notes": {**notes, "SET": f"{SET_PROXY} (SET50 ETF) used as SET proxy - yfinance has no ^SET.BK history"},
-            "price_as_of": str(prices.dropna(how="all").index[-1].date())}
+            "price_as_of": str(prices.dropna(how="all").index[-1].date()),
+            "price_as_of_by_ticker": price_as_of_by_ticker,
+            "price_as_of_min": price_as_of_min,
+            "stale_price_tickers": stale_price_tickers}
 
 
 async def _positions(pool: Any) -> list[dict[str, Any]]:
@@ -382,6 +415,10 @@ async def run_risk_report(pool: Any) -> dict[str, Any]:
         "worst_stress": min(({"key": k, "label": s["label"], "pnl_thb": s["pnl_thb"], "pnl_pct": s["pnl_pct"]}
                              for k, s in report["stress"].items()), key=lambda x: x["pnl_thb"]),
         "limit_breaches": report["limit_breaches"], "provisional": provisional, "price_as_of": report["price_as_of"],
+        "price_as_of_by_ticker": report["price_as_of_by_ticker"], "price_as_of_min": report["price_as_of_min"],
+        "stale_price_tickers": report["stale_price_tickers"],
+        "risk_coverage_weight": report["risk_coverage_weight"],
+        "var_coverage_incomplete": report["var_coverage_incomplete"],
         "thai_equity_pct": report["thai_equity_exposure"]["thai_equity_pct"], "locked_positions": report["locked_positions"],
         "fx": (report.get("fx_risk") or {}).get("summary"),
         "owner_holds": sorted(_owner_holds()),
