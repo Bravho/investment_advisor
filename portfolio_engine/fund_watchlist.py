@@ -32,7 +32,7 @@ TAX_RULES_TH = {
     "SSF": "SSF ให้สิทธิลดหย่อนเฉพาะการซื้อปี 2563–2567 — ไม่ได้ใส่กองทุน SSF ในรายการ (ตรวจสอบอีกครั้งหากมีการขยายสิทธิ)",
 }
 
-# group: tax | general | usbond | usbond_uh ; status: holding | watching
+# group: tax | general | usbond | usbond_uh ; status: holding | watching | trend (monitor only, not an investment candidate) | dropped (DB only, hidden)
 REGISTRY: list[dict[str, Any]] = [
     # --- Tho's holdings
     dict(code="K-TNZ-ThaiESG", group="tax", tax_type="ThaiESG", status="holding", reason_th="ถืออยู่ — ThaiESG หุ้นไทยขนาดใหญ่ (KAsset)"),
@@ -65,11 +65,10 @@ REGISTRY: list[dict[str, Any]] = [
     dict(code="DAOL-USTBILL", group="usbond", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ อายุ ≤ 1 ปี (ถือตรง) · ป้องกันค่าเงิน 62.82% (factsheet 19 ต.ค. 69) · อายุเฉลี่ย 49 วัน — แทบไม่มีความเสี่ยงดอกเบี้ย แต่ส่วนที่ไม่ป้องกัน (~37%) ขึ้นลงตามค่าเงินบาท"),
     dict(code="TUSBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (JPM US Aggregate: พันธบัตรรัฐ ~23%, MBS หน่วยงานรัฐ ~32%, หุ้นกู้ ~32%) · ป้องกันค่าเงิน 95.17% (30 ก.ย. 69) · อายุเฉลี่ย ~6 ปี"),
     dict(code="MUBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (กองหลักเดียวกับ TUSBOND แต่ค่าธรรมเนียมสูงกว่า) · ป้องกันค่าเงิน 98% (30 ก.ย. 69)"),
-    # --- US bonds, UNHEDGED (added 2026-11-01, t36u). TLUSGOVRMF moved here from 'usbond' (unhedged by policy).
-    dict(code="TLUSGOV", group="usbond_uh", tax_type=None, status="watching", ter_factsheet=(0.2568, "SEC factsheet M0853_2569, data 30 Sep 2026 (actual total expense, excl. other expenses)"), reason_th="พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) ไม่ป้องกันค่าเงินตามนโยบาย · ค่าใช้จ่ายรวมเก็บจริง 0.2568% ตาม factsheet 30 ก.ย. 69 (Finnomena แสดง 2.26% — น่าจะคลาดเคลื่อน) · ไม่มีค่าธรรมเนียมซื้อ/ขาย · ได้ดอกเบี้ยสหรัฐฯ เต็ม แต่ขึ้นลงตามค่าเงินบาท"),
-    dict(code="TLUSGOVRMF", group="usbond_uh", tax_type="RMF", status="watching", reason_th="RMF พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) ไม่ป้องกันค่าเงิน · ค่าใช้จ่ายรวม 0.4494% (factsheet 30 ก.ย. 69) · ลดหย่อนภาษีได้ (เงื่อนไข RMF) · RMF พันธบัตรสหรัฐฯ กองเดียวที่พบ"),
-    dict(code="TUSFIX", group="usbond_uh", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ 1–3 เดือน (BIL) · นโยบายป้องกันค่าเงินตามดุลยพินิจ แต่ตอนนี้ป้องกัน 0% (factsheet 30 ก.ย. 69) — ผู้จัดการอาจกลับมาป้องกันได้ · มีประวัติตั้งแต่ปี 2559"),
-    dict(code="MUBONDUH-A", group="usbond_uh", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (JPM US Aggregate; พันธบัตรรัฐ ~23%) ไม่ป้องกันค่าเงิน (0% ตาม factsheet 30 ก.ย. 69) · มีความเสี่ยงดอกเบี้ย + เครดิต · ค่าธรรมเนียมสูง (TER 0.94% + ขาย 1.07%)"),
+    # --- US bonds, UNHEDGED (added 2026-11-01, t36u; trimmed to TUSFIX only on t38u - TLUSGOV, TLUSGOVRMF, MUBONDUH-A set status='dropped' in DB, rows/NAV history kept).
+    # TUSFIX = TREND WATCH ONLY (t38u, 2026-11-01): Tho expects NOT to invest. Kept for USD/THB + US short-rate trend context.
+    # status 'trend' -> never an investment candidate in advisor context; no watch score; fund_watchlist never feeds signals/plans.
+    dict(code="TUSFIX", group="usbond_uh", tax_type=None, status="trend", reason_th="ติดตามแนวโน้มเท่านั้น (Tho คาดว่าจะไม่ลงทุน) — ใช้ดูทิศทางค่าเงินบาท/ดอลลาร์ และดอกเบี้ยระยะสั้นสหรัฐฯ · ตั๋วเงินคลังสหรัฐฯ 1–3 เดือน (BIL) · ป้องกันค่าเงิน 0% ตอนนี้ (factsheet 30 ก.ย. 69) · ไม่ใช่ตัวเลือกการลงทุน"),
 ]
 BY_CODE = {r["code"]: r for r in REGISTRY}
 
@@ -253,6 +252,8 @@ async def refresh(pool: Any) -> dict[str, Any]:
                 "avg_sharpe_3y": _num(perf.get("sharpe_ratio_avg_3y")), "std_1y": _num(perf.get("std_1y")),
                 "max_drawdown_1y": _num(perf.get("max_drawdown_1y")), "avg_max_drawdown_1y": _num(perf.get("max_drawdown_avg_1y"))}
         score, basis = _score(fees, perf)
+        if r.get("status") == "trend":  # monitor-only: do not rank it against investable funds
+            score, basis = None, {**basis, "missing_th": "ติดตามแนวโน้มเท่านั้น — ไม่ให้คะแนน (ไม่ใช่ตัวเลือกการลงทุน)"}
         stale = nav_date is None or (today - nav_date).days > MAX_NAV_AGE_DAYS
         async with pool.acquire() as conn:
             await conn.execute(
@@ -280,7 +281,7 @@ async def get_list(pool: Any) -> dict[str, Any]:
     await ensure_tables(pool)
     today = datetime.now(ICT).date()
     async with pool.acquire() as conn:
-        rows = [dict(r) for r in await conn.fetch("SELECT * FROM fund_watchlist ORDER BY group_key DESC, status, score DESC NULLS LAST, code")]
+        rows = [dict(r) for r in await conn.fetch("SELECT * FROM fund_watchlist WHERE status <> 'dropped' ORDER BY group_key DESC, status, score DESC NULLS LAST, code")]
         spark = {}
         for r in await conn.fetch("""SELECT code, array_agg(nav ORDER BY nav_date) v FROM fund_nav_daily
                                      WHERE nav_date > current_date - 95 GROUP BY code"""):
@@ -300,7 +301,8 @@ async def get_list(pool: Any) -> dict[str, Any]:
               "usbond": sum(1 for i in items if i["group_key"] == "usbond"),
               "usbond_uh": sum(1 for i in items if i["group_key"] == "usbond_uh"),
               "by_tax_type": {t: sum(1 for i in items if i.get("tax_type") == t and i["group_key"] == "tax") for t in ("ThaiESG", "ThaiESGX", "RMF", "SSF")},
-              "holding": sum(1 for i in items if i["status"] == "holding")}
+              "holding": sum(1 for i in items if i["status"] == "holding"),
+              "trend": sum(1 for i in items if i["status"] == "trend")}
     return {"items": items, "counts": counts, "tax_rules_th": TAX_RULES_TH, "stale_after_days": MAX_NAV_AGE_DAYS,
             "source": "Finnomena public fund API (SEC/AIMC data); SEC open API not used (needs subscription key)",
             "score_definition_th": "คะแนน 0–100 = ต้นทุน (TER) 40 + ผลตอบแทนต่อความผันผวนเทียบค่าเฉลี่ยกลุ่ม AIMC 60 (คำนวณเอง ไม่ใช่คำแนะนำซื้อขาย)",
@@ -312,7 +314,7 @@ async def advisor_context(pool: Any) -> str:
     lines = ["=== THAI FUND WATCH LIST (Finnomena/SEC data; advisory only, Tho places orders himself) ==="]
     for grp, title in (("tax", "Tax-deductible (ThaiESG/ThaiESGX/RMF)"), ("general", "General funds (no tax benefit)"),
                        ("usbond", "US bond funds, FX-hedged (watch only; hedge % from factsheets; hedging THB costs ~ the US-TH short-rate gap)"),
-                       ("usbond_uh", "US bond funds, UNHEDGED (watch only; full US yield but every 1% stronger baht = -1% on these; adds to direct USD exposure on top of SCBGOLDE)")):
+                       ("usbond_uh", "US bond fund, UNHEDGED - TREND WATCH ONLY (TUSFIX; Tho does not plan to invest; never recommend buying it)")):
         lines.append(f"  [{title}]")
         for i in d["items"]:
             if i["group_key"] != grp:
@@ -322,7 +324,7 @@ async def advisor_context(pool: Any) -> str:
             nav = f"NAV {i['nav']:.4f} ({i['nav_date']}{', STALE' if i.get('nav_stale') else ''})" if i.get("nav") else "NAV unknown"
             r = ", ".join(f"{k} {rt[k]:+.1f}%" for k in ("1m", "ytd", "1y", "3y") if rt.get(k) is not None)
             cost = f"TER {f['ter_actual']}%" if f.get("ter_actual") is not None else (f"mgmt fee {f.get('mgmt_actual')}% (TER unknown)" if f.get("mgmt_actual") is not None else "fees unknown")
-            lines.append(f"  - {i['code']} [{i.get('tax_type') or 'general'}{', HOLDING' if i['status'] == 'holding' else ''}] {i.get('amc') or ''} {i.get('aimc_category') or ''}: "
+            lines.append(f"  - {i['code']} [{i.get('tax_type') or 'general'}{', HOLDING' if i['status'] == 'holding' else ''}{', TREND-WATCH ONLY - NOT an investment candidate, Tho expects not to invest; use only as USD/THB + US short-rate context' if i['status'] == 'trend' else ''}] {i.get('amc') or ''} {i.get('aimc_category') or ''}: "
                          f"{nav}; {r or 'returns unknown'}; {cost}; risk {i.get('risk_level') or 'unknown'}; FX {i.get('fx_hedge') or 'n/a (Thai assets)'}; "
                          f"watch score {i['score'] if i.get('score') is not None else 'n/a'} (cost+risk-adjusted vs peers); "
                          f"why: {i.get('reason_th') or ''}")

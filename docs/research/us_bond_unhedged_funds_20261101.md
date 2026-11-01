@@ -55,3 +55,9 @@ Excluded: USD-denominated money-market feeders (SCBUSDYIELD, ASP-USDL USD class,
 
 ## Wiring
 `fund_watchlist` group `usbond_uh`: TLUSGOV, TLUSGOVRMF (moved from `usbond`), TUSFIX, MUBONDUH-A — refreshed by the existing 08:30/21:30 job; dashboard tab "พันธบัตรสหรัฐ (ไม่ป้องกันค่าเงิน)". Not in signals/forecasts (fund_watchlist never feeds them).
+
+## Update 1 Nov 2026 14:10 ICT (t38u)
+Tho: keep only **TUSFIX**, for trend assessment — he expects not to invest. Changes:
+- TUSFIX: `fund_watchlist.status = 'trend'` → no watch score, badge "ติดตามแนวโน้มเท่านั้น · ไม่ลงทุน", advisor context tags it "TREND-WATCH ONLY - NOT an investment candidate". fund_watchlist never feeds P3.3 signals, forecasts or trade plans.
+- TLUSGOV, TLUSGOVRMF, MUBONDUH-A: removed from the registry and set `status='dropped'` in the DB (rows and NAV history kept, hidden from the dashboard/advisor; no NAV refresh).
+- Hedged group (DAOL-USTBILL, TUSTREASURY, TUSBOND-A, MUBOND-A) and the US bond ETFs (SGOV, SHY, IEF, TIP) unchanged.
