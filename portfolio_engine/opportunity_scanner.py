@@ -76,7 +76,7 @@ async def scan_universe(pool: Any) -> list[str]:
     Crypto is excluded (display-only card elsewhere); mutual funds have no daily volume/RSI feed here.
     Falls back to env WATCHLIST_TICKERS only if the DB read fails."""
     try:
-        wl = await pool.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' ORDER BY ticker")
+        wl = await pool.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond') ORDER BY ticker")
         hd = await pool.fetch("SELECT ticker FROM holdings WHERE quantity > 0 AND COALESCE(asset_class, '') <> 'mutual_fund' ORDER BY ticker")
         tickers = [r["ticker"] for r in wl] + [r["ticker"] for r in hd]
         tickers = [t.strip().upper() for t in tickers

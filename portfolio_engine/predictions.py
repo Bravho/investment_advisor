@@ -307,7 +307,7 @@ async def _subjects(pool: Any) -> list[dict[str, Any]]:
     # TDEX.BK factor forecast) - added 2026-10-30.
     held = [p for p in await re_mod._positions(pool) if not p.get("locked")]
     async with pool.acquire() as conn:
-        ideas = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' ORDER BY ticker")]
+        ideas = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond') ORDER BY ticker")]
     out = [{"subject": p["ticker"], "type": "holding", "value_thb": p["value_thb"], "qty": p["quantity"]} for p in held]
     have = {o["subject"] for o in out}
     out += [{"subject": t, "type": "idea"} for t in ideas if t not in have]

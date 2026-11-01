@@ -166,7 +166,25 @@ SEED: list[dict[str, Any]] = [
     {"ticker": "GLDM", "name": "SPDR Gold MiniShares", "asset_type": "etf", "market": "US", "sector": "gold", "ter": 0.10},
     {"ticker": "IAU", "name": "iShares Gold Trust", "asset_type": "etf", "market": "US", "sector": "gold", "ter": 0.25},
     {"ticker": "GDX", "name": "VanEck Gold Miners ETF", "asset_type": "etf", "market": "US", "sector": "gold_miners"},
+    # US Treasury ETFs (added 2026-11-01, t35u) - price/watch reference for the hedged Thai US-bond funds.
+    # sector 'us_bond' is kept OUT of the signal / forecast / screen / trade-plan universes (see SIGNAL_EXCLUDED_SECTORS):
+    # adding low-vol bond ETFs to the equity cross-section would change everyone's P3.3 scores without a gate run.
+    {"ticker": "SGOV", "name": "iShares 0-3 Month Treasury Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.09, "thesis": "[US bond reference 2026-11-01] 0-3 month T-bills: cash-like USD reference (no rate risk); THB investor carries full USD/THB risk. Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
+    {"ticker": "SHY", "name": "iShares 1-3 Year Treasury Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.15, "thesis": "[US bond reference 2026-11-01] 1-3y Treasuries: low duration; hurts a little if the Fed hikes. Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
+    {"ticker": "IEF", "name": "iShares 7-10 Year Treasury Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.15, "thesis": "[US bond reference 2026-11-01] 7-10y Treasuries: classic flight-to-quality hedge, but loses if yields rise (Fed hike / inflation). Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
+    {"ticker": "TIP", "name": "iShares TIPS Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.18, "thesis": "[US bond reference 2026-11-01] US inflation-linked Treasuries: hedge for an oil/war inflation shock; still has rate risk. Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
 ]
+
+# Watch-list sectors that are display/price-alert only and never enter signals, forecasts, screens or trade plans.
+SIGNAL_EXCLUDED_SECTORS = ("us_bond",)
+BOND_TRIGGERS = [
+    {"type": "move_1d_pct", "value": 1.5, "note": "abs 1-day move >= 1.5% (large for Treasuries)"},
+    {"type": "new_52w_low", "note": "close at a 52-week low"},
+]
+for _it in SEED:
+    if _it.get("sector") == "us_bond":
+        _it.setdefault("triggers", BOND_TRIGGERS)
+SIGNAL_UNIVERSE_SQL = "status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond')"
 
 
 def _legacy_notes() -> dict[str, tuple[str, Optional[str]]]:
@@ -215,7 +233,7 @@ async def seed_investment_watchlist(pool: Any) -> int:
                 thesis_bits.append(f"[legacy watchlist {note_as_of}] {note}")
             if council and council.get("label"):
                 thesis_bits.append(f"[guru council {council.get('as_of')}] {council['label']}")
-            thesis = "\n".join(thesis_bits) or "Thesis not written yet - Tho to add."
+            thesis = item.get("thesis") or "\n".join(thesis_bits) or "Thesis not written yet - Tho to add."
             score, basis = None, None
             if council and isinstance(council.get("conviction"), (int, float)):
                 c = float(council["conviction"])
@@ -224,7 +242,8 @@ async def seed_investment_watchlist(pool: Any) -> int:
             costs = dict(_COST_TH if item["market"] == "SET" else _COST_US)
             if item.get("ter") is not None:
                 costs["ter_pct"] = item["ter"]
-                costs["vs_holding"] = "alternative to SCBGOLDE: compare TER vs SCBGOLDE fees + FX"
+                costs["vs_holding"] = ("US Treasury ETF reference (unhedged USD): compare with FX-hedged Thai US-bond funds; TER = issuer expense ratio, verify on issuer page"
+                                       if item["sector"] == "us_bond" else "alternative to SCBGOLDE: compare TER vs SCBGOLDE fees + FX")
             res = await conn.execute(
                 """INSERT INTO investment_watchlist (ticker, name, asset_type, market, sector, currency,
                        thesis, thesis_as_of, triggers, costs, score, score_basis, seeded_from)
@@ -233,8 +252,8 @@ async def seed_investment_watchlist(pool: Any) -> int:
                 t, item["name"], item["asset_type"], item["market"], item["sector"],
                 "THB" if item["market"] == "SET" else "USD", thesis,
                 date.fromisoformat(note_as_of or council.get("as_of")) if (note_as_of or (council or {}).get("as_of")) else None,
-                _j(DEFAULT_TRIGGERS), _j(costs), score, basis,
-                "data/watchlist.json + data/council/reports (2026-10-29 seed)",
+                _j(item.get("triggers") or DEFAULT_TRIGGERS), _j(costs), score, basis,
+                item.get("seeded_from") or "data/watchlist.json + data/council/reports (2026-10-29 seed)",
             )
             inserted += int(res.split()[-1])
     return inserted

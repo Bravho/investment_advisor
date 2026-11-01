@@ -32,7 +32,7 @@ TAX_RULES_TH = {
     "SSF": "SSF ให้สิทธิลดหย่อนเฉพาะการซื้อปี 2563–2567 — ไม่ได้ใส่กองทุน SSF ในรายการ (ตรวจสอบอีกครั้งหากมีการขยายสิทธิ)",
 }
 
-# group: tax | general ; status: holding | watching
+# group: tax | general | usbond ; status: holding | watching
 REGISTRY: list[dict[str, Any]] = [
     # --- Tho's holdings
     dict(code="K-TNZ-ThaiESG", group="tax", tax_type="ThaiESG", status="holding", reason_th="ถืออยู่ — ThaiESG หุ้นไทยขนาดใหญ่ (KAsset)"),
@@ -60,6 +60,12 @@ REGISTRY: list[dict[str, Any]] = [
     dict(code="SCBVIET(E)", group="general", tax_type=None, status="watching", reason_th="หุ้นเวียดนาม — ตลาดเกิดใหม่ที่เฝ้าดูอยู่"),
     dict(code="SCBCHAE", group="general", tax_type=None, status="watching", reason_th="หุ้นจีน — ติดตามโอกาสฟื้นตัว (ความเสี่ยงสูง)"),
     dict(code="K-CASH-A", group="general", tax_type=None, status="watching", reason_th="กองทุนตลาดเงิน — พักเงินสดระหว่างรอจังหวะ"),
+    # --- US bonds, FX-hedged (added 2026-11-01, t35u). Hedge % = factsheet "FX Hedging" figure; policy is dynamic (manager's discretion)
+    dict(code="TUSTREASURY", group="usbond", tax_type=None, status="watching", reason_th="พันธบัตรรัฐบาลสหรัฐฯ ล้วน (feeder iShares GOVT) · ป้องกันค่าเงิน 91.24% (factsheet 30 ก.ย. 69) · อายุเฉลี่ยตราสาร ~5 ปี 4 เดือน — ได้ประโยชน์ถ้าดอกเบี้ยลง/ตลาดตื่นตระหนก แต่ขาดทุนถ้า Fed ขึ้นดอกเบี้ย"),
+    dict(code="DAOL-USTBILL", group="usbond", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ อายุ ≤ 1 ปี (ถือตรง) · ป้องกันค่าเงิน 62.82% (factsheet 19 ต.ค. 69) · อายุเฉลี่ย 49 วัน — แทบไม่มีความเสี่ยงดอกเบี้ย แต่ส่วนที่ไม่ป้องกัน (~37%) ขึ้นลงตามค่าเงินบาท"),
+    dict(code="TUSBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (JPM US Aggregate: พันธบัตรรัฐ ~23%, MBS หน่วยงานรัฐ ~32%, หุ้นกู้ ~32%) · ป้องกันค่าเงิน 95.17% (30 ก.ย. 69) · อายุเฉลี่ย ~6 ปี"),
+    dict(code="MUBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (กองหลักเดียวกับ TUSBOND แต่ค่าธรรมเนียมสูงกว่า) · ป้องกันค่าเงิน 98% (30 ก.ย. 69)"),
+    dict(code="TLUSGOVRMF", group="usbond", tax_type="RMF", status="watching", reason_th="RMF พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) — ไม่ป้องกันค่าเงิน (unhedged) ตามนโยบาย · ไม่พบ RMF พันธบัตรสหรัฐฯ แบบป้องกันค่าเงิน (ค้นจากรายชื่อกองทุนทั้งหมดใน Finnomena 1 พ.ย. 69) · เก็บไว้เทียบ"),
 ]
 BY_CODE = {r["code"]: r for r in REGISTRY}
 
@@ -281,7 +287,8 @@ async def get_list(pool: Any) -> dict[str, Any]:
         r["is_foreign"] = bool(r.get("fx_hedge"))
         items.append(r)
     counts = {"tax": sum(1 for i in items if i["group_key"] == "tax"), "general": sum(1 for i in items if i["group_key"] == "general"),
-              "by_tax_type": {t: sum(1 for i in items if i.get("tax_type") == t) for t in ("ThaiESG", "ThaiESGX", "RMF", "SSF")},
+              "usbond": sum(1 for i in items if i["group_key"] == "usbond"),
+              "by_tax_type": {t: sum(1 for i in items if i.get("tax_type") == t and i["group_key"] == "tax") for t in ("ThaiESG", "ThaiESGX", "RMF", "SSF")},
               "holding": sum(1 for i in items if i["status"] == "holding")}
     return {"items": items, "counts": counts, "tax_rules_th": TAX_RULES_TH, "stale_after_days": MAX_NAV_AGE_DAYS,
             "source": "Finnomena public fund API (SEC/AIMC data); SEC open API not used (needs subscription key)",
@@ -292,7 +299,8 @@ async def get_list(pool: Any) -> dict[str, Any]:
 async def advisor_context(pool: Any) -> str:
     d = await get_list(pool)
     lines = ["=== THAI FUND WATCH LIST (Finnomena/SEC data; advisory only, Tho places orders himself) ==="]
-    for grp, title in (("tax", "Tax-deductible (ThaiESG/ThaiESGX/RMF)"), ("general", "General funds (no tax benefit)")):
+    for grp, title in (("tax", "Tax-deductible (ThaiESG/ThaiESGX/RMF)"), ("general", "General funds (no tax benefit)"),
+                       ("usbond", "US bond funds, FX-hedged (watch only; hedge % from factsheets; hedging THB costs ~ the US-TH short-rate gap)")):
         lines.append(f"  [{title}]")
         for i in d["items"]:
             if i["group_key"] != grp:
