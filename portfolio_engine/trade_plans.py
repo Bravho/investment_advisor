@@ -392,6 +392,25 @@ async def build_checklist(pool: Any, plan: dict[str, Any], ctx: Optional[dict[st
     add("events_in_window", None if not ev_warn else False,
         ("event inside plan window: " + ", ".join(ev_warn) + " - size/hold decision needed") if ev_warn else "no earnings/XD inside window (per Yahoo calendar)",
         required=False)
+    # 2026-11-01 (Tho t39u, INTC lesson): earnings-gap context, informational (required=False, not scoring)
+    try:
+        import earnings_risk as _er
+        gs = await asyncio.to_thread(_er.gap_stats, t)
+    except Exception:  # noqa: BLE001
+        gs = None
+    if gs:
+        stop_pct = (entry - stop) / entry * 100 if entry and stop and stop < entry else None
+        jump = stop_pct is not None and gs["p90_abs_move_pct"] > stop_pct
+        has_e = any(w.startswith("earnings") for w in ev_warn)
+        add("earnings_gap_risk", (None if has_e and jump else True),
+            f"earnings-day moves (last {gs['n']}): median {gs['median_abs_move_pct']}%, p90 {gs['p90_abs_move_pct']}%, worst {gs['worst_move_pct']}%"
+            + (f"; stop distance {stop_pct:.1f}%" if stop_pct is not None else "")
+            + ("; earnings INSIDE window and a p90 gap would jump the stop - size for the gap or enter after the report" if has_e and jump else ""),
+            required=False)
+        if gs["post_gap_watch"]:
+            lr = gs["last_reaction"]
+            add("post_earnings_gap", None, f"fell {lr['move_pct']}% on earnings {lr['reaction_day']} ({gs['trading_days_since_last']} trading days ago) - "
+                "wait for a base; shadow rule (not live) would skip it", required=False)
     # factor overlap: correlation with current holdings
     try:
         held = [p["ticker"] for p in positions if p["ticker"] not in ("SCBGOLDE", "SCB_GOLD_FUND")]

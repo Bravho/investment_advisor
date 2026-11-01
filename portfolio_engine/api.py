@@ -46,6 +46,7 @@ import macro_trends as macro_mod
 import sector_moves as sm_mod
 import fund_watchlist as fw_mod
 import geo_risk as geo_mod
+import earnings_risk as er_mod  # 2026-11-01 (Tho t39u): earnings-event gap risk, display/context only
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -1108,6 +1109,43 @@ async def macro_advisor_context() -> dict[str, Any]:
 @app.get("/fx/advisor-context")
 async def fx_advisor_context() -> dict[str, Any]:
     return {"context": fx_mod.advisor_context(fx_mod.latest_cached())}
+
+
+# ------------------------------------------------------------------ Earnings event risk (2026-11-01, Tho t39u, INTC lesson)
+_ER_CACHE: dict[str, Any] = {"t": 0.0, "rep": None}
+
+
+async def _earnings_report(force: bool = False) -> dict[str, Any]:
+    if not force and _ER_CACHE["rep"] and time.time() - _ER_CACHE["t"] < 3600:
+        return _ER_CACHE["rep"]
+    pool = await db_pool.get_pool()
+    async with pool.acquire() as conn:
+        watch = [r["ticker"] for r in await conn.fetch(
+            "SELECT ticker FROM investment_watchlist WHERE market = 'US' AND " + watch_mod.SIGNAL_UNIVERSE_SQL + " ORDER BY ticker")]
+        sig = [dict(r) for r in await conn.fetch(
+            "SELECT ticker, score FROM signal_scores WHERE as_of = (SELECT max(as_of) FROM signal_scores)")]
+    rep = await asyncio.to_thread(er_mod.build, watch, [])
+    try:
+        rep["post_gap_shadow"] = er_mod.log_post_gap_shadow(sig, rep)
+    except Exception as exc:  # noqa: BLE001
+        rep["post_gap_shadow"] = {"error": str(exc)[:120]}
+    rep["band_rule"] = {"status": "live", "mult": pred_mod.EARNINGS_SIGMA_MULT,
+                        "note": "forecast bands widen when an earnings reaction day is inside the 3d/1m horizon (gate PASS)"}
+    _ER_CACHE.update(t=time.time(), rep=rep)
+    return rep
+
+
+@app.get("/earnings/risk")
+async def earnings_risk(force: bool = False) -> dict[str, Any]:
+    return to_jsonable(await _earnings_report(force))
+
+
+@app.get("/earnings/advisor-context")
+async def earnings_advisor_context() -> dict[str, Any]:
+    try:
+        return {"context": er_mod.advisor_context(await _earnings_report())}
+    except Exception as exc:  # noqa: BLE001
+        return {"context": "=== EARNINGS EVENT RISK ===\n  unavailable (%s) - do not quote earnings dates." % type(exc).__name__}
 
 
 @app.get("/owner-holds")

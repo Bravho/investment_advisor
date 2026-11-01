@@ -18,3 +18,5 @@ export const useMomentumBase = (refreshMs = 600000) => useApi(() => portfolioCli
 // 2026-11-01 (Tho): approved plans + approval history; override approvals carry override_badge_th / badge_th
 export const useApprovedPlans = (refreshMs = 300000) => useApi(() => portfolioClient.get('/trade-plans', { params: { status: 'approved' } }), [], refreshMs)
 export const usePlanAudit = (refreshMs = 300000) => useApi(() => portfolioClient.get('/trade-plans/audit', { params: { limit: 20 } }), [], refreshMs)
+// 2026-11-01 (Tho t39u): earnings-event gap risk (display only)
+export const useEarningsRisk = (refreshMs = 900000) => useApi(() => portfolioClient.get('/earnings/risk'), [], refreshMs)

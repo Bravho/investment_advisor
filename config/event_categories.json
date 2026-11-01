@@ -1,0 +1,34 @@
+{
+  "_doc": "Event-category registry for the PLANNED news-event impact model (equities). Added 2026-11-01 (Tho t39u, INTC lesson). SPEC/LABELS ONLY - nothing reads this into signals, forecasts or weights yet. Crypto event categories stay owned by portfolio_engine/crypto_events.py (Binance-hack watch routine runs to 2026-11-07); this file does NOT change that module or its thresholds. When the impact model is built (after 2026-11-07), any scoring use must pass ops/backtest_gate.py.",
+  "categories": {
+    "earnings_guidance_shock": {
+      "label_th": "งบ/แนวโน้มรายได้ช็อก (earnings / guidance)",
+      "scope": "single stocks + sector read-through (peers, sector ETF, index)",
+      "headline_regex": "(guidance|outlook|forecast|guides?) .*(cut|lower|below|miss|weak|disappoint|slash)|(misses|beats) .*(estimates|expectations)|(earnings|results) .*(plunge|sink|tumble|soar|surge|nosedive)|warning sparks",
+      "structured_trigger": "company-published earnings reaction session (earnings_risk.reaction_day) with |reaction-day move| >= 7% or |z| >= 3 vs trailing 60d vol",
+      "measure": ["reaction-day close-to-close %", "open gap %", "volume vs 50d avg", "z vs 60d daily vol", "peer/sector-ETF same-day move", "next 5/20 trading-day drift"],
+      "known_facts": {
+        "band_rule_live": "forecast bands x2.156 (3d) / x1.204 (1m) when an earnings reaction day is inside the horizon - ops/earnings_band_gate.py PASS 2026-11-01",
+        "post_gap_drift": "basket of 12 US mega/large caps, 5y: median next-20d after a <= -7% earnings gap = -0.16%, lower in 50% of cases -> no reliable drift edge (descriptive)",
+        "post_gap_block_rule": "gate PASS but decided by ONE rebalance in 7y (GOOGL Jul 2026) -> SHADOW (data/shadow/earnings_post_gap_shadow.jsonl)"
+      },
+      "labelled_examples": [
+        {
+          "ticker": "INTC", "event_date": "2026-10-30", "report": "Q3 2026 after close 2026-10-29 (US ET)",
+          "trigger": "Q4 guide revenue $15-16B vs ~$17.1B consensus, non-GAAP EPS $0.25 vs ~$0.43; PC TAM cut (memory costs); Fab 28 Israel explosion ~$300M Q4 revenue hit",
+          "reaction": {"close_to_close_pct": -28.58, "open_gap_pct": -25.75, "open_to_close_pct": -3.80, "volume_x_50d": 4.53, "z_vs_1y_vol": -5.8},
+          "read_through_same_day_pct": {"^SOX": -7.20, "SOXX": -8.24, "SMH": -6.98, "AMD": -10.88, "TSM": -5.95, "AVGO": -5.48, "MU": -5.30, "NVDA": -4.22, "QQQ": -3.47, "SPY": -1.77},
+          "sources": ["https://www.intc.com/news-events/press-releases/detail/1786/intel-reports-third-quarter-2026-financial-results",
+                      "https://www.investing.com/news/stock-market-news/intel-warning-sparks-chip-rout-pc-weakness-clouds-turnaround-4987123",
+                      "https://www.cnbc.com/2026/10/30/amazon-intel-earnings-big-tech-ai-spending-concerns.html"],
+          "price_source": "Yahoo Finance daily bars (yfinance), retrieved 2026-11-01"
+        },
+        {
+          "ticker": "GOOGL", "event_date": "2026-10-29", "report": "Q3 2026 after close 2026-10-28 (US ET)",
+          "reaction": {"close_to_close_pct": -12.64},
+          "note": "on our watch list; measured by earnings_risk.reaction_moves (Yahoo closes)"
+        }
+      ]
+    }
+  }
+}

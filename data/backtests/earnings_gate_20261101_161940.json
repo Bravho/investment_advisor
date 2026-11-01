@@ -1,0 +1,421 @@
+{
+  "generated_at": "2026-11-01T16:19:40",
+  "benchmark": "SPY",
+  "tickers": [
+    "QQQ",
+    "NVDA",
+    "MSFT",
+    "GOOGL",
+    "TSM",
+    "AVGO",
+    "MU",
+    "VNM",
+    "EWJ",
+    "INDA",
+    "FXI",
+    "GLDM",
+    "IAU",
+    "GDX"
+  ],
+  "earnings_covered": [
+    "AVGO",
+    "GOOGL",
+    "MSFT",
+    "MU",
+    "NVDA",
+    "TSM"
+  ],
+  "config": "Earnings-event overlays on the live P3.3 signal - walk-forward gate (2026-11-01, Tho t39u, INTC lesson).",
+  "runs": {
+    "baseline_p33": {
+      "cagr": 0.3232,
+      "sharpe": 1.084,
+      "vol": 0.3,
+      "max_drawdown": -0.3222,
+      "days": 1759,
+      "benchmark_cagr": 0.1557,
+      "excess_cagr": 0.1674,
+      "hit_rate": 0.6706,
+      "n_months": 85,
+      "oos_from": "2019-10-31",
+      "oos_to": "2026-10-30",
+      "folds": {
+        "2019": {
+          "skill": 0.017621371298247812,
+          "hit": 0.6666666666666666,
+          "return": 0.0810873142692905,
+          "benchmark_return": 0.06346594297104269,
+          "n_months": 3
+        },
+        "2020": {
+          "skill": 0.279694065490534,
+          "hit": 0.6666666666666666,
+          "return": 0.46300998781483926,
+          "benchmark_return": 0.18331592232430527,
+          "n_months": 12
+        },
+        "2021": {
+          "skill": 0.3445662459981387,
+          "hit": 0.8333333333333334,
+          "return": 0.6318536934785282,
+          "benchmark_return": 0.2872874474803895,
+          "n_months": 12
+        },
+        "2022": {
+          "skill": -0.06107877958155006,
+          "hit": 0.4166666666666667,
+          "return": -0.24283227574946376,
+          "benchmark_return": -0.1817534961679137,
+          "n_months": 12
+        },
+        "2023": {
+          "skill": 0.19107576377241253,
+          "hit": 0.6666666666666666,
+          "return": 0.45283364520946834,
+          "benchmark_return": 0.2617578814370558,
+          "n_months": 12
+        },
+        "2024": {
+          "skill": 0.07050848225778039,
+          "hit": 0.5833333333333334,
+          "return": 0.3193731615210964,
+          "benchmark_return": 0.248864679263316,
+          "n_months": 12
+        },
+        "2025": {
+          "skill": 0.2097044942701256,
+          "hit": 0.8333333333333334,
+          "return": 0.3868950070345236,
+          "benchmark_return": 0.177190512764398,
+          "n_months": 12
+        },
+        "2026": {
+          "skill": 0.24230447797186527,
+          "hit": 0.7,
+          "return": 0.35918427253776164,
+          "benchmark_return": 0.11687979456589637,
+          "n_months": 10
+        }
+      }
+    },
+    "pre_excl_10d": {
+      "cagr": 0.2777,
+      "sharpe": 0.9833,
+      "vol": 0.293,
+      "max_drawdown": -0.3642,
+      "days": 1759,
+      "benchmark_cagr": 0.1557,
+      "excess_cagr": 0.1219,
+      "hit_rate": 0.6353,
+      "n_months": 85,
+      "oos_from": "2019-10-31",
+      "oos_to": "2026-10-30",
+      "folds": {
+        "2019": {
+          "skill": 0.017621371298247812,
+          "hit": 0.6666666666666666,
+          "return": 0.0810873142692905,
+          "benchmark_return": 0.06346594297104269,
+          "n_months": 3
+        },
+        "2020": {
+          "skill": 0.2509476596275928,
+          "hit": 0.6666666666666666,
+          "return": 0.43426358195189807,
+          "benchmark_return": 0.18331592232430527,
+          "n_months": 12
+        },
+        "2021": {
+          "skill": 0.24879376541860676,
+          "hit": 0.75,
+          "return": 0.5360812128989962,
+          "benchmark_return": 0.2872874474803895,
+          "n_months": 12
+        },
+        "2022": {
+          "skill": -0.08331276332783755,
+          "hit": 0.3333333333333333,
+          "return": -0.26506625949575124,
+          "benchmark_return": -0.1817534961679137,
+          "n_months": 12
+        },
+        "2023": {
+          "skill": 0.0056596706405132036,
+          "hit": 0.6666666666666666,
+          "return": 0.267417552077569,
+          "benchmark_return": 0.2617578814370558,
+          "n_months": 12
+        },
+        "2024": {
+          "skill": 0.1190107518532093,
+          "hit": 0.5833333333333334,
+          "return": 0.3678754311165253,
+          "benchmark_return": 0.248864679263316,
+          "n_months": 12
+        },
+        "2025": {
+          "skill": 0.22630123052802187,
+          "hit": 0.8333333333333334,
+          "return": 0.4034917432924199,
+          "benchmark_return": 0.177190512764398,
+          "n_months": 12
+        },
+        "2026": {
+          "skill": 0.18176050472041272,
+          "hit": 0.6,
+          "return": 0.2986402992863091,
+          "benchmark_return": 0.11687979456589637,
+          "n_months": 10
+        }
+      }
+    },
+    "pre_excl_month": {
+      "cagr": 0.1551,
+      "sharpe": 0.6674,
+      "vol": 0.2714,
+      "max_drawdown": -0.3703,
+      "days": 1759,
+      "benchmark_cagr": 0.1557,
+      "excess_cagr": -0.0006,
+      "hit_rate": 0.5765,
+      "n_months": 85,
+      "oos_from": "2019-10-31",
+      "oos_to": "2026-10-30",
+      "folds": {
+        "2019": {
+          "skill": 0.017621371298247812,
+          "hit": 0.6666666666666666,
+          "return": 0.0810873142692905,
+          "benchmark_return": 0.06346594297104269,
+          "n_months": 3
+        },
+        "2020": {
+          "skill": 0.05151572934710069,
+          "hit": 0.5833333333333334,
+          "return": 0.23483165167140596,
+          "benchmark_return": 0.18331592232430527,
+          "n_months": 12
+        },
+        "2021": {
+          "skill": -0.06758918858887042,
+          "hit": 0.5833333333333334,
+          "return": 0.21969825889151906,
+          "benchmark_return": 0.2872874474803895,
+          "n_months": 12
+        },
+        "2022": {
+          "skill": -0.09158199573847492,
+          "hit": 0.3333333333333333,
+          "return": -0.2733354919063886,
+          "benchmark_return": -0.1817534961679137,
+          "n_months": 12
+        },
+        "2023": {
+          "skill": -0.12160275002800436,
+          "hit": 0.5833333333333334,
+          "return": 0.14015513140905145,
+          "benchmark_return": 0.2617578814370558,
+          "n_months": 12
+        },
+        "2024": {
+          "skill": 0.013661509183293896,
+          "hit": 0.5833333333333334,
+          "return": 0.2625261884466099,
+          "benchmark_return": 0.248864679263316,
+          "n_months": 12
+        },
+        "2025": {
+          "skill": 0.2389371407882499,
+          "hit": 0.8333333333333334,
+          "return": 0.4161276535526479,
+          "benchmark_return": 0.177190512764398,
+          "n_months": 12
+        },
+        "2026": {
+          "skill": 0.017698800958974026,
+          "hit": 0.5,
+          "return": 0.1345785955248704,
+          "benchmark_return": 0.11687979456589637,
+          "n_months": 10
+        }
+      }
+    },
+    "haircut_month": {
+      "cagr": 0.2376,
+      "sharpe": 0.9456,
+      "vol": 0.2618,
+      "max_drawdown": -0.3188,
+      "days": 1759,
+      "benchmark_cagr": 0.1557,
+      "excess_cagr": 0.0819,
+      "hit_rate": 0.6471,
+      "n_months": 85,
+      "oos_from": "2019-10-31",
+      "oos_to": "2026-10-30",
+      "folds": {
+        "2019": {
+          "skill": 0.017621371298247812,
+          "hit": 0.6666666666666666,
+          "return": 0.0810873142692905,
+          "benchmark_return": 0.06346594297104269,
+          "n_months": 3
+        },
+        "2020": {
+          "skill": 0.12143459778107335,
+          "hit": 0.5833333333333334,
+          "return": 0.3047505201053786,
+          "benchmark_return": 0.18331592232430527,
+          "n_months": 12
+        },
+        "2021": {
+          "skill": 0.12699646339435366,
+          "hit": 0.75,
+          "return": 0.41428391087474314,
+          "benchmark_return": 0.2872874474803895,
+          "n_months": 12
+        },
+        "2022": {
+          "skill": -0.056239691870198505,
+          "hit": 0.4166666666666667,
+          "return": -0.2379931880381122,
+          "benchmark_return": -0.1817534961679137,
+          "n_months": 12
+        },
+        "2023": {
+          "skill": 0.038235068523117643,
+          "hit": 0.6666666666666666,
+          "return": 0.29999294996017345,
+          "benchmark_return": 0.2617578814370558,
+          "n_months": 12
+        },
+        "2024": {
+          "skill": 0.023584537003898065,
+          "hit": 0.6666666666666666,
+          "return": 0.2724492162672141,
+          "benchmark_return": 0.248864679263316,
+          "n_months": 12
+        },
+        "2025": {
+          "skill": 0.15173425837667476,
+          "hit": 0.8333333333333334,
+          "return": 0.32892477114107277,
+          "benchmark_return": 0.177190512764398,
+          "n_months": 12
+        },
+        "2026": {
+          "skill": 0.2083006508129721,
+          "hit": 0.6,
+          "return": 0.3251804453788685,
+          "benchmark_return": 0.11687979456589637,
+          "n_months": 10
+        }
+      }
+    },
+    "post_gap_block": {
+      "cagr": 0.338,
+      "sharpe": 1.1178,
+      "vol": 0.3013,
+      "max_drawdown": -0.3222,
+      "days": 1759,
+      "benchmark_cagr": 0.1557,
+      "excess_cagr": 0.1822,
+      "hit_rate": 0.6706,
+      "n_months": 85,
+      "oos_from": "2019-10-31",
+      "oos_to": "2026-10-30",
+      "folds": {
+        "2019": {
+          "skill": 0.017621371298247812,
+          "hit": 0.6666666666666666,
+          "return": 0.0810873142692905,
+          "benchmark_return": 0.06346594297104269,
+          "n_months": 3
+        },
+        "2020": {
+          "skill": 0.279694065490534,
+          "hit": 0.6666666666666666,
+          "return": 0.46300998781483926,
+          "benchmark_return": 0.18331592232430527,
+          "n_months": 12
+        },
+        "2021": {
+          "skill": 0.3445662459981387,
+          "hit": 0.8333333333333334,
+          "return": 0.6318536934785282,
+          "benchmark_return": 0.2872874474803895,
+          "n_months": 12
+        },
+        "2022": {
+          "skill": -0.06107877958155006,
+          "hit": 0.4166666666666667,
+          "return": -0.24283227574946376,
+          "benchmark_return": -0.1817534961679137,
+          "n_months": 12
+        },
+        "2023": {
+          "skill": 0.19107576377241253,
+          "hit": 0.6666666666666666,
+          "return": 0.45283364520946834,
+          "benchmark_return": 0.2617578814370558,
+          "n_months": 12
+        },
+        "2024": {
+          "skill": 0.07050848225778039,
+          "hit": 0.5833333333333334,
+          "return": 0.3193731615210964,
+          "benchmark_return": 0.248864679263316,
+          "n_months": 12
+        },
+        "2025": {
+          "skill": 0.2097044942701256,
+          "hit": 0.8333333333333334,
+          "return": 0.3868950070345236,
+          "benchmark_return": 0.177190512764398,
+          "n_months": 12
+        },
+        "2026": {
+          "skill": 0.35194608187972465,
+          "hit": 0.7,
+          "return": 0.468825876445621,
+          "benchmark_return": 0.11687979456589637,
+          "n_months": 10
+        }
+      }
+    }
+  },
+  "gates": {
+    "pre_excl_10d": {
+      "pass": false,
+      "mean_skill_base": 0.1617995151846943,
+      "mean_skill_cand": 0.12084777384484587,
+      "mean_hit_base": 0.6708333333333333,
+      "mean_hit_cand": 0.6375,
+      "reason": "candidate mean skill did not improve and mean hit fell below the allowed floor"
+    },
+    "pre_excl_month": {
+      "pass": false,
+      "mean_skill_base": 0.1617995151846943,
+      "mean_skill_cand": 0.007332577152564579,
+      "mean_hit_base": 0.6708333333333333,
+      "mean_hit_cand": 0.5833333333333334,
+      "reason": "candidate mean skill did not improve and mean hit fell below the allowed floor"
+    },
+    "haircut_month": {
+      "pass": false,
+      "mean_skill_base": 0.1617995151846943,
+      "mean_skill_cand": 0.07895840691501736,
+      "mean_hit_base": 0.6708333333333333,
+      "mean_hit_cand": 0.6479166666666666,
+      "reason": "candidate mean skill did not improve and mean hit fell below the allowed floor"
+    },
+    "post_gap_block": {
+      "pass": true,
+      "mean_skill_base": 0.1617995151846943,
+      "mean_skill_cand": 0.17550471567317671,
+      "mean_hit_base": 0.6708333333333333,
+      "mean_hit_cand": 0.6708333333333333,
+      "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+    }
+  },
+  "any_pass": true
+}

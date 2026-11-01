@@ -43,6 +43,12 @@ PROXY = {"SCBGOLDE": ("GC=F", "THB=X")}  # NAV history not free -> gold x USD/TH
 PROXY["XAUTHB"] = ("GC=F", "THB=X")
 MODELS = ["drift", "momentum", "meanrev", "regime", "signal", "analyst"]
 PRIOR_W = {"drift": .20, "momentum": .25, "meanrev": .25, "regime": .10, "signal": .10, "analyst": .10}
+# 2026-11-01 (Tho t39u, INTC -28.6% on 30 Oct): earnings-aware bands. When a company-published earnings
+# reaction day falls inside (as-of, target], sigma x mult. Fitted pre-2022, OOS 2022-2026 gate PASS
+# (ops/earnings_band_gate.py -> data/backtests/earnings_band_gate_20261101_162126.json: mean skill .00373 -> .00389,
+# hit .534 unchanged; 80%-band coverage in earnings windows 3d 48.9% -> 75.0%, 1m 69.2% -> 77.6%).
+# US single stocks only (where it was tested); direction/median unchanged, only bands, P(up) magnitude and confidence.
+EARNINGS_SIGMA_MULT = {"3d": 2.156, "1m": 1.204}
 # 2026-11-01 (P3.3): models with NO matured track record (signal, analyst: n=0, no point-in-time history to backtest)
 # are display-only - their outputs are still recorded in method.models so they can earn weight later:
 # activated with ACTIVATE_W only after >= MIN_N_RETIRE matured outcomes with skill > 0 and hit > 50%.
@@ -410,6 +416,7 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
         facs = {r["key"]: {"reading": float(r["reading"]) if r["reading"] is not None else None, "as_of": r["as_of"].isoformat() if r["as_of"] else None}
                 for r in await conn.fetch("SELECT key, reading, as_of FROM market_factors")}
     track = await scoreboard(pool, brief=True)
+    earn_dates = await asyncio.to_thread(_earnings_reaction_days, [s["subject"] for s in subs if s["type"] != "factor"])
     made = 0
     unchanged = 0
     now = datetime.now(timezone.utc)
@@ -442,6 +449,7 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
         news = await _news_for(pool, subj) if s["type"] != "factor" else None
         base = float(ser.iloc[-1])
         as_of = ser.index[-1].date()
+        e_react = earn_dates.get(subj) or []
         for h in due:
             # Even a forced run must not freeze a second forecast from the same
             # underlying close for this subject/horizon.
@@ -453,10 +461,16 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
             mo = model_outputs(np.log(ser), hd, extras)
             if "error" in mo:
                 continue
-            c = combine(mo, weights[h], base, hd, weights[h].get("_sigma_scale", 1.0))
+            tgt_d = target_date(as_of, hd)
+            e_in = [d for d in e_react if as_of < d <= tgt_d] if h in EARNINGS_SIGMA_MULT else []
+            e_mult = EARNINGS_SIGMA_MULT[h] if e_in else 1.0
+            c = combine(mo, weights[h], base, hd, weights[h].get("_sigma_scale", 1.0) * e_mult)
             method = {
                 "model_version": MODEL_VERSION,
                 "sigma_scale": round(weights[h].get("_sigma_scale", 1.0), 4),
+                "earnings_event": ({"reaction_day": str(e_in[0]), "sigma_mult": e_mult,
+                                    "source": "yfinance get_earnings_dates (company-published)",
+                                    "gate": "ops/earnings_band_gate.py PASS 2026-11-01"} if e_in else None),
                 "confidence_def": "|2*P(up)-1| x (0.5+0.5*model sign agreement); <0.1 low, 0.1-0.3 medium, >0.3 high",
                 "ensemble": "weighted mean of model expected log-returns; Student-t(5) bands",
                 "models": {k: (round(v, 6) if v is not None else None) for k, v in mo["models"].items()},
@@ -479,6 +493,10 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
                 # 2026-11-01 (P3.2/P3.4): SHADOW features - recorded for future validation, NOT used in the forecast
                 "shadow": _shadow_features(subj, closes, hd, news),
             }
+            if e_in:
+                method["assumptions"].append(
+                    f"Earnings: reaction session {e_in[0]} falls inside this {h} window -> bands widened x{e_mult} "
+                    f"(earnings-day gaps; INTC -28.6% on 30 Oct 2026). Median/direction unchanged.")
             if subj == "THB=X":
                 fx_fc[h] = {"median": c["median"], "mu": c["mu"], "b80": c["b80"], "p_up": c["p_up"], "base": base}
             elif fx_ret_all is not None and fx_fc.get(h):
@@ -507,6 +525,33 @@ async def generate_live(pool: Any, force: bool = False) -> dict[str, Any]:
             if await _insert(pool, rec):
                 made += 1
     return {"due": due, "made": made, "unchanged_close_skipped": unchanged}
+
+
+def _earnings_reaction_days(subjects: list[str]) -> dict[str, list[date]]:
+    """US single stocks: upcoming earnings reaction sessions (same day if pre-open, else next weekday)."""
+    out: dict[str, list[date]] = {}
+    us = [t for t in subjects if t and "." not in t and "=" not in t and not t.startswith("^") and t not in PROXY]
+    if not us:
+        return out
+    try:
+        import earnings_risk as _er
+        recs = _er.fetch_dates(us)
+    except Exception as exc:  # noqa: BLE001 - bands then simply stay vol-only
+        LOGGER.info("earnings dates unavailable: %s", exc)
+        return out
+    today = date.today()
+    for t, rec in recs.items():
+        days = []
+        for e in rec.get("events") or []:
+            ts = pd.Timestamp(e["ts"])
+            d = ts.date()
+            if not (ts.hour < 9 or (ts.hour == 9 and ts.minute < 30)):
+                d = (pd.Timestamp(d) + pd.offsets.BDay(1)).date()
+            if d >= today - timedelta(days=7):
+                days.append(d)
+        if days:
+            out[t] = sorted(set(days))
+    return out
 
 
 async def _insert(pool: Any, rec: dict[str, Any]) -> bool:

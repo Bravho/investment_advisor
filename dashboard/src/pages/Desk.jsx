@@ -7,9 +7,10 @@ import PredictionsPanel from '../components/PredictionsPanel'
 import SetupPanel from '../components/SetupPanel'
 import FxRiskPanel from '../components/FxRiskPanel'
 import Stamp from '../components/Stamp'
+import EarningsRiskCard from '../components/EarningsRiskCard'
 import { Badge, SourceBadge } from '../components/UI'
 import { useFactors, useFxRisk, useRiskReport, useWatchlist } from '../hooks/usePhase3'
-import { useApprovedPlans, useJournal, usePlanAudit, useMomentumBase, usePredictionScoreboard, usePredictions, useSignals, useTradePlans } from '../hooks/usePhase4'
+import { useApprovedPlans, useEarningsRisk, useJournal, usePlanAudit, useMomentumBase, usePredictionScoreboard, usePredictions, useSignals, useTradePlans } from '../hooks/usePhase4'
 import { number } from '../utils/format'
 
 const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k] : m), '')
@@ -17,7 +18,7 @@ const maxTs = (arr, k) => (arr || []).reduce((m, x) => (x?.[k] && x[k] > m ? x[k
 // Pro #8 (2026-10-30): one-screen trading desk.
 export default function Desk() {
   const risk = useRiskReport(), fx = useFxRisk(), factors = useFactors(), watch = useWatchlist(), signals = useSignals()
-  const approvedPlans = useApprovedPlans(), planAudit = usePlanAudit()
+  const approvedPlans = useApprovedPlans(), planAudit = usePlanAudit(), earn = useEarningsRisk()
   const plans = useTradePlans(120000), journal = useJournal(), preds = usePredictions(), board = usePredictionScoreboard(), setup = useMomentumBase()
   const s = risk.data?.summary || {}
   const reg = signals.data?.regime
@@ -44,6 +45,8 @@ export default function Desk() {
         <FxRiskPanel report={fx.data} loading={fx.loading} error={fx.error} retry={fx.refetch} /></Stamp>
       <FactorHeatmap report={risk.data} factors={factors.data} loading={risk.loading} error={risk.error} retry={risk.refetch} />
       <DeskPlans plans={plans.data} journal={journal.data} loading={plans.loading} error={plans.error} retry={plans.refetch} approved={approvedPlans.data} audit={planAudit.data} onChanged={() => { approvedPlans.refetch(); planAudit.refetch() }} />
+      <Stamp items={[{ source: 'earnings dates · Yahoo', asOf: earn.data?.generated_at, staleHours: 30 }]}>
+        <EarningsRiskCard data={earn.data} loading={earn.loading} error={earn.error} retry={earn.refetch} /></Stamp>
       <Stamp items={[{ source: 'signals · local LLM council', asOf: maxTs(signals.data?.items, 'created_at') }]}>
         <SignalsPanel payload={signals.data} plans={plans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} /></Stamp>
       <Stamp items={[{ source: 'predictions (frozen)', asOf: maxTs(preds.data?.items || preds.data?.predictions, 'made_at') }, { source: 'scoreboard', asOf: boardAsOf, staleHours: 48 }]}>

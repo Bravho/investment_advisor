@@ -306,6 +306,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 approved = (await client.get(f"{ENGINE_URL}/trade-plans", params={"status": "approved"})).json().get("plans", [])
             except Exception:  # noqa: BLE001
                 approved = []
+            try:  # 2026-11-01 (Tho t39u, INTC lesson): earnings-event gap risk, context only
+                er_ctx = (await client.get(f"{ENGINE_URL}/earnings/advisor-context", timeout=60)).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                er_ctx = "=== EARNINGS EVENT RISK ===\n  unavailable - do not quote earnings dates."
             try:  # 2026-10-31: Thai fund watch list (tax-deductible ThaiESG/RMF vs general funds) - Finnomena NAVs
                 fund_ctx = (await client.get(f"{ENGINE_URL}/funds/watchlist/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
@@ -347,6 +351,7 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                  "forecasts or weights unless they pass the walk-forward gate.")
     lines.append(macro_ctx)
     lines.append(fund_ctx)
+    lines.append(er_ctx)
     lines.append(owner_holds_block())
     return "\n".join(lines) + "\n\n" + fc, tickers
 

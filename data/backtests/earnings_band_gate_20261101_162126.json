@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-11-01T16:21:26",
+  "tickers": [
+    "NVDA",
+    "MSFT",
+    "GOOGL",
+    "TSM",
+    "AVGO",
+    "MU"
+  ],
+  "multipliers_fit_pre2022": {
+    "3d": 2.156,
+    "1m": 1.204
+  },
+  "oos_from": "2022-01-01",
+  "baseline": {
+    "1m": {
+      "n": 1428,
+      "skill": 0.005797584894953189,
+      "hit": 0.5357142857142857,
+      "cov80_all": 0.786,
+      "cov80_earnings_windows": 0.692,
+      "cov80_normal_windows": 0.831,
+      "n_earnings_windows": 468
+    },
+    "3d": {
+      "n": 1428,
+      "skill": 0.0016541408607765318,
+      "hit": 0.5315126050420168,
+      "cov80_all": 0.754,
+      "cov80_earnings_windows": 0.489,
+      "cov80_normal_windows": 0.771,
+      "n_earnings_windows": 88
+    }
+  },
+  "candidate": {
+    "1m": {
+      "n": 1428,
+      "skill": 0.00622101475147363,
+      "hit": 0.5357142857142857,
+      "cov80_all": 0.813,
+      "cov80_earnings_windows": 0.776,
+      "cov80_normal_windows": 0.831,
+      "n_earnings_windows": 468
+    },
+    "3d": {
+      "n": 1428,
+      "skill": 0.0015665721475013328,
+      "hit": 0.5315126050420168,
+      "cov80_all": 0.77,
+      "cov80_earnings_windows": 0.75,
+      "cov80_normal_windows": 0.771,
+      "n_earnings_windows": 88
+    }
+  },
+  "verdict": {
+    "pass": true,
+    "mean_skill_base": 0.0037258628778648606,
+    "mean_skill_cand": 0.0038937934494874815,
+    "mean_hit_base": 0.5336134453781513,
+    "mean_hit_cand": 0.5336134453781513,
+    "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+  },
+  "design": "Earnings-aware forecast bands - walk-forward gate (2026-11-01, Tho t39u, INTC lesson)."
+}
