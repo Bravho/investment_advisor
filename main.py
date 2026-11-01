@@ -298,6 +298,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 geo_ctx = (await client.get(f"{ENGINE_URL}/geo/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
                 geo_ctx = "=== GEOPOLITICAL / WAR RISK ===\n  Geo risk monitor unavailable - do not quote geo-risk numbers."
+            try:  # 2026-11-01 (Tho t31u): contagion check (crypto/geo -> equities), context only
+                ct_ctx = (await client.get(f"{ENGINE_URL}/contagion/advisor-context", timeout=60)).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                ct_ctx = "=== CONTAGION CHECK ===\n  unavailable - do not quote contagion numbers."
             try:  # 2026-11-01 (Tho t27u): approved plans, override approvals always labelled
                 approved = (await client.get(f"{ENGINE_URL}/trade-plans", params={"status": "approved"})).json().get("plans", [])
             except Exception:  # noqa: BLE001
@@ -337,6 +341,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
         lines.append(setup_ctx)
     lines.append(fx_ctx)
     lines.append(geo_ctx)
+    lines.append(ct_ctx)
+    lines.append("NOTE on news: news/sentiment is CONTEXT only. The live signal score (P3.3) uses prices only (momentum, low vol, "
+                 "technical); news tone, crypto events, geo risk and contagion checks are shown to Tho but do not change scores, "
+                 "forecasts or weights unless they pass the walk-forward gate.")
     lines.append(macro_ctx)
     lines.append(fund_ctx)
     lines.append(owner_holds_block())

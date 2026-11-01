@@ -123,6 +123,34 @@ def send_line(text: str, dry: bool) -> bool:
     return ok
 
 
+CONTAGION_URL = "http://127.0.0.1:8996/contagion/status"
+
+
+def check_contagion(state: dict, dry: bool) -> None:
+    """2026-11-01 (Tho t31u): one LINE alert per crypto/geo event when the contagion check reaches
+    level 'contagion' (documented thresholds in portfolio_engine/contagion.py). Alert only - no trading."""
+    try:
+        with urllib.request.urlopen(CONTAGION_URL, timeout=60) as resp:
+            st = json.loads(resp.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        log(f"contagion check unavailable ({exc.__class__.__name__})")
+        return
+    sent = set(state.get("contagion_alerted", []))
+    for ev in st.get("events", []):
+        if ev.get("level") != "contagion" or ev.get("key") in sent:
+            continue
+        m = ev.get("moves", {})
+        g = lambda t, k="chg_pct": (m.get(t) or {}).get(k)  # noqa: E731
+        text = (f"⚠️ ตรวจพบการลามสู่ตลาดหุ้น\n{ev.get('title', '')[:120]}\n"
+                f"BTC {g('BTC-USD')}% · SPY {g('SPY')}% · QQQ {g('QQQ')}% · VIX {g('^VIX', 'last')} · USD/THB {g('THB=X')}%\n"
+                f"(ตั้งแต่ราคาปิด {g('SPY', 'anchor_date')} ถึง {g('SPY', 'last_date')})\n"
+                "ข้อมูลประกอบเท่านั้น ไม่ใช่คำแนะนำซื้อขาย · ดูหน้า ข่าวและอารมณ์ตลาด\n" + datetime.now().strftime("%Y-%m-%d %H:%M ICT"))
+        if send_line(text, dry):
+            sent.add(ev.get("key"))
+    state["contagion_alerted"] = sorted(sent)[-50:]
+    state["contagion_level"] = st.get("level")
+
+
 def main() -> int:
     dry = "--dry-run" in sys.argv or os.getenv("HEALTH_MONITOR_DRY_RUN") == "1"
     if "--test-alert" in sys.argv:
@@ -156,6 +184,8 @@ def main() -> int:
         if send_line("\n".join(lines), dry):
             state["last_alert"] = datetime.now().isoformat()
 
+    if "--no-contagion" not in sys.argv:
+        check_contagion(state, dry)
     state["failing"] = failing
     state["checked_at"] = datetime.now().isoformat()
     if not dry:

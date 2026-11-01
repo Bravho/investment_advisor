@@ -1,0 +1,58 @@
+{
+  "_note": "Verified facts attached to crypto event cards whose headline/entity matches. Checked by hand from reliable free sources; update when the story changes. Display-only.",
+  "events": [
+    {
+      "key": "binance_hack_2026_10_29",
+      "match_re": "binance",
+      "valid_from": "2026-10-29",
+      "valid_to": "2026-11-30",
+      "checked_at": "2026-11-01 10:50 ICT",
+      "facts_th": [
+        "เกิดเหตุ 29 ต.ค. 2026 ราว 20:05 UTC (30 ต.ค. 03:05 เวลาไทย) แฮกเกอร์ดึงเงินจาก hot wallet ของ Binance บนราว 10-11 บล็อกเชนภายในประมาณ 20 นาที",
+        "มูลค่าที่ถูกขโมย: Binance ประเมินราว 6,300 ล้านดอลลาร์ (ตัวเลขที่ Tho เห็นถูกต้อง) บริษัทวิเคราะห์บล็อกเชนประเมิน 6,360-6,430 ล้านดอลลาร์ (TRM, Elliptic, Chainalysis) ตัวเลข 5,700 ล้านเป็นตัวเลขช่วงแรกที่ยังไม่ยืนยัน (และเท่ากับยอดที่ Binance ชดเชยแล้ว 90%)",
+        "643 ล้านดอลลาร์ไม่ใช่ยอดที่ถูกขโมย แต่เป็นเงินไหลออกจาก ETF บิตคอยน์สหรัฐฯ ในวันที่ 30 ต.ค. (SoSoValue) ประมาณ 0.7% ของสินทรัพย์ในกองทุน",
+        "FBI ระบุว่าเป็นฝีมือกลุ่ม TraderTraitor ของเกาหลีเหนือ; ถูกอายัดไว้แล้วราว 2,800-3,000 ล้านดอลลาร์ (ส่วนใหญ่เป็น USDT/USDC)",
+        "สถานะ ณ เช้า 1 พ.ย.: Binance บอกว่าชดเชยแล้ว 90% จากเงินบริษัท กองทุน SAFU และกองทุนประกันฟิวเจอร์ส ผู้ใช้ไม่ต้องรับภาระ; มีแผนเปิดถอนเงิน 1 พ.ย. แบบทยอย แต่จนถึงเช้า 1 พ.ย. ยังไม่เปิด; หลักฐานทุนสำรองแบบเต็ม (zero-knowledge) คาดว่าจะออกราว 3 พ.ย.; ตัวเลขชดเชยเป็นการรายงานของ Binance เอง ยังไม่มีผู้ตรวจสอบอิสระยืนยัน"
+      ],
+      "sources": [
+        {
+          "title": "Binance: Security Incident Update (2026-10-30)",
+          "date": "2026-10-30",
+          "url": "https://www.binance.com/en/support/announcement/detail/c5a8729a97ac486d963784d96c5642d7"
+        },
+        {
+          "title": "Elliptic: North Korea likely behind the $6.4 billion Binance hack",
+          "date": "2026-10-31",
+          "url": "https://www.elliptic.co/insights/binance-largest-hack-in-history/"
+        },
+        {
+          "title": "Chainalysis: Tracing the $6.4 Billion Theft to North Korea",
+          "date": "2026-10-30",
+          "url": "https://www.chainalysis.com/blog/binance-exploit-latest-findings-and-response/"
+        },
+        {
+          "title": "Nikkei Asia/Reuters: Binance says it has covered 90% of losses from $6.3bn hack",
+          "date": "2026-11-01",
+          "url": "https://asia.nikkei.com/spotlight/cryptocurrencies/binance-says-it-has-covered-90-of-losses-from-6.3bn-hack"
+        },
+        {
+          "title": "BeInCrypto: Investors pull $643 million from Bitcoin ETFs",
+          "date": "2026-10-31",
+          "url": "https://beincrypto.com/investors-pull-643-million-bitcoin-etfs/"
+        },
+        {
+          "title": "CoinDesk: Binance loses over $6 billion in the largest crypto hack to date",
+          "date": "2026-10-29",
+          "url": "https://www.coindesk.com/business/2026/10/29/potential-multi-billion-binance-hack-hitting-crypto-markets"
+        },
+        {
+          "title": "Taiwan Nomad News: withdrawals still not open at 08:19 Taiwan time 1 Nov",
+          "date": "2026-11-01",
+          "url": "https://news.dna.org.tw/money/binance-withdrawal-resume-90-percent-replenished-usdt-freelancer-2026/"
+        }
+      ],
+      "headline_th": "Binance ถูกแฮ็ก ~6,300 ล้านดอลลาร์ (ใหญ่ที่สุดในประวัติศาสตร์คริปโต)",
+      "event_at_utc": "2026-10-29T20:05:00+00:00"
+    }
+  ]
+}

@@ -1134,6 +1134,11 @@ Portfolio context: {json_dumps(context)}{market_intel_section}"""
             facts_md = f"{facts_md}\n\n{_geo.render_brief(await _geo.latest(await db_pool.get_pool()))}"
         except Exception:  # noqa: BLE001
             logger.warning("geo risk brief section unavailable")
+        try:  # 2026-11-01: contagion check (crypto/geo event -> equities; context only)
+            import contagion as _ct
+            facts_md = f"{facts_md}\n\n{_ct.render_brief(await _ct.status(await db_pool.get_pool()))}"
+        except Exception:  # noqa: BLE001
+            logger.warning("contagion brief section unavailable")
     except Exception as _exc:  # noqa: BLE001
         logger.warning("Market context section unavailable: %s", _exc)
     try:

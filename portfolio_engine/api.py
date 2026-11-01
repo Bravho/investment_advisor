@@ -1029,6 +1029,23 @@ async def crypto_events_ep(hours: int = Query(72, ge=24, le=720)) -> dict[str, A
     return to_jsonable(await ce_mod.current(await db_pool.get_pool(), hours))
 
 
+# 2026-11-01 (Tho t31u): contagion check - crypto/geo event spilling into equities? display + LINE alert + context only
+@app.get("/contagion/status")
+async def contagion_status(refresh: bool = False) -> dict[str, Any]:
+    import contagion as ct_mod
+    return to_jsonable(await ct_mod.status(await db_pool.get_pool(), max_age_s=0 if refresh else 900))
+
+
+@app.get("/contagion/advisor-context")
+async def contagion_advisor_context() -> dict[str, Any]:
+    import contagion as ct_mod
+    try:
+        st = await ct_mod.status(await db_pool.get_pool())
+        return {"context": ct_mod.render_text(st), "level": st.get("level")}
+    except Exception as exc:  # noqa: BLE001
+        return {"context": f"=== CONTAGION CHECK ===\n  unavailable ({type(exc).__name__}) - do not quote contagion numbers.", "level": "unknown"}
+
+
 @app.post("/crypto/events/replay")
 async def crypto_events_replay() -> dict[str, Any]:
     import crypto_events as ce_mod

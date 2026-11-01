@@ -1,4 +1,5 @@
 import { Card, SectionTitle, ServiceError, Skeleton } from './UI'
+import ContagionBlock from './ContagionBlock'
 
 // 2026-11-01: geopolitical / war-risk card. Context/display only - not used in signals, forecasts or rebalance.
 // Scenario probabilities are JUDGMENT (config/geo_conflicts.json), market numbers are measured (yfinance, GPR index).
@@ -6,7 +7,8 @@ const LV = { high: ['สูง', 'bg-red-500/20 text-red-200'], elevated: ['ส�
 const pct = v => (v === null || v === undefined ? 'unknown' : `${v > 0 ? '+' : ''}${Number(v).toFixed(1)}%`)
 const MK = [['BZ=F', 'น้ำมันเบรนท์'], ['GC=F', 'ทองคำ'], ['^VIX', 'VIX (ความกลัว)'], ['THB=X', 'USD/THB']]
 
-export default function GeoRiskCard({ data, loading, error, retry }) {
+export default function GeoRiskCard({ data, loading, error, retry, contagion }) {
+  const geoEv = (contagion?.events || []).filter(e => e.kind === 'geo')
   if (loading && !data) return <Skeleton className="h-56" />
   if (error || !data) return <Card><SectionTitle title="ความเสี่ยงสงคราม/ภูมิรัฐศาสตร์" /><ServiceError retry={retry} compact /></Card>
   const a = data.assessment || {}, g = data.gpr?.daily || {}, ms = data.market_stress || {}
@@ -27,6 +29,8 @@ export default function GeoRiskCard({ data, loading, error, retry }) {
         <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{c.status_th}</p>
         {n && <p className="mt-0.5 text-[10px] text-slate-500">ข่าว 7 วัน: {n.articles_7d} ชิ้น{n.volume_ratio ? ` (x${n.volume_ratio} จากปกติ)` : ''}</p>}
       </div> })}</div>
+    {geoEv.length > 0 ? geoEv.map(e => <div key={e.key}><p className="mt-2 text-[11px] text-slate-300">เหตุการณ์: {e.title}</p><ContagionBlock ev={e} /></div>)
+      : contagion && <p className="mt-2 text-[11px] text-slate-500">ตรวจการลามสู่ตลาดหุ้น: ไม่มีเหตุการณ์ภูมิรัฐศาสตร์ที่เข้าเกณฑ์ตรวจ (ตัวชี้วัดตึงเครียด หรือข่าวเพิ่ม ≥2 เท่า และ ≥8 ชิ้น ใน 7 วัน)</p>}
     {a.ww3 && <p className="mt-2 text-[12px] text-slate-300">🌍 {a.ww3.label_th}: <b>{a.ww3.p_12m}</b> ใน 12 เดือน <span className="text-slate-500">(ประเมิน ไม่ใช่ข้อมูลข่าวกรอง)</span></p>}
     <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] md:grid-cols-4">{MK.map(([k, l]) => { const m = ms[k]; return <div key={k} className="rounded bg-[#121620] px-2 py-1"><span className="text-slate-400">{l}</span> <span className="text-white">{m?.last == null ? 'unknown' : Number(m.last).toLocaleString('en-US', { maximumFractionDigits: 2 })}</span> <span className={m?.chg_1m_pct > 0 ? 'text-amber-300' : 'text-sky-300'}>{pct(m?.chg_1m_pct)} 1 เดือน</span></div> })}</div>
     {eu && <p className="mt-2 rounded bg-sky-900/20 p-2 text-[11px] leading-relaxed text-sky-100">ข่าว "ให้คนยุโรปตุนอาหาร": ที่จริงคือคำแนะนำให้มีของจำเป็นพอ <b>72 ชั่วโมง (3 วัน)</b> ของ EU (มี.ค. 2025) และแคมเปญ Be Ready ของอังกฤษ (22 ต.ค. 2026) เป็นการเตรียมพร้อมทุกภัย (น้ำท่วม ไซเบอร์ ไฟดับ สงคราม) ไม่ได้มาจากข่าวกรองว่าจะเกิดสงครามใหญ่</p>}

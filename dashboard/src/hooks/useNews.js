@@ -28,3 +28,7 @@ export const useMarketMood = (refreshMs = 300000) =>
 // 2026-11-01: geopolitical / war-risk monitor (context/display only; probabilities are judgment)
 export const useGeoRisk = (refreshMs = 1800000) =>
   useApi(() => portfolioClient.get('/geo/risk', { timeout: 180000 }), [], refreshMs)
+
+// 2026-11-01: contagion check - is a crypto/geo event spilling into equities? (display/alert/context only)
+export const useContagion = (refreshMs = 900000) =>
+  useApi(() => portfolioClient.get('/contagion/status', { timeout: 120000 }), [], refreshMs)

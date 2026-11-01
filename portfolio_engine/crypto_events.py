@@ -251,14 +251,36 @@ def _publisher(url: Any, source: Any) -> str:
     return re.sub(r"\s*\(.*\)$", "", str(source or "unknown")).strip().lower()
 
 
+def _verified_facts() -> list[dict[str, Any]]:
+    """2026-11-01: hand-verified facts (config/crypto_verified_facts.json) attached to matching cards."""
+    import json as _json
+    from pathlib import Path as _Path
+    f = _Path(__file__).resolve().parents[1] / "config" / "crypto_verified_facts.json"
+    try:
+        return _json.loads(f.read_text(encoding="utf-8")).get("events", [])
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def _attach_verified(card: dict[str, Any], facts: list[dict[str, Any]]) -> None:
+    text = " ".join(str(card.get(k) or "") for k in ("headline", "entity")) + " " + " ".join(h.get("title", "") for h in card.get("headlines") or [])
+    day = str(card.get("at"))[:10]
+    for ev in facts:
+        if re.search(ev["match_re"], text, re.I) and ev.get("valid_from", "") <= day <= ev.get("valid_to", "9999"):
+            card["verified"] = {k: ev.get(k) for k in ("key", "headline_th", "facts_th", "sources", "checked_at", "event_at_utc")}
+            return
+
+
 async def current(pool: Any, hours: int = 72) -> dict[str, Any]:
     th = {**THRESHOLDS, **await active_thresholds(pool)}
     now = datetime.now(timezone.utc)
     cards = await build(pool, now - timedelta(hours=hours), now, th)
     cards = [c for c in cards if c["at"] >= _ts(now - timedelta(hours=hours))]
+    facts = _verified_facts()
     for c in cards:
         if c["type"] == "price":
             await _attach_related(pool, c)
+        _attach_verified(c, facts)
     return {"checked_at": datetime.now(ICT).isoformat(timespec="minutes"), "window_hours": hours, "cards": [_jsonable(c) for c in cards],
             "empty_text_th": "ไม่มีเหตุการณ์สำคัญ" if not cards else None, "thresholds": th,
             "rule_th": "แสดงเฉพาะเหตุการณ์คริปโตที่กระทบแนวโน้มแรง: ข่าวหมวดกฎหมาย/ETF/exchange ถูกแฮ็ก/stablecoin/ทุนสำรองรัฐ/liquidation ที่ผลกระทบสูง"
