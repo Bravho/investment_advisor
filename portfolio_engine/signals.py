@@ -27,8 +27,8 @@ import pandas as pd
 
 from market_history import SET_PROXY, download_closes, download_ohlc, http_json
 from fundamentals import get_fundamentals
-from signal_score import (BASE_WEIGHTS, PRICE_METRIC_MAP, REGIME_TILT, composite_score, price_components,
-                          rsi_score as shared_rsi_score)
+from signal_score import (BASE_WEIGHTS, PRICE_METRIC_MAP, REGIME_TILT, composite_score, p33_components,
+                          price_components, rsi_score as shared_rsi_score)
 
 LOGGER = logging.getLogger("portfolio_engine.signals")
 ICT = ZoneInfo("Asia/Bangkok")
@@ -36,6 +36,12 @@ COUNCIL_MODEL = "hermes3:8b"
 # F3 shadow switch: the shared scorer is recorded on every run, but changing the
 # score/rank used by the live API remains opt-in until its exact backtest passes.
 UNIFIED_SCORE_LIVE = False
+# 2026-11-01 (Tho t31u "ใช้สูตร P3.3 ไปก่อน"): live score = P3.3 price composite (signal_score.p33_components:
+# momentum + low_vol + technical, no MACD / volume / regime tilt, percentiles within global or Thai group).
+# Gate (ops/p33_gate.py, data/backtests/p33_gate_20261101_104145.json) vs the pre-P3.3 live formula: PASS global
+# (Sharpe 0.903 -> 1.084, excess CAGR +8.3% -> +16.7%, hit 61.2% -> 67.1%) and PASS thai (Sharpe 0.196 -> 0.311;
+# Thai remains display-only/"weak"). "legacy" restores the pre-P3.3 live score; it is always stored as a shadow.
+LIVE_FORMULA = "p33"
 HOLDING_PROXY = {"SCBGOLDE": "GC=F*THB=X"}
 # 2026-11-01 (P3.3): only components with price history could be walk-forward tested (ops/p3_backtest.py,
 # data/backtests/p3_20261101_0056.json, walkforward.simulate, same costs/weak thresholds):
@@ -44,8 +50,8 @@ HOLDING_PROXY = {"SCBGOLDE": "GC=F*THB=X"}
 # value / quality / dividend / flows / fundamentals / sentiment have no point-in-time history -> weight 0 in the live
 # score (display-only). The previous all-component composite is kept as `score_all` for display.
 VALIDATED_COMPONENTS = {"momentum", "low_vol", "technical"}
-VALIDATION = {"global": {"status": "pass", "detail": "OOS Sharpe 1.05, excess CAGR +15.2%, hit 52.6% (2019-10..2026-10)"},
-              "thai": {"status": "weak", "detail": "OOS Sharpe 0.31, excess CAGR +0.1%, hit 48.6% < 50% (2019-10..2026-10)"}}
+VALIDATION = {"global": {"status": "pass", "detail": "P3.3 formula OOS Sharpe 1.08, excess CAGR +16.7%/yr vs SPY, positive months 67.1% (2019-10..2026-10, monthly top-3)"},
+              "thai": {"status": "weak", "detail": "P3.3 formula OOS Sharpe 0.31, excess CAGR -0.2%/yr vs SET proxy, positive months 51.8% - display only (2019-10..2026-10)"}}
 
 
 def validation_for(ticker: str) -> dict[str, str]:
@@ -373,6 +379,28 @@ async def run_signals(pool: Any, council: bool = True) -> dict[str, Any]:
                    "fundamentals": {"source": "Yahoo Finance via yfinance (free)", "as_of": str((funds.get(t) or {}).get("retrieved_at", ""))[:10] or None},
                    "benchmark": SET_PROXY if (t.endswith(".BK") or t in HOLDING_PROXY) else "SPY",
                    "nvdr": nvdr.get(sym), "sentiment": sent.get(t)}
+    # 2026-11-01: P3.3 live score - percentiles within each validated group (global vs SPY, Thai vs SET proxy)
+    p33: dict[str, dict[str, Optional[float]]] = {}
+    for group, bench_t in (("thai", SET_PROXY), ("global", "SPY")):
+        members = [u["ticker"] for u in uni if (validation_for(u["ticker"]) is VALIDATION[group])]
+        series = {}
+        for t in members:
+            c, _v, _src = _price_series(t, ohlc, closes)
+            if c is not None and c.dropna().size > 0:
+                series[t] = c
+        if not series or bench_t not in closes:
+            continue
+        frame = pd.concat(series, axis=1)
+        frame.index = pd.to_datetime(frame.index).tz_localize(None) if getattr(frame.index, "tz", None) is not None else pd.to_datetime(frame.index)
+        b = closes[bench_t].copy()
+        b.index = pd.to_datetime(b.index).tz_localize(None) if getattr(b.index, "tz", None) is not None else pd.to_datetime(b.index)
+        frame = frame.join(b.rename("__bench__"), how="outer").sort_index().ffill(limit=5)
+        frame = frame[frame["__bench__"].notna()]
+        comp = p33_components(frame, "__bench__")
+        for t in members:
+            if not comp.empty and t in comp.index:
+                row = comp.loc[t]
+                p33[t] = {k: (round(float(row[k]), 2) if pd.notna(row[k]) else None) for k in ("momentum", "low_vol", "technical", "score")}
     # cross-sectional percentiles
     metric_pct: dict[str, dict[str, float]] = {t: {} for t in tickers}
     for metric, (comp, hib) in METRIC_MAP.items():
@@ -401,7 +429,20 @@ async def run_signals(pool: Any, council: bool = True) -> dict[str, Any]:
         avail = {k: v for k, v in avail_all.items() if k in VALIDATED_COMPONENTS}  # P3.3: untested parts display-only
         wsum = sum(weights[k] for k in avail)
         score_unified = composite_score(comps, regime["regime"], VALIDATED_COMPONENTS)
-        score = _live_composite_score(comps, regime["regime"], weights)
+        score_legacy = _live_composite_score(comps, regime["regime"], weights)
+        p33_t = p33.get(t) or {}
+        if LIVE_FORMULA == "p33":
+            score = p33_t.get("score")
+            raw[t]["score_formula"] = "p33" if score is not None else "p33: not scored (needs 230 closes in the last 252 days)"
+            if p33_t.get("score") is not None:
+                avail = {k: p33_t[k] for k in ("momentum", "low_vol", "technical") if p33_t.get(k) is not None}
+                wsum = sum(weights[k] for k in avail)
+        else:
+            score = score_legacy
+            raw[t]["score_formula"] = "legacy"
+        raw[t]["score_legacy_shadow"] = round(score_legacy, 2) if score_legacy is not None else None
+        raw[t]["score_p33"] = p33_t.get("score")
+        raw[t]["p33_components"] = {k: p33_t.get(k) for k in ("momentum", "low_vol", "technical")} if p33_t else None
         coverage = wsum / (sum(weights[k] for k in VALIDATED_COMPONENTS) or 1)
         agreement = 1 - min(1.0, float(np.std(list(avail.values()))) / 35) if len(avail) >= 2 else 0.3
         conf = round(coverage * (0.5 + 0.5 * agreement), 3)
@@ -511,7 +552,7 @@ async def latest_signals(pool: Any) -> dict[str, Any]:
         reg = await conn.fetchrow("SELECT * FROM market_regime ORDER BY as_of DESC LIMIT 1")
     return {"as_of": rows[0]["as_of"].isoformat() if rows else None, "regime": _row(reg) if reg else None,
             "items": [_row(r) for r in rows],
-            "method": "Cross-sectional percentiles across ideas+holdings; regime-tilted weights; confidence = coverage x agreement. "
+            "method": "Live score = P3.3 price composite (momentum 12-1/6m, low vol/beta, price vs 200d, 3m excess return, RSI band; weights .15/.10/.15; percentiles within global or Thai group; no MACD/volume/regime tilt) since 2026-11-01; pre-P3.3 score kept as raw.score_legacy_shadow; confidence = coverage x agreement. "
                       "Free data: yfinance, SET NVDR/investor-type, local sentiment. Not financial advice."}
 
 

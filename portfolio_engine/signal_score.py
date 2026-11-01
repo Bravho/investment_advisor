@@ -204,8 +204,14 @@ def cross_section_scores(
     asof: Any,
     regime: Optional[str],
     components_allowed: Set[str],
+    exclude_metrics: Optional[Set[str]] = None,
+    use_tilt: bool = True,
 ) -> pd.Series:
-    """Score a universe exactly like live using data available at one as-of date."""
+    """Score a universe exactly like live using data available at one as-of date.
+
+    ``exclude_metrics`` / ``use_tilt`` exist only for ablation research (2026-11-01);
+    the defaults reproduce the pre-P3.3 live formula exactly."""
+    excluded = set(exclude_metrics or ())
     raw: Dict[str, Dict[str, Any]] = {}
     for ticker in closes.columns:
         volume = volumes[ticker] if volumes is not None and ticker in volumes.columns else None
@@ -213,6 +219,8 @@ def cross_section_scores(
 
     metric_percentiles: Dict[str, Dict[str, float]] = {ticker: {} for ticker in closes.columns}
     for metric, (_, higher_is_better) in PRICE_METRIC_MAP.items():
+        if metric in excluded:
+            continue
         values = {
             ticker: number
             for ticker, metrics in raw.items()
@@ -234,7 +242,61 @@ def cross_section_scores(
                 if owner == component and metric in metric_percentiles[ticker]
             ]
             components[component] = round(float(np.mean(percentiles)), 1) if percentiles else None
-        score = composite_score(components, regime, components_allowed)
+        score = composite_score(components, regime if use_tilt else "neutral", components_allowed)
         if score is not None:
             scores[ticker] = score
     return pd.Series(scores, dtype=float).reindex(closes.columns)
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-01 (Tho t31u): P3.3 price composite = the live score.
+# momentum (12-1, 6m) + low_vol (1y vol, beta) + technical (price/SMA200, 3m excess return, RSI band);
+# base weights 0.15/0.10/0.15, no MACD, no volume, no regime tilt. Percentiles are ranked WITHIN one
+# universe (global vs SPY, Thai vs the SET proxy), exactly as walk-forward tested in ops/p3_backtest.py.
+P33_WEIGHTS: Dict[str, float] = {"momentum": BASE_WEIGHTS["momentum"], "low_vol": BASE_WEIGHTS["low_vol"],
+                                 "technical": BASE_WEIGHTS["technical"]}
+P33_MIN_OBS = 230  # of the last 252 rows
+
+
+def _rsi_frame(px: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    d = px.diff()
+    up = d.clip(lower=0).ewm(alpha=1 / n, adjust=False).mean()
+    dn = (-d.clip(upper=0)).ewm(alpha=1 / n, adjust=False).mean()
+    return 100 - 100 / (1 + up / dn.replace(0, np.nan))
+
+
+def p33_components(h: pd.DataFrame, bench_col: Optional[str]) -> pd.DataFrame:
+    """Per-ticker P3.3 components (0-100 percentiles within ``h``) and the composite ``score``.
+
+    ``h`` holds closes up to the as-of date (one column per ticker, optionally the benchmark column).
+    Returns an empty frame when there are 260 rows or fewer. Tickers with fewer than 230 valid closes in
+    the last 252 rows get NaN (not scored)."""
+    if len(h) <= 260:
+        return pd.DataFrame()
+    hh = h.drop(columns=[bench_col], errors="ignore") if bench_col else h
+    r = hh.pct_change(fill_method=None)
+    bench = h[bench_col] if bench_col and bench_col in h else None
+    mom = pd.concat([(hh.iloc[-22] / hh.iloc[-252] - 1).rank(pct=True),
+                     (hh.iloc[-1] / hh.iloc[-126] - 1).rank(pct=True)], axis=1).mean(axis=1)
+    vol = (r.iloc[-252:].std()).rank(pct=True, ascending=False)
+    if bench is not None:
+        br = bench.pct_change(fill_method=None).iloc[-252:]
+        beta = r.iloc[-252:].apply(lambda c: c.cov(br) / br.var() if br.var() > 0 else np.nan)
+        vol = pd.concat([vol, beta.rank(pct=True, ascending=False)], axis=1).mean(axis=1)
+    trend = hh.iloc[-1] / hh.iloc[-200:].mean() - 1
+    rs3 = (hh.iloc[-1] / hh.iloc[-63] - 1) - ((bench.iloc[-1] / bench.iloc[-63] - 1) if bench is not None else 0)
+    rsi = _rsi_frame(hh.iloc[-120:]).iloc[-1]
+    rsi_sc = rsi.apply(lambda x: rsi_score(float(x)) if pd.notna(x) else np.nan)
+    tech = pd.concat([trend.rank(pct=True), rs3.rank(pct=True), rsi_sc.rank(pct=True)], axis=1).mean(axis=1)
+    wm, wl, wt = P33_WEIGHTS["momentum"], P33_WEIGHTS["low_vol"], P33_WEIGHTS["technical"]
+    score = (wm * mom + wl * vol + wt * tech) / (wm + wl + wt)
+    ok = hh.iloc[-252:].notna().sum() >= P33_MIN_OBS
+    out = pd.DataFrame({"momentum": mom * 100, "low_vol": vol * 100, "technical": tech * 100, "score": score * 100})
+    out.loc[~ok.reindex(out.index).fillna(False)] = np.nan
+    return out
+
+
+def p33_scores(h: pd.DataFrame, bench_col: Optional[str]) -> pd.Series:
+    """P3.3 composite score (0-100) per ticker; NaN = not scored."""
+    comp = p33_components(h, bench_col)
+    return comp["score"] if not comp.empty else pd.Series(dtype=float)

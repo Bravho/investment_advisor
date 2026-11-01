@@ -1,0 +1,830 @@
+{
+  "generated_at": "2026-11-01T10:41:10",
+  "config": {
+    "baseline": "pre-P3.3 live formula (exact)",
+    "candidate": "signal_score.p33_scores (shared with live)",
+    "setup": "same as ops/f3_backtest.py: monthly top-3, walkforward costs, yearly OOS folds"
+  },
+  "universes": {
+    "global": {
+      "benchmark": "SPY",
+      "tickers": [
+        "QQQ",
+        "NVDA",
+        "MSFT",
+        "GOOGL",
+        "TSM",
+        "AVGO",
+        "MU",
+        "VNM",
+        "EWJ",
+        "INDA",
+        "FXI",
+        "GLDM",
+        "IAU",
+        "GDX"
+      ],
+      "runs": {
+        "live_full": {
+          "cagr": 0.2383,
+          "sharpe": 0.903,
+          "vol": 0.2803,
+          "max_drawdown": -0.3153,
+          "days": 1759,
+          "benchmark_cagr": 0.1557,
+          "excess_cagr": 0.0826,
+          "hit_rate": 0.6118,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.005883053365987934,
+              "hit": 0.3333333333333333,
+              "return": 0.057582328084581746,
+              "benchmark_return": 0.06346538145056968,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": 0.028731529250693777,
+              "hit": 0.4166666666666667,
+              "return": 0.21204815370894203,
+              "benchmark_return": 0.18331662445824826,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.05586946020327588,
+              "hit": 0.6666666666666666,
+              "return": 0.34315685704992305,
+              "benchmark_return": 0.28728739684664717,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": -0.028150251553446415,
+              "hit": 0.3333333333333333,
+              "return": -0.2099038597507613,
+              "benchmark_return": -0.1817536081973149,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": -0.009326864356875575,
+              "hit": 0.6666666666666666,
+              "return": 0.2524310170801809,
+              "benchmark_return": 0.26175788143705647,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.052091721870013874,
+              "hit": 0.75,
+              "return": 0.3009562685198264,
+              "benchmark_return": 0.2488645466498125,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.30984709367222507,
+              "hit": 0.9166666666666666,
+              "return": 0.48703773143925266,
+              "benchmark_return": 0.1771906377670276,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.23212803373912982,
+              "hit": 0.6,
+              "return": 0.3490078283050271,
+              "benchmark_return": 0.11687979456589725,
+              "n_months": 10
+            }
+          }
+        },
+        "no_macd": {
+          "cagr": 0.2347,
+          "sharpe": 0.8841,
+          "vol": 0.2843,
+          "max_drawdown": -0.3138,
+          "days": 1759,
+          "benchmark_cagr": 0.1557,
+          "excess_cagr": 0.0789,
+          "hit_rate": 0.6,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": 0.01579928339588199,
+              "hit": 0.3333333333333333,
+              "return": 0.07926466484645167,
+              "benchmark_return": 0.06346538145056968,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": 0.06324626327378158,
+              "hit": 0.4166666666666667,
+              "return": 0.24656288773202983,
+              "benchmark_return": 0.18331662445824826,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.22721256756768482,
+              "hit": 0.75,
+              "return": 0.514499964414332,
+              "benchmark_return": 0.28728739684664717,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": -0.028321939536440688,
+              "hit": 0.3333333333333333,
+              "return": -0.21007554773375559,
+              "benchmark_return": -0.1817536081973149,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": -0.04462847091033839,
+              "hit": 0.6666666666666666,
+              "return": 0.21712941052671808,
+              "benchmark_return": 0.26175788143705647,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": -0.05328541454981628,
+              "hit": 0.6666666666666666,
+              "return": 0.19557913209999622,
+              "benchmark_return": 0.2488645466498125,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.17785374556341038,
+              "hit": 0.8333333333333334,
+              "return": 0.355044383330438,
+              "benchmark_return": 0.1771906377670276,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.25551161387153476,
+              "hit": 0.6,
+              "return": 0.372391408437432,
+              "benchmark_return": 0.11687979456589725,
+              "n_months": 10
+            }
+          }
+        },
+        "no_volume": {
+          "cagr": 0.2523,
+          "sharpe": 0.9312,
+          "vol": 0.2855,
+          "max_drawdown": -0.3697,
+          "days": 1759,
+          "benchmark_cagr": 0.1557,
+          "excess_cagr": 0.0966,
+          "hit_rate": 0.6353,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.015807355209862095,
+              "hit": 0.6666666666666666,
+              "return": 0.047658026240707585,
+              "benchmark_return": 0.06346538145056968,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": 0.15587232995168265,
+              "hit": 0.5833333333333334,
+              "return": 0.3391889544099309,
+              "benchmark_return": 0.18331662445824826,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.10843086615671305,
+              "hit": 0.6666666666666666,
+              "return": 0.3957182630033602,
+              "benchmark_return": 0.28728739684664717,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": -0.09168110500609916,
+              "hit": 0.3333333333333333,
+              "return": -0.27343471320341406,
+              "benchmark_return": -0.1817536081973149,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": -0.029031744330995535,
+              "hit": 0.6666666666666666,
+              "return": 0.23272613710606094,
+              "benchmark_return": 0.26175788143705647,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.06826913850982064,
+              "hit": 0.6666666666666666,
+              "return": 0.31713368515963314,
+              "benchmark_return": 0.2488645466498125,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.38027367471704765,
+              "hit": 0.9166666666666666,
+              "return": 0.5574643124840752,
+              "benchmark_return": 0.1771906377670276,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.21952067700174704,
+              "hit": 0.6,
+              "return": 0.3364004715676443,
+              "benchmark_return": 0.11687979456589725,
+              "n_months": 10
+            }
+          }
+        },
+        "no_regime_tilt": {
+          "cagr": 0.2553,
+          "sharpe": 1.0075,
+          "vol": 0.2591,
+          "max_drawdown": -0.3512,
+          "days": 1759,
+          "benchmark_cagr": 0.1557,
+          "excess_cagr": 0.0996,
+          "hit_rate": 0.6235,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.00021208694736940537,
+              "hit": 0.6666666666666666,
+              "return": 0.06325329450320027,
+              "benchmark_return": 0.06346538145056968,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": 0.2021893360703355,
+              "hit": 0.5833333333333334,
+              "return": 0.38550596052858377,
+              "benchmark_return": 0.18331662445824826,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.12260619180904331,
+              "hit": 0.75,
+              "return": 0.4098935886556905,
+              "benchmark_return": 0.28728739684664717,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": -0.07050376727848584,
+              "hit": 0.25,
+              "return": -0.25225737547580074,
+              "benchmark_return": -0.1817536081973149,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": 0.02049923663334874,
+              "hit": 0.5833333333333334,
+              "return": 0.2822571180704052,
+              "benchmark_return": 0.26175788143705647,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.06543608434898429,
+              "hit": 0.75,
+              "return": 0.3143006309987968,
+              "benchmark_return": 0.2488645466498125,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.3484106587291591,
+              "hit": 0.8333333333333334,
+              "return": 0.5256012964961867,
+              "benchmark_return": 0.1771906377670276,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.10768064512211728,
+              "hit": 0.6,
+              "return": 0.22456043968801453,
+              "benchmark_return": 0.11687979456589725,
+              "n_months": 10
+            }
+          }
+        },
+        "p33_shared": {
+          "cagr": 0.3232,
+          "sharpe": 1.084,
+          "vol": 0.3,
+          "max_drawdown": -0.3222,
+          "days": 1759,
+          "benchmark_cagr": 0.1557,
+          "excess_cagr": 0.1674,
+          "hit_rate": 0.6706,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": 0.0176218230938594,
+              "hit": 0.6666666666666666,
+              "return": 0.08108720454442908,
+              "benchmark_return": 0.06346538145056968,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": 0.27969442420491775,
+              "hit": 0.6666666666666666,
+              "return": 0.463011048663166,
+              "benchmark_return": 0.18331662445824826,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.34456645665186336,
+              "hit": 0.8333333333333334,
+              "return": 0.6318538534985105,
+              "benchmark_return": 0.28728739684664717,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": -0.06107884967465271,
+              "hit": 0.4166666666666667,
+              "return": -0.2428324578719676,
+              "benchmark_return": -0.1817536081973149,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": 0.19107541729690247,
+              "hit": 0.6666666666666666,
+              "return": 0.45283329873395894,
+              "benchmark_return": 0.26175788143705647,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.07050826278617839,
+              "hit": 0.5833333333333334,
+              "return": 0.3193728094359909,
+              "benchmark_return": 0.2488645466498125,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.20970440022681314,
+              "hit": 0.8333333333333334,
+              "return": 0.38689503799384073,
+              "benchmark_return": 0.1771906377670276,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.24230437387379378,
+              "hit": 0.7,
+              "return": 0.35918416843969103,
+              "benchmark_return": 0.11687979456589725,
+              "n_months": 10
+            }
+          }
+        }
+      },
+      "gate_p33_vs_live": {
+        "pass": true,
+        "mean_skill_base": 0.07941345868237856,
+        "mean_skill_cand": 0.16179953855745946,
+        "mean_hit_base": 0.5854166666666666,
+        "mean_hit_cand": 0.6708333333333333,
+        "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+      },
+      "ablation_vs_live": {
+        "no_macd": {
+          "pass": false,
+          "mean_skill_base": 0.07941345868237856,
+          "mean_skill_cand": 0.07667345608446227,
+          "mean_hit_base": 0.5854166666666666,
+          "mean_hit_cand": 0.575,
+          "reason": "candidate mean skill did not improve and mean hit fell below the allowed floor"
+        },
+        "no_volume": {
+          "pass": true,
+          "mean_skill_base": 0.07941345868237856,
+          "mean_skill_cand": 0.09948081022375678,
+          "mean_hit_base": 0.5854166666666666,
+          "mean_hit_cand": 0.6375,
+          "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+        },
+        "no_regime_tilt": {
+          "pass": true,
+          "mean_skill_base": 0.07941345868237856,
+          "mean_skill_cand": 0.09951328731089162,
+          "mean_hit_base": 0.5854166666666666,
+          "mean_hit_cand": 0.6270833333333333,
+          "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+        }
+      }
+    },
+    "thai": {
+      "benchmark": "TDEX.BK",
+      "tickers": [
+        "KBANK.BK",
+        "BBL.BK",
+        "KTB.BK",
+        "TTB.BK",
+        "SCB.BK",
+        "PTT.BK",
+        "PTTEP.BK",
+        "TOP.BK",
+        "IRPC.BK",
+        "AOT.BK",
+        "BAFS.BK",
+        "ADVANC.BK"
+      ],
+      "runs": {
+        "live_full": {
+          "cagr": 0.0192,
+          "sharpe": 0.1964,
+          "vol": 0.2096,
+          "max_drawdown": -0.4394,
+          "days": 1694,
+          "benchmark_cagr": 0.0467,
+          "excess_cagr": -0.0275,
+          "hit_rate": 0.4941,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.06743886932863996,
+              "hit": 0.3333333333333333,
+              "return": -0.06930979300285978,
+              "benchmark_return": -0.0018709236742198154,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": -0.13164537500575146,
+              "hit": 0.25,
+              "return": -0.24149043273841553,
+              "benchmark_return": -0.10984505773266406,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": -0.07680369055097103,
+              "hit": 0.4166666666666667,
+              "return": 0.05739864491879576,
+              "benchmark_return": 0.1342023354697668,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": 0.05539239431564713,
+              "hit": 0.6666666666666666,
+              "return": 0.1456414461799116,
+              "benchmark_return": 0.09024905186426446,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": -0.027192886604523347,
+              "hit": 0.3333333333333333,
+              "return": -0.11085191527509353,
+              "benchmark_return": -0.08365902867057018,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.045896661761073654,
+              "hit": 0.75,
+              "return": 0.13679948778144335,
+              "benchmark_return": 0.0909028260203697,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.2570873371410194,
+              "hit": 0.75,
+              "return": 0.21553891643556633,
+              "benchmark_return": -0.04154842070545306,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": -0.2093466646168909,
+              "hit": 0.3,
+              "return": 0.08148413998618897,
+              "benchmark_return": 0.29083080460307986,
+              "n_months": 10
+            }
+          }
+        },
+        "no_macd": {
+          "cagr": 0.0253,
+          "sharpe": 0.2245,
+          "vol": 0.2119,
+          "max_drawdown": -0.4394,
+          "days": 1694,
+          "benchmark_cagr": 0.0467,
+          "excess_cagr": -0.0214,
+          "hit_rate": 0.5059,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.06743886932863996,
+              "hit": 0.3333333333333333,
+              "return": -0.06930979300285978,
+              "benchmark_return": -0.0018709236742198154,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": -0.14499209886279552,
+              "hit": 0.25,
+              "return": -0.2548371565954596,
+              "benchmark_return": -0.10984505773266406,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": -0.07547734848812082,
+              "hit": 0.4166666666666667,
+              "return": 0.058724986981645966,
+              "benchmark_return": 0.1342023354697668,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": 0.06388884365393444,
+              "hit": 0.6666666666666666,
+              "return": 0.1541378955181989,
+              "benchmark_return": 0.09024905186426446,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": 0.04275346329564411,
+              "hit": 0.3333333333333333,
+              "return": -0.04090556537492607,
+              "benchmark_return": -0.08365902867057018,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.02686368536672301,
+              "hit": 0.75,
+              "return": 0.11776651138709271,
+              "benchmark_return": 0.0909028260203697,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.26414967118072274,
+              "hit": 0.75,
+              "return": 0.22260125047526969,
+              "benchmark_return": -0.04154842070545306,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": -0.22597606852558205,
+              "hit": 0.4,
+              "return": 0.06485473607749781,
+              "benchmark_return": 0.29083080460307986,
+              "n_months": 10
+            }
+          }
+        },
+        "no_volume": {
+          "cagr": 0.0411,
+          "sharpe": 0.2959,
+          "vol": 0.2143,
+          "max_drawdown": -0.4611,
+          "days": 1694,
+          "benchmark_cagr": 0.0467,
+          "excess_cagr": -0.0056,
+          "hit_rate": 0.4941,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.09357202573711076,
+              "hit": 0.0,
+              "return": -0.09544294941133058,
+              "benchmark_return": -0.0018709236742198154,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": -0.16598432568106358,
+              "hit": 0.25,
+              "return": -0.27582938341372765,
+              "benchmark_return": -0.10984505773266406,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": -0.12416939613270661,
+              "hit": 0.4166666666666667,
+              "return": 0.010032939337060176,
+              "benchmark_return": 0.1342023354697668,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": 0.09431601957106595,
+              "hit": 0.6666666666666666,
+              "return": 0.1845650714353304,
+              "benchmark_return": 0.09024905186426446,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": -0.06468435445992093,
+              "hit": 0.3333333333333333,
+              "return": -0.1483433831304911,
+              "benchmark_return": -0.08365902867057018,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.02741572825638605,
+              "hit": 0.5833333333333334,
+              "return": 0.11831855427675575,
+              "benchmark_return": 0.0909028260203697,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.22882843924370344,
+              "hit": 0.75,
+              "return": 0.18728001853825038,
+              "benchmark_return": -0.04154842070545306,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": 0.18850064603994943,
+              "hit": 0.6,
+              "return": 0.4793314506430293,
+              "benchmark_return": 0.29083080460307986,
+              "n_months": 10
+            }
+          }
+        },
+        "no_regime_tilt": {
+          "cagr": 0.036,
+          "sharpe": 0.2729,
+          "vol": 0.2191,
+          "max_drawdown": -0.4809,
+          "days": 1694,
+          "benchmark_cagr": 0.0467,
+          "excess_cagr": -0.0107,
+          "hit_rate": 0.5059,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.06743886932863996,
+              "hit": 0.3333333333333333,
+              "return": -0.06930979300285978,
+              "benchmark_return": -0.0018709236742198154,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": -0.18457928339203977,
+              "hit": 0.25,
+              "return": -0.29442434112470384,
+              "benchmark_return": -0.10984505773266406,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": 0.05665932410228991,
+              "hit": 0.5,
+              "return": 0.1908616595720567,
+              "benchmark_return": 0.1342023354697668,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": 0.11317677812729587,
+              "hit": 0.5833333333333334,
+              "return": 0.20342582999156034,
+              "benchmark_return": 0.09024905186426446,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": 0.03250787194291205,
+              "hit": 0.4166666666666667,
+              "return": -0.05115115672765813,
+              "benchmark_return": -0.08365902867057018,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.10306262686673939,
+              "hit": 0.8333333333333334,
+              "return": 0.1939654528871091,
+              "benchmark_return": 0.0909028260203697,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.2029482742331543,
+              "hit": 0.6666666666666666,
+              "return": 0.16139985352770125,
+              "benchmark_return": -0.04154842070545306,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": -0.26659739997435317,
+              "hit": 0.3,
+              "return": 0.024233404628726696,
+              "benchmark_return": 0.29083080460307986,
+              "n_months": 10
+            }
+          }
+        },
+        "p33_shared": {
+          "cagr": 0.0444,
+          "sharpe": 0.3107,
+          "vol": 0.2173,
+          "max_drawdown": -0.5045,
+          "days": 1694,
+          "benchmark_cagr": 0.0467,
+          "excess_cagr": -0.0023,
+          "hit_rate": 0.5176,
+          "n_months": 85,
+          "oos_from": "2019-10-31",
+          "oos_to": "2026-10-30",
+          "folds": {
+            "2019": {
+              "skill": -0.08980258900133209,
+              "hit": 0.0,
+              "return": -0.0916735126755519,
+              "benchmark_return": -0.0018709236742198154,
+              "n_months": 3
+            },
+            "2020": {
+              "skill": -0.2553835144686042,
+              "hit": 0.25,
+              "return": -0.36522857220126825,
+              "benchmark_return": -0.10984505773266406,
+              "n_months": 12
+            },
+            "2021": {
+              "skill": -0.07990223738050894,
+              "hit": 0.5,
+              "return": 0.05430009808925784,
+              "benchmark_return": 0.1342023354697668,
+              "n_months": 12
+            },
+            "2022": {
+              "skill": 0.16040951528889358,
+              "hit": 0.75,
+              "return": 0.25065856715315804,
+              "benchmark_return": 0.09024905186426446,
+              "n_months": 12
+            },
+            "2023": {
+              "skill": 0.14565516203141715,
+              "hit": 0.4166666666666667,
+              "return": 0.06199613336084697,
+              "benchmark_return": -0.08365902867057018,
+              "n_months": 12
+            },
+            "2024": {
+              "skill": 0.06647906543257087,
+              "hit": 0.75,
+              "return": 0.15738189145294057,
+              "benchmark_return": 0.0909028260203697,
+              "n_months": 12
+            },
+            "2025": {
+              "skill": 0.22268523769990578,
+              "hit": 0.6666666666666666,
+              "return": 0.18113681699445272,
+              "benchmark_return": -0.04154842070545306,
+              "n_months": 12
+            },
+            "2026": {
+              "skill": -0.07754194306380358,
+              "hit": 0.4,
+              "return": 0.2132888615392763,
+              "benchmark_return": 0.29083080460307986,
+              "n_months": 10
+            }
+          }
+        }
+      },
+      "gate_p33_vs_live": {
+        "pass": true,
+        "mean_skill_base": -0.019256386611129564,
+        "mean_skill_cand": 0.011574837067317323,
+        "mean_hit_base": 0.475,
+        "mean_hit_cand": 0.4666666666666667,
+        "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+      },
+      "ablation_vs_live": {
+        "no_macd": {
+          "pass": true,
+          "mean_skill_base": -0.019256386611129564,
+          "mean_skill_cand": -0.014528590213514256,
+          "mean_hit_base": 0.475,
+          "mean_hit_cand": 0.4875,
+          "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+        },
+        "no_volume": {
+          "pass": false,
+          "mean_skill_base": -0.019256386611129564,
+          "mean_skill_cand": 0.011331341387537872,
+          "mean_hit_base": 0.475,
+          "mean_hit_cand": 0.45,
+          "reason": "candidate mean hit fell below the allowed floor"
+        },
+        "no_regime_tilt": {
+          "pass": true,
+          "mean_skill_base": -0.019256386611129564,
+          "mean_skill_cand": -0.0012825846778301703,
+          "mean_hit_base": 0.475,
+          "mean_hit_cand": 0.4854166666666666,
+          "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+        }
+      }
+    }
+  },
+  "pass_global": true,
+  "pass_thai": true
+}

@@ -184,30 +184,11 @@ def walk(recs: list[dict], train_filter, test_filter, models: list[str], prior: 
 
 
 def p33_composite_weights(h: pd.DataFrame, bench_col: str) -> pd.Series:
-    """Frozen P3.3 baseline, exposed so F3 compares against the exact formula."""
+    """Frozen P3.3 formula; since 2026-11-01 the math lives in portfolio_engine/signal_score.p33_scores
+    (shared with live). Ranking/top-k selection is unchanged (score/100 is a monotone rescale)."""
     import walkforward as wf
-    BW = S.BASE_WEIGHTS
-    wm, wl, wt = BW["momentum"], BW["low_vol"], BW["technical"]
-    if len(h) <= 260:
-        return pd.Series(dtype=float)
-    hh = h.drop(columns=[bench_col], errors="ignore")
-    r = hh.pct_change(fill_method=None)
-    bench = h[bench_col] if bench_col in h else None
-    mom = pd.concat([(hh.iloc[-22] / hh.iloc[-252] - 1).rank(pct=True),
-                     (hh.iloc[-1] / hh.iloc[-126] - 1).rank(pct=True)], axis=1).mean(axis=1)
-    vol = (r.iloc[-252:].std()).rank(pct=True, ascending=False)
-    if bench is not None:
-        br = bench.pct_change(fill_method=None).iloc[-252:]
-        beta = r.iloc[-252:].apply(lambda c: c.cov(br) / br.var() if br.var() > 0 else np.nan)
-        vol = pd.concat([vol, beta.rank(pct=True, ascending=False)], axis=1).mean(axis=1)
-    trend = hh.iloc[-1] / hh.iloc[-200:].mean() - 1
-    rs3 = (hh.iloc[-1] / hh.iloc[-63] - 1) - ((bench.iloc[-1] / bench.iloc[-63] - 1) if bench is not None else 0)
-    rsi = wf._rsi_frame(hh.iloc[-120:]).iloc[-1]
-    rsi_sc = rsi.apply(lambda x: S._rsi_score(float(x)) if pd.notna(x) else np.nan)
-    tech = pd.concat([trend.rank(pct=True), rs3.rank(pct=True), rsi_sc.rank(pct=True)], axis=1).mean(axis=1)
-    score = (wm * mom + wl * vol + wt * tech) / (wm + wl + wt)
-    ok = hh.iloc[-252:].notna().sum() >= 230
-    return wf._top(score[ok].dropna())
+    from signal_score import p33_scores
+    return wf._top(p33_scores(h, bench_col).dropna())
 
 
 def p33_signals(closes_g: pd.DataFrame, closes_t: pd.DataFrame) -> dict:
