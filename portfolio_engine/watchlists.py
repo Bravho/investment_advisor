@@ -173,10 +173,13 @@ SEED: list[dict[str, Any]] = [
     {"ticker": "SHY", "name": "iShares 1-3 Year Treasury Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.15, "thesis": "[US bond reference 2026-11-01] 1-3y Treasuries: low duration; hurts a little if the Fed hikes. Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
     {"ticker": "IEF", "name": "iShares 7-10 Year Treasury Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.15, "thesis": "[US bond reference 2026-11-01] 7-10y Treasuries: classic flight-to-quality hedge, but loses if yields rise (Fed hike / inflation). Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
     {"ticker": "TIP", "name": "iShares TIPS Bond ETF", "asset_type": "etf", "market": "US", "sector": "us_bond", "ter": 0.18, "thesis": "[US bond reference 2026-11-01] US inflation-linked Treasuries: hedge for an oil/war inflation shock; still has rate risk. Watch/price alerts only - not in signals.", "seeded_from": "t35u US-bond research 2026-11-01"},
+    # sector 'us_income' (covered-call / option-income ETFs): display + price alerts + forecasts only; kept OUT of
+    # P3.3 signals, momentum screens, opportunity scanner and trade plans (strategy caps upside; not gated). t41u 2026-11-01.
+    {"ticker": "JEPQ", "name": "JPMorgan Nasdaq Equity Premium Income ETF", "asset_type": "etf", "market": "US", "sector": "us_income", "ter": 0.35, "thesis": "[US income reference 2026-11-01] Nasdaq-100 stocks + call-option ELNs: ~11-12% monthly distribution (mostly ordinary income, 15% US WHT with W-8BEN), beta ~0.72 vs QQQ, captured ~72% of up / ~68% of down months since 2022; lagged QQQ ~4 pts/yr. Income tool, not a hedge. UCITS twin JEPQ LN (IE000U9J8HX9) and Thai feeders (KT-JEPQ, TLNDQINCOME-UH-X) avoid US estate tax. Watch/forecast only - not in signals/trade plans. See docs/research/jepq_20261101.md", "seeded_from": "t41u JEPQ research 2026-11-01"},
 ]
 
 # Watch-list sectors that are display/price-alert only and never enter signals, forecasts, screens or trade plans.
-SIGNAL_EXCLUDED_SECTORS = ("us_bond",)
+SIGNAL_EXCLUDED_SECTORS = ("us_bond", "us_income")  # us_income: still forecast (predictions excludes us_bond only)
 BOND_TRIGGERS = [
     {"type": "move_1d_pct", "value": 1.5, "note": "abs 1-day move >= 1.5% (large for Treasuries)"},
     {"type": "new_52w_low", "note": "close at a 52-week low"},
@@ -184,7 +187,7 @@ BOND_TRIGGERS = [
 for _it in SEED:
     if _it.get("sector") == "us_bond":
         _it.setdefault("triggers", BOND_TRIGGERS)
-SIGNAL_UNIVERSE_SQL = "status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond')"
+SIGNAL_UNIVERSE_SQL = "status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income')"
 
 
 def _legacy_notes() -> dict[str, tuple[str, Optional[str]]]:
@@ -243,7 +246,7 @@ async def seed_investment_watchlist(pool: Any) -> int:
             if item.get("ter") is not None:
                 costs["ter_pct"] = item["ter"]
                 costs["vs_holding"] = ("US Treasury ETF reference (unhedged USD): compare with FX-hedged Thai US-bond funds; TER = issuer expense ratio, verify on issuer page"
-                                       if item["sector"] == "us_bond" else "alternative to SCBGOLDE: compare TER vs SCBGOLDE fees + FX")
+                                       if item["sector"] == "us_bond" else ("covered-call income ETF (unhedged USD): compare with QQQ total return, UCITS JEPQ LN and Thai feeders (KT-JEPQ / TLNDQINCOME-UH-X)" if item["sector"] == "us_income" else "alternative to SCBGOLDE: compare TER vs SCBGOLDE fees + FX"))
             res = await conn.execute(
                 """INSERT INTO investment_watchlist (ticker, name, asset_type, market, sector, currency,
                        thesis, thesis_as_of, triggers, costs, score, score_basis, seeded_from)

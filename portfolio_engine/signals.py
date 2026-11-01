@@ -314,7 +314,7 @@ async def _sentiment(pool: Any, tickers: list[str]) -> dict[str, dict[str, Any]]
 
 async def _universe(pool: Any) -> list[dict[str, Any]]:
     async with pool.acquire() as conn:
-        ideas = [dict(r) for r in await conn.fetch("SELECT ticker, name, sector, currency FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond')")]
+        ideas = [dict(r) for r in await conn.fetch("SELECT ticker, name, sector, currency FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income')")]
     import risk_engine as re_mod
     # Locked tax-wrapper funds (ThaiESG, lock_until in the future) get no buy/sell signal: nothing may be sold or
     # switched before the lock ends, and they have no free daily NAV history (2026-10-30).

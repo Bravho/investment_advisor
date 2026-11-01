@@ -698,7 +698,7 @@ async def run_screen(pool: Any, make_plans: bool = True) -> dict[str, Any]:
     cfg = load_cfg()
     await ensure_tables(pool)
     async with pool.acquire() as conn:
-        wl = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond')")]
+        wl = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income')")]
     names = sorted(set(THAI + US + [t for t in wl if t and "=" not in t and not t.startswith("^")]))
     frames = await asyncio.to_thread(_frames, names, cfg, "2y")
     frames = {t: drop_partial_bar(t, f) for t, f in frames.items()}
@@ -807,7 +807,7 @@ async def propose_plans(pool: Any, rows: list[dict[str, Any]], cfg: dict[str, An
 async def run_backtest(pool: Any) -> dict[str, Any]:
     await ensure_tables(pool)
     async with pool.acquire() as conn:
-        wl = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond')")]
+        wl = [r["ticker"] for r in await conn.fetch("SELECT ticker FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income')")]
     res = await asyncio.to_thread(run_backtest_sync, [t for t in wl if t and "=" not in t and not t.startswith("^")])
     res["comparison"] = await compare_with_existing(pool, res)
     res["live_params"] = _live_params(res)
