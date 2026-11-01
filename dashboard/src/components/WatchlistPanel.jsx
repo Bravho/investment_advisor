@@ -49,7 +49,7 @@ function FundTable({ items, rules }) {
 }
 
 export default function WatchlistPanel({ payload, loading, error, retry }) {
-  const [tab, setTab] = useState(() => { const q = new URLSearchParams(window.location.search).get('wl'); return ['tax', 'general', 'usbond'].includes(q) ? q : 'stocks' })
+  const [tab, setTab] = useState(() => { const q = new URLSearchParams(window.location.search).get('wl'); return ['tax', 'general', 'usbond', 'usbond_uh'].includes(q) ? q : 'stocks' })
   const [taxType, setTaxType] = useState('all')
   const funds = useFundWatchlist()
   if (loading) return <Skeleton className="h-96" />
@@ -57,17 +57,18 @@ export default function WatchlistPanel({ payload, loading, error, retry }) {
   const fp = funds.data || {}
   const fItems = fp.items || []
   const counts = fp.counts || {}
-  const tabs = [['stocks', 'หุ้น/ETF', items.length], ['tax', 'กองทุนลดหย่อนภาษี', counts.tax ?? 0], ['general', 'กองทุนทั่วไป', counts.general ?? 0], ['usbond', 'พันธบัตรสหรัฐ (ป้องกันค่าเงิน)', counts.usbond ?? 0]]
+  const tabs = [['stocks', 'หุ้น/ETF', items.length], ['tax', 'กองทุนลดหย่อนภาษี', counts.tax ?? 0], ['general', 'กองทุนทั่วไป', counts.general ?? 0], ['usbond', 'พันธบัตรสหรัฐ (ป้องกันค่าเงิน)', counts.usbond ?? 0], ['usbond_uh', 'พันธบัตรสหรัฐ (ไม่ป้องกันค่าเงิน)', counts.usbond_uh ?? 0]]
   const tabBar = <div className="mb-3 flex flex-wrap gap-2">{tabs.map(([k, label, n]) =>
     <button key={k} onClick={() => setTab(k)} className={`rounded-lg px-3 py-1.5 text-xs ${tab === k ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>{label} <span className="opacity-70">({n})</span></button>)}</div>
   if (tab !== 'stocks') {
     const shown = fItems.filter(f => f.group_key === tab && (tab !== 'tax' || taxType === 'all' || f.tax_type === taxType))
     return <Card>
-      <SectionTitle title="รายการเฝ้าดูการลงทุน" subtitle={`${tab === 'tax' ? 'กองทุนลดหย่อนภาษี' : tab === 'usbond' ? 'กองทุนพันธบัตร/ตราสารหนี้สหรัฐฯ แบบป้องกันค่าเงิน (เฝ้าดูเท่านั้น)' : 'กองทุนทั่วไป (ไม่มีสิทธิลดหย่อน)'} · NAV จาก ${fp.source || 'Finnomena'} · NAV เก่ากว่า ${fp.stale_after_days ?? 7} วัน = STALE`} />
+      <SectionTitle title="รายการเฝ้าดูการลงทุน" subtitle={`${tab === 'tax' ? 'กองทุนลดหย่อนภาษี' : tab === 'usbond' ? 'กองทุนพันธบัตร/ตราสารหนี้สหรัฐฯ แบบป้องกันค่าเงิน (เฝ้าดูเท่านั้น)' : tab === 'usbond_uh' ? 'กองทุนพันธบัตร/ตราสารหนี้สหรัฐฯ ไม่ป้องกันค่าเงิน (เฝ้าดูเท่านั้น)' : 'กองทุนทั่วไป (ไม่มีสิทธิลดหย่อน)'} · NAV จาก ${fp.source || 'Finnomena'} · NAV เก่ากว่า ${fp.stale_after_days ?? 7} วัน = STALE`} />
       {tabBar}
       {tab === 'tax' && <div className="mb-3 flex flex-wrap gap-1.5">{['all', ...TAX_TYPES].map(t =>
         <button key={t} onClick={() => setTaxType(t)} className={`rounded-full px-2.5 py-0.5 text-[11px] ${taxType === t ? 'bg-sky-600 text-white' : 'bg-slate-800 text-slate-400'}`}>{t === 'all' ? 'ทั้งหมด' : t} ({t === 'all' ? counts.tax ?? 0 : counts.by_tax_type?.[t] ?? 0})</button>)}</div>}
       {tab === 'usbond' && <p className="mb-2 rounded-lg bg-slate-800/60 p-2 text-[11px] leading-relaxed text-amber-200/90">ป้องกันค่าเงิน = ไม่ต้องกังวลบาทแข็ง แต่มี "ค่าป้องกัน" ราว ๆ ส่วนต่างดอกเบี้ยสหรัฐฯ–ไทย (ปลาย ต.ค. 69: Fed 3.75–4.00% vs ธปท. 1.00% ≈ 2.8–3% ต่อปี) ซึ่งกินผลตอบแทนพันธบัตรระยะสั้นไปเกือบหมด · กองระยะยาวขาดทุนได้ถ้า Fed ขึ้นดอกเบี้ย · % ป้องกันค่าเงินตาม factsheet ล่าสุด (นโยบายเป็นแบบตามดุลยพินิจ) · ETF อ้างอิง SGOV/SHY/IEF/TIP อยู่แท็บหุ้น/ETF (ไม่ป้องกันค่าเงิน, ไม่เข้าสัญญาณ)</p>}
+      {tab === 'usbond_uh' && <p className="mb-2 rounded-lg bg-slate-800/60 p-2 text-[11px] leading-relaxed text-amber-200/90">ไม่ป้องกันค่าเงิน = ได้ดอกเบี้ยสหรัฐฯ เต็ม (~3.9–4% ต่อปี) ไม่เสียค่าป้องกัน ~2.8–3% · แต่บาทแข็ง 1% = กองนี้ลด ~1% · บาทมักอ่อนเมื่อเกิดวิกฤต/สงคราม จึงช่วยกันชนได้ · USD/THB ~33.7 อยู่ใกล้จุดสูงสุดรอบ 1 ปี (เสี่ยงบาทกลับมาแข็ง) · รวมกับ SCBGOLDE แล้วเงินที่ผูกกับดอลลาร์จะเพิ่มขึ้น ดูหน้า FX risk</p>}
       {tab === 'tax' && taxType === 'SSF' && <p className="mb-2 text-[11px] text-amber-300/80">{fp.tax_rules_th?.SSF}</p>}
       {funds.loading ? <Skeleton className="h-72" /> : funds.error ? <ServiceError retry={funds.refetch} compact /> : <FundTable items={shown} rules={fp.tax_rules_th} />}
       <p className="mt-3 text-[10px] text-slate-500">{fp.score_definition_th} · RSI/โซนเข้าซื้อ "—" เพราะกองทุนซื้อขายที่ NAV สิ้นวัน · {fp.note_th} · ค่าธรรมเนียมจาก Finnomena อาจต่างจาก factsheet</p>

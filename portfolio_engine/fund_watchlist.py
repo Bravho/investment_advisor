@@ -32,7 +32,7 @@ TAX_RULES_TH = {
     "SSF": "SSF ให้สิทธิลดหย่อนเฉพาะการซื้อปี 2563–2567 — ไม่ได้ใส่กองทุน SSF ในรายการ (ตรวจสอบอีกครั้งหากมีการขยายสิทธิ)",
 }
 
-# group: tax | general | usbond ; status: holding | watching
+# group: tax | general | usbond | usbond_uh ; status: holding | watching
 REGISTRY: list[dict[str, Any]] = [
     # --- Tho's holdings
     dict(code="K-TNZ-ThaiESG", group="tax", tax_type="ThaiESG", status="holding", reason_th="ถืออยู่ — ThaiESG หุ้นไทยขนาดใหญ่ (KAsset)"),
@@ -65,7 +65,11 @@ REGISTRY: list[dict[str, Any]] = [
     dict(code="DAOL-USTBILL", group="usbond", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ อายุ ≤ 1 ปี (ถือตรง) · ป้องกันค่าเงิน 62.82% (factsheet 19 ต.ค. 69) · อายุเฉลี่ย 49 วัน — แทบไม่มีความเสี่ยงดอกเบี้ย แต่ส่วนที่ไม่ป้องกัน (~37%) ขึ้นลงตามค่าเงินบาท"),
     dict(code="TUSBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (JPM US Aggregate: พันธบัตรรัฐ ~23%, MBS หน่วยงานรัฐ ~32%, หุ้นกู้ ~32%) · ป้องกันค่าเงิน 95.17% (30 ก.ย. 69) · อายุเฉลี่ย ~6 ปี"),
     dict(code="MUBOND-A", group="usbond", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (กองหลักเดียวกับ TUSBOND แต่ค่าธรรมเนียมสูงกว่า) · ป้องกันค่าเงิน 98% (30 ก.ย. 69)"),
-    dict(code="TLUSGOVRMF", group="usbond", tax_type="RMF", status="watching", reason_th="RMF พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) — ไม่ป้องกันค่าเงิน (unhedged) ตามนโยบาย · ไม่พบ RMF พันธบัตรสหรัฐฯ แบบป้องกันค่าเงิน (ค้นจากรายชื่อกองทุนทั้งหมดใน Finnomena 1 พ.ย. 69) · เก็บไว้เทียบ"),
+    # --- US bonds, UNHEDGED (added 2026-11-01, t36u). TLUSGOVRMF moved here from 'usbond' (unhedged by policy).
+    dict(code="TLUSGOV", group="usbond_uh", tax_type=None, status="watching", ter_factsheet=(0.2568, "SEC factsheet M0853_2569, data 30 Sep 2026 (actual total expense, excl. other expenses)"), reason_th="พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) ไม่ป้องกันค่าเงินตามนโยบาย · ค่าใช้จ่ายรวมเก็บจริง 0.2568% ตาม factsheet 30 ก.ย. 69 (Finnomena แสดง 2.26% — น่าจะคลาดเคลื่อน) · ไม่มีค่าธรรมเนียมซื้อ/ขาย · ได้ดอกเบี้ยสหรัฐฯ เต็ม แต่ขึ้นลงตามค่าเงินบาท"),
+    dict(code="TLUSGOVRMF", group="usbond_uh", tax_type="RMF", status="watching", reason_th="RMF พันธบัตรสหรัฐฯ 0–3 เดือน (SGOV) ไม่ป้องกันค่าเงิน · ค่าใช้จ่ายรวม 0.4494% (factsheet 30 ก.ย. 69) · ลดหย่อนภาษีได้ (เงื่อนไข RMF) · RMF พันธบัตรสหรัฐฯ กองเดียวที่พบ"),
+    dict(code="TUSFIX", group="usbond_uh", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ 1–3 เดือน (BIL) · นโยบายป้องกันค่าเงินตามดุลยพินิจ แต่ตอนนี้ป้องกัน 0% (factsheet 30 ก.ย. 69) — ผู้จัดการอาจกลับมาป้องกันได้ · มีประวัติตั้งแต่ปี 2559"),
+    dict(code="MUBONDUH-A", group="usbond_uh", tax_type=None, status="watching", reason_th="ตราสารหนี้สหรัฐฯ รวม (JPM US Aggregate; พันธบัตรรัฐ ~23%) ไม่ป้องกันค่าเงิน (0% ตาม factsheet 30 ก.ย. 69) · มีความเสี่ยงดอกเบี้ย + เครดิต · ค่าธรรมเนียมสูง (TER 0.94% + ขาย 1.07%)"),
 ]
 BY_CODE = {r["code"]: r for r in REGISTRY}
 
@@ -233,6 +237,12 @@ async def refresh(pool: Any) -> dict[str, Any]:
         nav_pts = [(_d(n["date"]), _num(n["value"]), _num(n.get("amount"))) for n in navs if _num(n.get("value")) is not None]
         nav_date, nav = (nav_pts[-1][0], nav_pts[-1][1]) if nav_pts else (None, None)
         fees = _fees(det, raw["fee"])
+        if r.get("ter_factsheet"):  # 2026-11-01: Finnomena TER clearly off vs the SEC factsheet -> use the factsheet figure, keep both
+            tv, tsrc = r["ter_factsheet"]
+            fees["ter_actual_finnomena"] = fees.get("ter_actual")
+            fees["ter_actual"] = fees["cost_for_score"] = tv
+            fees["cost_for_score_basis"] = f"TER (actual) from {tsrc}"
+            fees["note_th"] = " · ".join(x for x in (fees.get("note_th"), f"TER ใช้ตาม factsheet {tv}% (Finnomena แสดง {fees['ter_actual_finnomena']}%)") if x)
         rets = {k: _num(perf.get(f"total_return_{k}")) for k in ("1w", "1m", "3m", "6m", "1y", "3y", "5y")}
         rets["ytd"] = _ytd(navs, today)
         rets["as_of"] = str(_d(perf.get("day_end_date")) or "") or None
@@ -288,6 +298,7 @@ async def get_list(pool: Any) -> dict[str, Any]:
         items.append(r)
     counts = {"tax": sum(1 for i in items if i["group_key"] == "tax"), "general": sum(1 for i in items if i["group_key"] == "general"),
               "usbond": sum(1 for i in items if i["group_key"] == "usbond"),
+              "usbond_uh": sum(1 for i in items if i["group_key"] == "usbond_uh"),
               "by_tax_type": {t: sum(1 for i in items if i.get("tax_type") == t and i["group_key"] == "tax") for t in ("ThaiESG", "ThaiESGX", "RMF", "SSF")},
               "holding": sum(1 for i in items if i["status"] == "holding")}
     return {"items": items, "counts": counts, "tax_rules_th": TAX_RULES_TH, "stale_after_days": MAX_NAV_AGE_DAYS,
@@ -300,7 +311,8 @@ async def advisor_context(pool: Any) -> str:
     d = await get_list(pool)
     lines = ["=== THAI FUND WATCH LIST (Finnomena/SEC data; advisory only, Tho places orders himself) ==="]
     for grp, title in (("tax", "Tax-deductible (ThaiESG/ThaiESGX/RMF)"), ("general", "General funds (no tax benefit)"),
-                       ("usbond", "US bond funds, FX-hedged (watch only; hedge % from factsheets; hedging THB costs ~ the US-TH short-rate gap)")):
+                       ("usbond", "US bond funds, FX-hedged (watch only; hedge % from factsheets; hedging THB costs ~ the US-TH short-rate gap)"),
+                       ("usbond_uh", "US bond funds, UNHEDGED (watch only; full US yield but every 1% stronger baht = -1% on these; adds to direct USD exposure on top of SCBGOLDE)")):
         lines.append(f"  [{title}]")
         for i in d["items"]:
             if i["group_key"] != grp:
