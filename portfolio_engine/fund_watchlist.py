@@ -60,6 +60,9 @@ REGISTRY: list[dict[str, Any]] = [
     dict(code="SCBVIET(E)", group="general", tax_type=None, status="watching", reason_th="หุ้นเวียดนาม — ตลาดเกิดใหม่ที่เฝ้าดูอยู่"),
     dict(code="SCBCHAE", group="general", tax_type=None, status="watching", reason_th="หุ้นจีน — ติดตามโอกาสฟื้นตัว (ความเสี่ยงสูง)"),
     dict(code="K-CASH-A", group="general", tax_type=None, status="watching", reason_th="กองทุนตลาดเงิน — พักเงินสดระหว่างรอจังหวะ"),
+    # 2026-11-01 (Tho t40u): new KAsset retirement-income multi-asset fund (launched 28 Oct 2026, only class = (R) auto-redemption,
+    # not tax-deductible). Watch only, NOT held. No track record yet -> score/returns stay unknown until history exists.
+    dict(code="K-WPLIFETIME(R)", group="general", tax_type=None, status="watching", reason_th="กองทุนผสมเพื่อรายได้หลังเกษียณ (KAsset ร่วมกับ J.P. Morgan AM) · ขายคืนอัตโนมัติ ≤12 ครั้ง/ปี (ไม่ใช่เงินปันผล) · พอร์ตตัวอย่าง: ตราสารหนี้ 50% (หุ้นกู้ไทย 35%, หุ้นกู้สหรัฐฯ IG 8%, HY 7%) หุ้นต่างประเทศ 22% หุ้นปันผลไทย 13% REITs 15% · ป้องกันค่าเงินตามดุลยพินิจ · TER 0.70% · ค่าขาย 0.50% (ยกเว้นถึง 29 ม.ค. 70) ขายคืน 0% · ขั้นต่ำครั้งแรก 50,000 บาท · เปิด 28 ต.ค. 69 ยังไม่มีผลงานย้อนหลัง · ไม่ได้ถือ"),
     # --- US bonds, FX-hedged (added 2026-11-01, t35u). Hedge % = factsheet "FX Hedging" figure; policy is dynamic (manager's discretion)
     dict(code="TUSTREASURY", group="usbond", tax_type=None, status="watching", reason_th="พันธบัตรรัฐบาลสหรัฐฯ ล้วน (feeder iShares GOVT) · ป้องกันค่าเงิน 91.24% (factsheet 30 ก.ย. 69) · อายุเฉลี่ยตราสาร ~5 ปี 4 เดือน — ได้ประโยชน์ถ้าดอกเบี้ยลง/ตลาดตื่นตระหนก แต่ขาดทุนถ้า Fed ขึ้นดอกเบี้ย"),
     dict(code="DAOL-USTBILL", group="usbond", tax_type=None, status="watching", reason_th="ตั๋วเงินคลังสหรัฐฯ อายุ ≤ 1 ปี (ถือตรง) · ป้องกันค่าเงิน 62.82% (factsheet 19 ต.ค. 69) · อายุเฉลี่ย 49 วัน — แทบไม่มีความเสี่ยงดอกเบี้ย แต่ส่วนที่ไม่ป้องกัน (~37%) ขึ้นลงตามค่าเงินบาท"),
