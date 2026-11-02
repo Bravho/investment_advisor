@@ -143,6 +143,10 @@ SEED: list[dict[str, Any]] = [
     {"ticker": "BBL.BK", "name": "Bangkok Bank", "asset_type": "stock", "market": "SET", "sector": "banks"},
     {"ticker": "KTB.BK", "name": "Krung Thai Bank", "asset_type": "stock", "market": "SET", "sector": "banks"},
     {"ticker": "TTB.BK", "name": "TMBThanachart Bank", "asset_type": "stock", "market": "SET", "sector": "banks"},
+    # sector 'thai_dividend' = display + price alerts + forecasts only; kept out of P3.3 signals, momentum screens, opportunity scanner and trade plans (t44u 2026-11-01).
+    {"ticker": "TISCO.BK", "name": "TISCO Financial Group", "asset_type": "stock", "market": "SET", "sector": "thai_dividend", "thesis": "[Thai dividend reference 2026-11-01] SET50 auto-loan/banking group; dividend yield >5% every year 2021-2025 (SETSMART 27 Apr 2026). Watch + forecasts only - excluded from P3.3 signals/trade plans until the backtest gate passes. See docs/research/thai_dividend_3_20261101.md", "seeded_from": "t44u Thai dividend research 2026-11-01"},
+    {"ticker": "TCAP.BK", "name": "Thanachart Capital", "asset_type": "stock", "market": "SET", "sector": "thai_dividend", "thesis": "[Thai dividend reference 2026-11-01] SET50 holding company (TTB stake, hire-purchase/insurance); dividend yield >5% every year 2021-2025 (SETSMART 27 Apr 2026). Watch + forecasts only - excluded from P3.3 signals/trade plans until the backtest gate passes. See docs/research/thai_dividend_3_20261101.md", "seeded_from": "t44u Thai dividend research 2026-11-01"},
+    {"ticker": "LH.BK", "name": "Land and Houses", "asset_type": "stock", "market": "SET", "sector": "thai_dividend", "thesis": "[Thai dividend reference 2026-11-01] SET50 housing developer; dividend yield >5% every year 2021-2025 (SETSMART 27 Apr 2026), partly from asset/investment sales (lumpy). Watch + forecasts only - excluded from P3.3 signals/trade plans until the backtest gate passes. See docs/research/thai_dividend_3_20261101.md", "seeded_from": "t44u Thai dividend research 2026-11-01"},
     {"ticker": "PTT.BK", "name": "PTT", "asset_type": "stock", "market": "SET", "sector": "energy"},
     {"ticker": "TOP.BK", "name": "Thai Oil", "asset_type": "stock", "market": "SET", "sector": "energy"},
     {"ticker": "IRPC.BK", "name": "IRPC", "asset_type": "stock", "market": "SET", "sector": "energy"},
@@ -179,7 +183,7 @@ SEED: list[dict[str, Any]] = [
 ]
 
 # Watch-list sectors that are display/price-alert only and never enter signals, forecasts, screens or trade plans.
-SIGNAL_EXCLUDED_SECTORS = ("us_bond", "us_income")  # us_income: still forecast (predictions excludes us_bond only)
+SIGNAL_EXCLUDED_SECTORS = ("us_bond", "us_income", "thai_dividend")  # us_income + thai_dividend: still forecast (predictions excludes us_bond only)
 BOND_TRIGGERS = [
     {"type": "move_1d_pct", "value": 1.5, "note": "abs 1-day move >= 1.5% (large for Treasuries)"},
     {"type": "new_52w_low", "note": "close at a 52-week low"},
@@ -187,7 +191,7 @@ BOND_TRIGGERS = [
 for _it in SEED:
     if _it.get("sector") == "us_bond":
         _it.setdefault("triggers", BOND_TRIGGERS)
-SIGNAL_UNIVERSE_SQL = "status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income')"
+SIGNAL_UNIVERSE_SQL = "status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income', 'thai_dividend')"
 
 
 def _legacy_notes() -> dict[str, tuple[str, Optional[str]]]:

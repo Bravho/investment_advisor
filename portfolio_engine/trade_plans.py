@@ -253,7 +253,7 @@ async def generate_proposals(pool: Any) -> dict[str, Any]:
     await ensure_tables(pool)
     async with pool.acquire() as conn:
         items = [dict(r) for r in await conn.fetch(
-            "SELECT ticker, currency FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income') ORDER BY ticker")]
+            "SELECT ticker, currency FROM investment_watchlist WHERE status <> 'dropped' AND COALESCE(sector, '') NOT IN ('us_bond', 'us_income', 'thai_dividend') ORDER BY ticker")]
     tickers = [i["ticker"] for i in items]
     ohlc = await asyncio.to_thread(download_ohlc, tickers, "2y")
     funds = await get_fundamentals(pool, tickers)
