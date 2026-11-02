@@ -2244,3 +2244,23 @@ toll and full unhedged USD/THB exposure, and it is still the one position the
 system cannot value. **Ask Tho for real `avg_cost_price` values.**
 
 ---
+
+## Nightly Run - 2026-10-30 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-10-30.md (164 headlines) and data/watchlist.json engine_snapshot (25 items).
+- Factor alerts: brent, us_iran_news, earnings_xd; regime risk_on.
+
+## Nightly Run - 2026-10-31 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-10-31.md (166 headlines) and data/watchlist.json engine_snapshot (25 items).
+- Factor alerts: gold; regime risk_on.
+
+## Nightly Run - 2026-11-01 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-01.md (234 headlines) and data/watchlist.json engine_snapshot (25 items).
+- Factor alerts: gold; regime risk_on.
+
+## Nightly Run - 2026-11-02 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-02.md (317 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: gold; regime risk_on.

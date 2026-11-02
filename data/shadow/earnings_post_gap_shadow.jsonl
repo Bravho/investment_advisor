@@ -1,0 +1,1 @@
+{"date": "2026-11-01", "top3": ["MSFT", "SPY", "KTB.BK"], "would_block": [], "post_gap_names": ["GOOGL", "INTC"], "rule": "skip if last earnings reaction <= -7% within 20 trading days", "status": "shadow"}
