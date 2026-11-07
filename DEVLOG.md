@@ -2264,3 +2264,28 @@ system cannot value. **Ask Tho for real `avg_cost_price` values.**
 - Mode: research_only (config/self_develop.json); no code edited.
 - Wrote data/market_intel/2026-11-02.md (317 headlines) and data/watchlist.json engine_snapshot (33 items).
 - Factor alerts: gold; regime risk_on.
+
+## Nightly Run - 2026-11-03 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-03.md (528 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, us_iran_news; regime risk_on.
+
+## Nightly Run - 2026-11-04 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-04.md (545 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, us_iran_news, jpythb; regime risk_on.
+
+## Nightly Run - 2026-11-05 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-05.md (527 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, us_iran_news, jpythb, gold, set_index; regime risk_on.
+
+## Nightly Run - 2026-11-06 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-06.md (526 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, us_iran_news, jpythb; regime risk_on.
+
+## Nightly Run - 2026-11-07 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-07.md (508 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, eurthb, jpythb, set_foreign_flow; regime risk_on.

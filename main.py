@@ -294,6 +294,10 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                 macro_ctx = (await client.get(f"{ENGINE_URL}/macro/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
                 macro_ctx = "=== KEY MACRO INDICATOR TRENDS ===\n  Macro board unavailable - do not quote macro forecasts or policy rates."
+            try:  # Cross-border allocation pressure: shadow/context only until its walk-forward gate passes.
+                flow_ctx = (await client.get(f"{ENGINE_URL}/country-flows/advisor-context")).json().get("context", "")
+            except Exception:  # noqa: BLE001
+                flow_ctx = "=== CROSS-BORDER COUNTRY FLOW PRESSURE ===\n  Flow-pressure monitor unavailable - do not infer foreign flows."
             try:  # 2026-11-01: geopolitical / war-risk layer (context only, judgment probabilities labelled)
                 geo_ctx = (await client.get(f"{ENGINE_URL}/geo/advisor-context")).json().get("context", "")
             except Exception:  # noqa: BLE001
@@ -350,6 +354,7 @@ async def engine_context(query: str, tickers: list[str]) -> tuple[str, list[str]
                  "technical); news tone, crypto events, geo risk and contagion checks are shown to Tho but do not change scores, "
                  "forecasts or weights unless they pass the walk-forward gate.")
     lines.append(macro_ctx)
+    lines.append(flow_ctx)
     lines.append(fund_ctx)
     lines.append(er_ctx)
     lines.append(owner_holds_block())

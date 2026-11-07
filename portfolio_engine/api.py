@@ -47,6 +47,7 @@ import sector_moves as sm_mod
 import fund_watchlist as fw_mod
 import geo_risk as geo_mod
 import earnings_risk as er_mod  # 2026-11-01 (Tho t39u): earnings-event gap risk, display/context only
+import country_flows as country_flow_mod
 from fastapi import Body
 
 from risk_scorer import calculate_portfolio_risk, save_daily_performance
@@ -1104,6 +1105,17 @@ async def macro_backfill() -> dict[str, Any]:
 @app.get("/macro/advisor-context")
 async def macro_advisor_context() -> dict[str, Any]:
     return {"context": await macro_mod.advisor_context(await db_pool.get_pool())}
+
+
+@app.get("/country-flows/thailand")
+async def country_flows_thailand() -> dict[str, Any]:
+    return await country_flow_mod.thailand_report(await db_pool.get_pool())
+
+
+@app.get("/country-flows/advisor-context")
+async def country_flows_advisor_context() -> dict[str, Any]:
+    report = await country_flow_mod.thailand_report(await db_pool.get_pool())
+    return {"context": country_flow_mod.advisor_context(report), "report": report}
 
 
 @app.get("/fx/advisor-context")

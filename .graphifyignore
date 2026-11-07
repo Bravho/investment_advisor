@@ -1,0 +1,19 @@
+# Graphify ignore for investment_advisor (code map only)
+venv/
+**/venv/
+.venv/
+**/node_modules/
+dashboard/dist/
+**/__pycache__/
+data/
+logs/
+screenshots/
+backups/
+graphify-out/
+.env
+.env.*
+*.log
+*.db
+*.sqlite
+*.html
+*.md

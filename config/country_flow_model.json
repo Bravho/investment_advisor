@@ -1,0 +1,34 @@
+{
+  "version": "1.0-shadow",
+  "status": "context_only_until_walk_forward_gate_passes",
+  "horizon": "5_to_20_trading_days",
+  "description": "Country-allocation pressure model. Lead indicators estimate relative foreign-investor appetite; observed flows confirm or contradict the estimate and never enter the lead score.",
+  "lead_weights": {
+    "relative_equity_momentum": 0.25,
+    "rate_carry": 0.15,
+    "fx_trend": 0.15,
+    "global_risk_appetite": 0.20,
+    "growth_and_earnings_revision": 0.15,
+    "commodity_terms_of_trade": 0.10
+  },
+  "structural_dimensions": [
+    "market_accessibility", "foreign_ownership_and_capital_mobility",
+    "liquidity_and_free_float", "institutional_and_policy_stability",
+    "benchmark_weight_change", "valuation_relative_to_history_and_peers"
+  ],
+  "rules": {
+    "minimum_lead_coverage": 0.5,
+    "risk_off_vix_level": 25.0,
+    "strong_score": 35.0,
+    "moderate_score": 15.0,
+    "flow_confirmation_daily_thb_bn": 1.0,
+    "flow_confirmation_5d_thb_bn": 3.0
+  },
+  "guardrails": [
+    "Do not call the score an actual capital-flow forecast.",
+    "Do not use contemporaneous observed flow in the lead score.",
+    "Do not alter signals, forecasts, construction weights, or trade plans before a point-in-time walk-forward backtest passes.",
+    "Separate equity, bond, FDI, bank, and resident-outflow channels when data become available.",
+    "Treat news as an event label or feature surprise, not generic sentiment."
+  ]
+}
