@@ -54,7 +54,7 @@
       "nav_thb": 23.1581,
       "source": "settrade_official",
       "source_url": "https://www.settrade.com/th/mutualfund/quote/SCBGOLDE/overview",
-      "recorded_at": "2026-11-07T05:10:04.183914+00:00"
+      "recorded_at": "2026-11-07T13:10:03.125158+00:00"
     }
   ],
   "SCBGOLDHE": [
@@ -125,7 +125,7 @@
       "nav_thb": 12.2111,
       "source": "settrade_official",
       "source_url": "https://www.settrade.com/th/mutualfund/quote/ES-SETESG-ThaiESG-A/overview",
-      "recorded_at": "2026-11-07T05:10:01.574104+00:00"
+      "recorded_at": "2026-11-07T13:10:00.833996+00:00"
     }
   ],
   "K-TNZ-ThaiESG": [
@@ -176,7 +176,7 @@
       "nav_thb": 12.6092,
       "source": "settrade_official",
       "source_url": "https://www.settrade.com/th/mutualfund/quote/K-TNZ-ThaiESG/overview",
-      "recorded_at": "2026-11-07T05:10:03.141958+00:00"
+      "recorded_at": "2026-11-07T13:10:01.927083+00:00"
     }
   ],
   "TDSThaiESG-A": [
@@ -227,7 +227,7 @@
       "nav_thb": 14.6502,
       "source": "settrade_official",
       "source_url": "https://www.settrade.com/th/mutualfund/quote/TDSThaiESG-A/overview",
-      "recorded_at": "2026-11-07T05:10:05.528828+00:00"
+      "recorded_at": "2026-11-07T13:10:03.913791+00:00"
     }
   ]
 }

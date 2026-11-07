@@ -30,6 +30,7 @@ function ItemButton({ item, labels, onClick }) {
       <span className="rounded-lg bg-slate-700/60 px-2 py-1 text-xs font-bold text-white">{item.ticker}</span>
       <span className="truncate text-[10px] text-slate-400">{item.name}</span>
     </div>
+    <div className="mt-2 flex items-baseline justify-between gap-2"><span className="text-base font-semibold text-white">{item.last != null ? number(item.last, 2) : '-'} <span className="text-[10px] font-normal text-slate-500">THB</span></span><span className="text-[10px] text-slate-500">ณ {item.last_date ?? '-'}</span></div>
     <div className="mt-2 flex items-center gap-3"><ScoreBar value={overall} /><span className="w-9 text-right text-xs font-semibold text-white">{number(overall, 0)}</span></div>
     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
       {Object.keys(labels).slice(0, 4).map(k => <span key={k}>{labels[k]} {item.scores?.[k] ?? '-'}</span>)}
@@ -46,8 +47,8 @@ function Detail({ item, labels, isFund, onClose }) {
   const xd = item.xd || {}
   const s = xd.summary || {}
   const rows = isFund
-    ? [['ผลตอบแทนปันผล', pct(item.yield_pct)], ['1Y รวมปันผล', pct(item.r1y_total)], ['3Y รวมปันผล', pct(item.r3y_total)], ['ความผันผวน 1Y', pct(item.vol_1y)], ['ขาดทุนสูงสุด 3Y', pct(item.max_dd_3y)], ['ราคาล่าสุด', number(item.last, 2)]]
-    : [['ปันผล (yield)', pct(item.yield_pct)], ['P/E', number(item.trailingPE, 1)], ['P/B', number(item.pb, 2)], ['ROE', pct(item.roe)], ['กำไรโต', pct(item.eps_g)], ['RSI 14', number(item.rsi, 1)], ['จากจุดสูง 52 สัปดาห์', pct(item.dd52)]]
+    ? [['ผลตอบแทนปันผล', pct(item.yield_pct)], ['1Y รวมปันผล', pct(item.r1y_total)], ['3Y รวมปันผล', pct(item.r3y_total)], ['ความผันผวน 1Y', pct(item.vol_1y)], ['ขาดทุนสูงสุด 3Y', pct(item.max_dd_3y)], ['ราคาล่าสุด', `${number(item.last, 2)} THB (${item.last_date ?? '-'})`]]
+    : [['ราคาล่าสุด', `${number(item.last, 2)} THB (${item.last_date ?? '-'})`], ['ปันผล (yield)', pct(item.yield_pct)], ['P/E', number(item.trailingPE, 1)], ['P/B', number(item.pb, 2)], ['ROE', pct(item.roe)], ['กำไรโต', pct(item.eps_g)], ['RSI 14', number(item.rsi, 1)], ['จากจุดสูง 52 สัปดาห์', pct(item.dd52)]]
   const xdRows = [
     ['ปันผลเฉลี่ยต่อครั้ง (% ของราคาก่อน XD)', pct(s.avg_payout_pct)],
     ['ก่อน XD 5 วัน (เฉลี่ย)', signed(s.avg_pre5)],
