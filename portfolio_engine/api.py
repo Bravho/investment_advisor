@@ -269,6 +269,12 @@ async def _macro_policy_job() -> dict[str, Any]:
     return r
 
 
+async def _thai_watchlist_job() -> dict[str, Any]:
+    """2026-11-07: Thai stock + listed fund watch list refresh (yfinance, free, local). Keeps the last good file on failure."""
+    from thai_watchlist.refresh import refresh as thai_refresh
+    return await thai_refresh()
+
+
 async def _fund_watch_job() -> dict[str, Any]:
     """2026-10-31: Thai fund watch list NAV/fee refresh (Finnomena public API, free)."""
     return await fw_mod.refresh(await db_pool.get_pool())
@@ -301,6 +307,8 @@ def configure_schedules() -> None:
     # 2026-10-30: momentum_base_swing setup (Tho's lesson, swing adaptation). Screen after the SET close (daily bars complete)
     # and again pre-brief; weekly walk-forward backtest. Proposals only - no order code exists.
     scheduler.add_job(_safe_job, "cron", args=["setup_screen_evening", _setup_screen_job], day_of_week="mon-fri", hour=17, minute=45, id="setup_screen_evening", replace_existing=True)
+    # 2026-11-07: Thai watch list refresh after the SET close, weekdays (Asia/Bangkok via the scheduler timezone).
+    scheduler.add_job(_safe_job, "cron", args=["thai_watchlist_refresh", _thai_watchlist_job], day_of_week="mon-fri", hour=17, minute=50, id="thai_watchlist_refresh", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["setup_screen_prebrief", _setup_screen_job], hour=6, minute=47, id="setup_screen_prebrief", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["setup_backtest", _setup_backtest_job], day_of_week="sun", hour=5, minute=30, id="setup_backtest", replace_existing=True)
     scheduler.add_job(_safe_job, "cron", args=["predictions_generate", _predictions_job], hour=6, minute=55, id="predictions_generate", replace_existing=True)

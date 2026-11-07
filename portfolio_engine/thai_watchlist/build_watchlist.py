@@ -11,6 +11,9 @@ import datetime as dt
 import json
 from pathlib import Path
 
+import argparse
+import os
+
 import xd_analysis
 
 HERE = Path(__file__).resolve().parent
@@ -45,10 +48,15 @@ def stock_rating(score: float) -> str:
 
 
 def main() -> None:
-    stocks = json.loads((HERE / "stocks_scored.json").read_text(encoding="utf-8"))
-    funds = json.loads((HERE / "funds_scored.json").read_text(encoding="utf-8"))
-    stock_raw = json.loads((HERE / "stocks_raw.json").read_text(encoding="utf-8"))
-    fund_raw = json.loads((HERE / "funds_raw.json").read_text(encoding="utf-8"))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--src", type=Path, default=HERE, help="folder with the *_raw.json and *_scored.json files")
+    ap.add_argument("--out", type=Path, default=OUT, help="output JSON path")
+    args = ap.parse_args()
+    src, out_path = args.src, args.out
+    stocks = json.loads((src / "stocks_scored.json").read_text(encoding="utf-8"))
+    funds = json.loads((src / "funds_scored.json").read_text(encoding="utf-8"))
+    stock_raw = json.loads((src / "stocks_raw.json").read_text(encoding="utf-8"))
+    fund_raw = json.loads((src / "funds_raw.json").read_text(encoding="utf-8"))
 
     for s in stocks:
         s["xd"] = xd_analysis.analyze(s["ticker"], stock_raw[s["ticker"]], TODAY, CONFIRMED_NEXT_XD)
@@ -105,8 +113,11 @@ def main() -> None:
         "stocks": stocks,
         "funds": funds,
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"wrote {OUT}: {len(stocks)} stocks, {len(funds)} funds, as of {out['as_of_prices']}")
+    # Atomic write: readers see either the old file or the complete new file, never a partial one.
+    tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    tmp.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, out_path)
+    print(f"wrote {out_path}: {len(stocks)} stocks, {len(funds)} funds, as of {out['as_of_prices']}")
 
 
 if __name__ == "__main__":
