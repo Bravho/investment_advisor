@@ -7,7 +7,7 @@ import StatCard from '../components/StatCard'
 import { ServiceError } from '../components/UI'
 import { useBrief } from '../hooks/useBrief'
 import { useMarketMood } from '../hooks/useNews'
-import { useOpportunities } from '../hooks/useOpportunities'
+import { useThaiWatchlist } from '../hooks/useThaiWatchlist'
 import { useAdvisoryCandidates } from '../hooks/useAdvisoryCandidates'
 import { useFactors, useRiskReport, useWatchlist } from '../hooks/usePhase3'
 import WatchlistPanel from '../components/WatchlistPanel'
@@ -28,7 +28,7 @@ export default function Dashboard() {
   const portfolio = usePortfolio()
   const performance = usePerformance(1, 60000)
   const risk = useRisk()
-  const opportunities = useOpportunities()
+  const watchlist = useThaiWatchlist()
   const advisory = useAdvisoryCandidates()
   const brief = useBrief()
   const mm = useMarketMood()
@@ -65,7 +65,7 @@ export default function Dashboard() {
       <StatCard label="คะแนนความเสี่ยง" sublabel="Portfolio Risk Score" value={`${number(riskScore, 0)} / 100`} detail={riskScore < 33 ? 'Low risk' : riskScore < 66 ? 'Moderate risk' : 'High risk'} icon={CircleGauge} tone={riskTone} loading={risk.loading} />
       <StatCard label="อารมณ์ตลาด" sublabel="Market Mood" value={mood} detail={moodDetail} icon={Landmark} tone={moodTone} loading={mm.loading} />
     </div>}
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px_340px]"><HoldingsTable holdings={portfolio.data?.holdings} loading={portfolio.loading} error={portfolio.error} retry={portfolio.refetch} /><OpportunityPanel opportunities={opportunities.data} loading={opportunities.loading} error={opportunities.error} retry={opportunities.refetch} /><AdvisoryCandidatesPanel payload={advisory.data} loading={advisory.loading} error={advisory.error} retry={advisory.refetch} /></div>
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px_340px]"><HoldingsTable holdings={portfolio.data?.holdings} loading={portfolio.loading} error={portfolio.error} retry={portfolio.refetch} /><OpportunityPanel watchlist={watchlist.data} loading={watchlist.loading} error={watchlist.error} retry={watchlist.refetch} /><AdvisoryCandidatesPanel payload={advisory.data} loading={advisory.loading} error={advisory.error} retry={advisory.refetch} /></div>
     <Stamp items={[{ source: 'brief_generator', asOf: brief.data?.generated_at }]}><BriefPanel brief={brief.data} loading={brief.loading} error={brief.error} retry={brief.refetch} /></Stamp>
     <Stamp items={[{ source: 'signals · local LLM', asOf: maxTs(signals.data?.items, 'created_at') }]}><SignalsPanel payload={signals.data} plans={tradePlans.data} loading={signals.loading} error={signals.error} retry={signals.refetch} /></Stamp>
     <ConstructionPanel data={cons.data} loading={cons.loading} error={cons.error} retry={cons.refetch} />

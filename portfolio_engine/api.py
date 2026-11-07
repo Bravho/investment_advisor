@@ -523,6 +523,19 @@ async def opportunities() -> list[dict[str, Any]]:
     return opportunity_cache["value"]
 
 
+THAI_WATCHLIST_PATH = Path(__file__).resolve().parents[1] / "data" / "thai_watchlist.json"
+
+
+@app.get("/opportunities/thai-watchlist")
+async def thai_watchlist() -> dict[str, Any]:
+    """Thai stock (20) and listed Thai fund (10) watch list, built offline by portfolio_engine/thai_watchlist/.
+    Read-only: serves data/thai_watchlist.json. Research only; no orders."""
+    try:
+        return json.loads(THAI_WATCHLIST_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="thai_watchlist.json not built yet")
+
+
 @app.get("/opportunities/tech")
 async def tech_opportunities(top_n: int = Query(10, ge=1, le=20)) -> list[dict[str, Any]]:
     """
