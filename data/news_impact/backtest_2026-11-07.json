@@ -1,0 +1,121 @@
+{
+  "generated_for": "2026-11-07",
+  "headlines_read": 14411,
+  "headlines_matched": 840,
+  "signals_skipped_incomplete_window": 61,
+  "events_deduplicated": 234,
+  "by_direction": {
+    "UP": {
+      "n_events": 105,
+      "mean_signed_day0": 0.000321,
+      "hit_day0": 0.5048,
+      "mean_signed_3d": -0.002191,
+      "hit_3d": 0.4857
+    },
+    "DOWN": {
+      "n_events": 129,
+      "mean_signed_day0": 0.001611,
+      "hit_day0": 0.5194,
+      "mean_signed_3d": 0.00837,
+      "hit_3d": 0.5659
+    }
+  },
+  "by_sector_direction": {
+    "ai_semis:UP": {
+      "n_events": 4,
+      "mean_signed_day0": 0.001309,
+      "hit_day0": 0.5,
+      "mean_signed_3d": -0.025604,
+      "hit_3d": 0.25
+    },
+    "big_tech:UP": {
+      "n_events": 31,
+      "mean_signed_day0": -0.001591,
+      "hit_day0": 0.4516,
+      "mean_signed_3d": -0.007196,
+      "hit_3d": 0.4516
+    },
+    "broad_market:UP": {
+      "n_events": 46,
+      "mean_signed_day0": 0.000158,
+      "hit_day0": 0.5217,
+      "mean_signed_3d": -0.002701,
+      "hit_3d": 0.413
+    },
+    "energy:UP": {
+      "n_events": 24,
+      "mean_signed_day0": 0.002937,
+      "hit_day0": 0.5417,
+      "mean_signed_3d": 0.009155,
+      "hit_3d": 0.7083
+    },
+    "ai_semis:DOWN": {
+      "n_events": 29,
+      "mean_signed_day0": 0.00429,
+      "hit_day0": 0.5862,
+      "mean_signed_3d": 0.023164,
+      "hit_3d": 0.5862
+    },
+    "big_tech:DOWN": {
+      "n_events": 21,
+      "mean_signed_day0": 0.000258,
+      "hit_day0": 0.4762,
+      "mean_signed_3d": 0.012073,
+      "hit_3d": 0.7143
+    },
+    "broad_market:DOWN": {
+      "n_events": 50,
+      "mean_signed_day0": 0.00013,
+      "hit_day0": 0.5,
+      "mean_signed_3d": 0.002406,
+      "hit_3d": 0.56
+    },
+    "energy:DOWN": {
+      "n_events": 29,
+      "mean_signed_day0": 0.002467,
+      "hit_day0": 0.5172,
+      "mean_signed_3d": 0.001177,
+      "hit_3d": 0.4483
+    }
+  },
+  "gate": {
+    "UP": {
+      "pass": false,
+      "mean_skill_base": 0.0,
+      "mean_skill_cand": -0.000935066666666667,
+      "mean_hit_base": 0.5,
+      "mean_hit_cand": 0.49523809523809526,
+      "reason": "candidate mean skill did not improve"
+    },
+    "DOWN": {
+      "pass": true,
+      "mean_skill_base": 0.0,
+      "mean_skill_cand": 0.004990693798449612,
+      "mean_hit_base": 0.5,
+      "mean_hit_cand": 0.5426356589147288,
+      "reason": "candidate mean skill improved and mean hit stayed within the allowed drop"
+    }
+  },
+  "case_2026_11_05": [
+    {
+      "sector": "broad_market",
+      "proxy": "SPY",
+      "day0_pct_2026_11_05": -4.41
+    },
+    {
+      "sector": "ai_semis",
+      "proxy": "SMH",
+      "day0_pct_2026_11_05": -11.21
+    },
+    {
+      "sector": "big_tech",
+      "proxy": "QQQ",
+      "day0_pct_2026_11_05": -6.49
+    },
+    {
+      "sector": "energy",
+      "proxy": "XLE",
+      "day0_pct_2026_11_05": -2.98
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "_doc": "Two-sided (UP / DOWN) news-impact rules for the SHADOW news-impact model. Added 2026-11-07. Used by ai_engine/news_impact.py. Shadow only: scores are logged, never used in advice, signals or weights until ops/news_impact_backtest.py passes ops/backtest_gate.py. Edit rules here, not in code. Each sector has a proxy ETF/index whose close-to-close move is the price check.",
+  "decay_weights": [1.0, 0.5, 0.25],
+  "decay_note": "weight on trading day 0, +1, +2 after the headline's reaction day (3-trading-day fading window)",
+  "min_direction_margin": 0,
+  "sectors": {
+    "broad_market": {
+      "proxy": "SPY",
+      "up": "\\b(stocks?|shares|s&p 500|wall street|dow|nasdaq)\\b.{0,30}\\b(rall(y|ies|ied)|surg(e|es|ed)|jump(s|ed)?|soar(s|ed)?|record high|hits? record)\\b|\\brate cuts?\\b|\\bcease-?fire\\b|\\bpeace deal\\b",
+      "down": "\\b(stocks?|shares|s&p 500|wall street|dow|nasdaq)\\b.{0,30}\\b(tumbl(e|es|ed)|plung(e|es|ed)|sink(s|ing)?|slid(e|es)|sell-?off|slump(s|ed)?|fall(s|ing)?|drop(s|ped)?)\\b|\\brate hikes?\\b|\\brecession (fears?|warning|risk)\\b"
+    },
+    "ai_semis": {
+      "proxy": "SMH",
+      "tickers": ["NVDA", "AMD", "AVGO", "MU", "TSM"],
+      "up": "\\b(ai|chip|semiconductor|data[- ]center)s?\\b.{0,40}\\b(demand|orders?|spending|capex|guidance|forecast)\\b.{0,20}\\b(beats?|raise[sd]?|surg(e|es|ed)|boost(s|ed)?|record)\\b|\\b(eases?|lift(s|ed)?|relax(es|ed)?)\\b.{0,30}\\b(ai|chip|export)\\b.{0,20}\\b(rules?|curbs?|restrictions?|ban)\\b",
+      "down": "\\b(ai|chip|semiconductor|data[- ]center)s?\\b.{0,40}\\b(rules?|curbs?|crackdown|restrictions?|ban|regulat\\w*|tariffs?|bubble)\\b|\\b(capex|spending) (cut|cuts|slow\\w*|pull ?back)\\b|\\bai (selloff|sell-?off|rout|stocks? (fall|drop|tumble|slump))\\b"
+    },
+    "big_tech": {
+      "proxy": "QQQ",
+      "tickers": ["AAPL", "MSFT", "NVDA"],
+      "up": "\\b(apple|microsoft|nvidia|big tech|mag ?7|magnificent seven)\\b.{0,40}\\b(beats?|raise[sd]?|record|buyback|upgrade[sd]?)\\b",
+      "down": "\\b(apple|microsoft|nvidia|big tech|mag ?7|magnificent seven)\\b.{0,40}\\b(miss(es|ed)?|cut[s]?|downgrade[sd]?|lawsuit|antitrust|probe|sues|fine[sd]?|plung\\w*|tumbl\\w*)\\b"
+    },
+    "energy": {
+      "proxy": "XLE",
+      "up": "\\b(oil|crude|brent)\\b.{0,30}\\b(surg\\w*|jump\\w*|soar\\w*|spik\\w*|rall\\w*)\\b|\\b(hormuz)\\b.{0,30}\\b(clos\\w*|restrict\\w*|block\\w*|mine\\w*)\\b|\\bopec\\b.{0,30}\\b(cut\\w*|curb\\w*)\\b",
+      "down": "\\b(oil|crude|brent)\\b.{0,30}\\b(plung\\w*|crash\\w*|slump\\w*|tumbl\\w*|slid\\w*|fall\\w*|drop\\w*)\\b|\\b(hormuz)\\b.{0,30}\\b(reopen\\w*|open\\w*)\\b|\\bopec\\b.{0,30}\\b(boost\\w*|increas\\w*|raise\\w*)\\b"
+    }
+  }
+}

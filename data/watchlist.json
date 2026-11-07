@@ -48,7 +48,7 @@
         "as_of": "2026-10-27T17:00:00+00:00"
       }
     },
-    "live_levels_updated_at": "2026-11-07T01:54:07.776592+00:00",
+    "live_levels_updated_at": "2026-11-07T02:54:10.716019+00:00",
     "live_levels_note": "Numeric levels above are refreshed from investor_db.market_factors (free sources). Narrative notes/flags are from the paused nightly agent (see last_updated)."
   },
   "holdings": {

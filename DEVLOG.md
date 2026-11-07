@@ -2289,3 +2289,13 @@ system cannot value. **Ask Tho for real `avg_cost_price` values.**
 - Mode: research_only (config/self_develop.json); no code edited.
 - Wrote data/market_intel/2026-11-07.md (508 headlines) and data/watchlist.json engine_snapshot (33 items).
 - Factor alerts: brent, eurthb, jpythb, set_foreign_flow; regime risk_on.
+
+## 2026-11-07 - Two-sided news-impact model (shadow only)
+- Lesson: the 2026-11-05 US selloff (Nasdaq about -5.5%, S&P 500 about -4.4% per reports; SPY -4.41%, QQQ -6.49%, SMH -11.21% in our price file) was driven by AI/tech policy headlines after the Democratic sweep, not the election result itself. The model must score UP and DOWN news separately, by sector, and check each call against prices.
+- Save point: local commit fd04701 (push BLOCKED: no git remote `origin` configured).
+- Backups: ~/backups/investor_db/investor_db_20261107_093518.dump and ~/backups/code/investment_advisor_20261107_093518.tar.gz.
+- Added: config/news_impact_rules.json (UP/DOWN regex per sector, proxies SPY/QQQ/SMH/XLE, 3-day decay 1/0.5/0.25); ai_engine/news_impact.py (classify, price check, append-only shadow log); ops/news_impact_backtest.py (read-only, gated per direction); ops/news_impact_shadow_run.py; ops/migrations/20261107_news_impact_shadow.sql (NOT run; owner to review and run); tests/test_news_impact.py (7 pass).
+- Added data: data/news_impact/prices_daily.csv (yfinance daily closes, 14 tickers, 2024-06-03 to 2026-11-06); data/news_impact/backtest_2026-11-07.json; data/shadow/news_impact_shadow.jsonl.
+- Backtest (14,411 headlines read, 840 matched, 234 events after de-duplication by sector/direction/reaction day): DOWN passed backtest_gate (129 events, mean signed day-0 +0.50%, hit 54.3%); UP failed (105 events, skill negative, hit 49.5%). UP stays out of scoring.
+- Known noise: some non-US headlines match the broad-market and AI rules (e.g. Brazilian stocks, a Bitcoin story). DOWN pass is provisional; any rule change needs a new out-of-sample check.
+- Not done: no DB writes; no advice, signal or weight changed; no scheduled routine created.
