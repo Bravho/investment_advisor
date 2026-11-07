@@ -48,7 +48,7 @@
         "as_of": "2026-10-27T17:00:00+00:00"
       }
     },
-    "live_levels_updated_at": "2026-11-07T02:54:10.716019+00:00",
+    "live_levels_updated_at": "2026-11-07T09:54:09.182299+00:00",
     "live_levels_note": "Numeric levels above are refreshed from investor_db.market_factors (free sources). Narrative notes/flags are from the paused nightly agent (see last_updated)."
   },
   "holdings": {
@@ -410,7 +410,7 @@
     "commodities": {
       "XAU/USD": {
         "name": "Gold spot",
-        "last_price_usd": 4079.5,
+        "last_price_usd": 4074.9,
         "date": "2026-11-06",
         "prior_price_usd": 4360,
         "change_pct": -2.5,
@@ -427,7 +427,7 @@
       },
       "BRENT": {
         "name": "Brent Crude",
-        "last_price_usd": 97.76,
+        "last_price_usd": 98.32,
         "wti_price_usd": 75.0,
         "date": "2026-11-06",
         "prior_price_usd": 79.5,
@@ -529,7 +529,7 @@
     "set_jun15_note": "CORRECTION — official Jun 15 close was 1,591.72 (-0.04%, THB 91.84bn), i.e. the relief rally HELD near 1,592 rather than reversing to the ~1,552 estimated overnight. Jun 16 close pending.",
     "us_iran_situation": "Interim MoU signed Jun 15-17 (ceasefire, Hormuz reopened, Iran oil sales resume, 60-day nuclear-talks window). The Jun-19 first round of follow-up technical talks at Burgenstock was POSTPONED at short notice (White House cited logistics; VP Vance postponed travel). Ceasefire/interim deal remain in effect; Switzerland still ready to facilitate, no new date set. An early snag, NOT a breakdown.",
     "us_iran_status_flag": "interim_signed_2026-06-17_hormuz_open; jun21-22_swiss_talks_RESUMED_roadmap_agreed_IAEA_inspectors_invited; jun23_US_granted_iran_60day_oil_license_transit_rising; lebanon_hormuz_reclosure_threat_WALKED_BACK",
-    "brent_crude_usd": 97.76,
+    "brent_crude_usd": 98.32,
     "wti_crude_usd": 68.5,
     "brent_change_pct": 5.0,
     "brent_note": "Brent ~$72 (Aug futures, -4% Jun 26), extending the slide as more tankers EXITED the Strait of Hormuz. Two-sided wrinkle: Trump said Iran 'violated the ceasefire' with drone attacks near Hormuz and a vessel was attacked in the Gulf of Oman — yet price FELL, i.e. the market is pricing de-escalation, not closure. Bearish for PTTEP earnings growth (not solvency; breakeven ~$45).",
@@ -567,7 +567,7 @@
     "nikkei_change_jun12_pct": 2.9,
     "nikkei_ytd_gain_pct": 30,
     "japan_ppi_may_yoy_pct": 6.3,
-    "gold_current_usd": 4079.5,
+    "gold_current_usd": 4074.9,
     "gold_prior_usd": 4175,
     "gold_change_jun18_pct": -2.5,
     "gold_fed_hangover_note": "Gold fell ~2.5% to ~$4,250 Jun 18 (from ~$4,360) — the hawkish FOMC dot-plot's real-yield headwind finally bit, the exact scenario fed_policy_risk_flag (ELEVATED 0.59) scores. Fed-driven, not a demand break; GS $5,400 / JPM $6,000 medium-term targets intact.",
