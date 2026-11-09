@@ -2299,3 +2299,13 @@ system cannot value. **Ask Tho for real `avg_cost_price` values.**
 - Backtest (14,411 headlines read, 840 matched, 234 events after de-duplication by sector/direction/reaction day): DOWN passed backtest_gate (129 events, mean signed day-0 +0.50%, hit 54.3%); UP failed (105 events, skill negative, hit 49.5%). UP stays out of scoring.
 - Known noise: some non-US headlines match the broad-market and AI rules (e.g. Brazilian stocks, a Bitcoin story). DOWN pass is provisional; any rule change needs a new out-of-sample check.
 - Not done: no DB writes; no advice, signal or weight changed; no scheduled routine created.
+
+## Nightly Run - 2026-11-08 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-08.md (199 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, set_index, set_foreign_flow; regime neutral.
+
+## Nightly Run - 2026-11-09 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-09.md (116 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, jpythb, set_index, set_foreign_flow; regime neutral.
