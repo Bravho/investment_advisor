@@ -2309,3 +2309,8 @@ system cannot value. **Ask Tho for real `avg_cost_price` values.**
 - Mode: research_only (config/self_develop.json); no code edited.
 - Wrote data/market_intel/2026-11-09.md (116 headlines) and data/watchlist.json engine_snapshot (33 items).
 - Factor alerts: brent, jpythb, set_index, set_foreign_flow; regime neutral.
+
+## Nightly Run - 2026-11-10 02:30 ICT (research-only)
+- Mode: research_only (config/self_develop.json); no code edited.
+- Wrote data/market_intel/2026-11-10.md (525 headlines) and data/watchlist.json engine_snapshot (33 items).
+- Factor alerts: brent, us_iran_news, jpythb, set_index; regime neutral.

@@ -1,11 +1,11 @@
 {
   "_meta": {
     "description": "Nightly watchlist tracker — prices and signals for all monitored assets",
-    "last_updated": "2026-11-09T02:30+07:00",
+    "last_updated": "2026-11-10T02:30+07:00",
     "updated_by": "nightly-research (local, research-only)",
     "base_currency": "THB",
-    "usd_thb_rate": 33.46,
-    "usd_thb_as_of": "2026-11-09",
+    "usd_thb_rate": 33.58,
+    "usd_thb_as_of": "2026-11-10",
     "price_feed_status": "COLLECTOR DEAD 27 days (8th consecutive run). NEW TONIGHT: the th_price_fallback.py module written on 2026-08-10 to solve this CANNOT RUN in the nightly agent's sandbox — outbound HTTP from Python is refused by an egress proxy (403 on CONNECT), verified by running it. It is a HOST-SIDE tool for Tho's machine only. The agent-side path is now data_collector/observed_marks.py: the agent retrieves prices with its own tooling and deposits them with mandatory provenance. Marks below come from data/observed_marks.json.",
     "equity_marks_as_of": "MIXED — see per-ticker last_price_date. PTTEP 2026-08-10; BAFS and SCB 2026-08-07.",
     "carried_marks_thb": {
@@ -21,11 +21,11 @@
     "live_levels": {
       "brent_crude_usd": {
         "source": "yfinance BZ=F daily close",
-        "as_of": "2026-11-09T00:00:00+00:00"
+        "as_of": "2026-11-10T00:00:00+00:00"
       },
       "gold_current_usd": {
         "source": "yfinance GC=F daily close (COMEX front month ~ spot)",
-        "as_of": "2026-11-09T00:00:00+00:00"
+        "as_of": "2026-11-10T00:00:00+00:00"
       },
       "gold_recent_high_usd": {
         "source": "yfinance GC=F 1y max close",
@@ -33,7 +33,7 @@
       },
       "usd_thb": {
         "source": "yfinance THB=X daily close",
-        "as_of": "2026-11-09T00:00:00+00:00"
+        "as_of": "2026-11-10T00:00:00+00:00"
       },
       "usd_thb_1yr_high": {
         "source": "yfinance THB=X 1y max close",
@@ -41,14 +41,14 @@
       },
       "us_fed_funds_rate_pct": {
         "source": "NY Fed EFFR API (FRED fallback - key invalid) target-range midpoint",
-        "as_of": "2026-11-06T00:00:00+00:00"
+        "as_of": "2026-11-09T00:00:00+00:00"
       },
       "bot_policy_rate_pct": {
         "source": "Bank of Thailand MPC decisions table (xlsx)",
         "as_of": "2026-10-27T17:00:00+00:00"
       }
     },
-    "live_levels_updated_at": "2026-11-09T14:51:09.765000+00:00",
+    "live_levels_updated_at": "2026-11-10T15:51:07.674032+00:00",
     "live_levels_note": "Numeric levels above are refreshed from investor_db.market_factors (free sources). Narrative notes/flags are from the paused nightly agent (see last_updated)."
   },
   "holdings": {
@@ -410,8 +410,8 @@
     "commodities": {
       "XAU/USD": {
         "name": "Gold spot",
-        "last_price_usd": 4130.0,
-        "date": "2026-11-09",
+        "last_price_usd": 4056.3,
+        "date": "2026-11-10",
         "prior_price_usd": 4360,
         "change_pct": -2.5,
         "ytd_high_usd": 5597,
@@ -427,9 +427,9 @@
       },
       "BRENT": {
         "name": "Brent Crude",
-        "last_price_usd": 93.79,
+        "last_price_usd": 90.61,
         "wti_price_usd": 75.0,
-        "date": "2026-11-09",
+        "date": "2026-11-10",
         "prior_price_usd": 79.5,
         "change_pct": -1.9,
         "iran_deal_status": "SIGNED (virtual) Jun 15 — Trump + VP Vance e-signed at G7; US blockade ends, Strait of Hormuz reopens, tankers cleared to transit immediately, 60-day nuclear-talks window opens. Formal in-person ceremony still flagged ~Jun 19 but the operative signing already occurred.",
@@ -452,10 +452,10 @@
     "currencies": {
       "USD_THB": {
         "name": "USD/Thai Baht",
-        "last_rate": 33.46,
+        "last_rate": 33.58,
         "prior_rate": 33.22,
         "week_range": "33.22-33.47",
-        "date": "2026-11-09",
+        "date": "2026-11-10",
         "note": "USD/THB ~33.39 (Jun 27), weakest baht since May 2025 but still BELOW the 33.5 line that flips currency_regime_flag to HIGH (week high 33.47, Jun 24). Driven by the widening US(hawkish)-Thai(easy 1.00%) rate gap. Two-sided: cushions SCBGOLDE's THB NAV but raises FX entry cost on any new USD buy.",
         "bot_policy_rate_pct": 1.0
       },
@@ -529,7 +529,7 @@
     "set_jun15_note": "CORRECTION — official Jun 15 close was 1,591.72 (-0.04%, THB 91.84bn), i.e. the relief rally HELD near 1,592 rather than reversing to the ~1,552 estimated overnight. Jun 16 close pending.",
     "us_iran_situation": "Interim MoU signed Jun 15-17 (ceasefire, Hormuz reopened, Iran oil sales resume, 60-day nuclear-talks window). The Jun-19 first round of follow-up technical talks at Burgenstock was POSTPONED at short notice (White House cited logistics; VP Vance postponed travel). Ceasefire/interim deal remain in effect; Switzerland still ready to facilitate, no new date set. An early snag, NOT a breakdown.",
     "us_iran_status_flag": "interim_signed_2026-06-17_hormuz_open; jun21-22_swiss_talks_RESUMED_roadmap_agreed_IAEA_inspectors_invited; jun23_US_granted_iran_60day_oil_license_transit_rising; lebanon_hormuz_reclosure_threat_WALKED_BACK",
-    "brent_crude_usd": 93.79,
+    "brent_crude_usd": 90.61,
     "wti_crude_usd": 68.5,
     "brent_change_pct": 5.0,
     "brent_note": "Brent ~$72 (Aug futures, -4% Jun 26), extending the slide as more tankers EXITED the Strait of Hormuz. Two-sided wrinkle: Trump said Iran 'violated the ceasefire' with drone attacks near Hormuz and a vessel was attacked in the Gulf of Oman — yet price FELL, i.e. the market is pricing de-escalation, not closure. Bearish for PTTEP earnings growth (not solvency; breakeven ~$45).",
@@ -567,7 +567,7 @@
     "nikkei_change_jun12_pct": 2.9,
     "nikkei_ytd_gain_pct": 30,
     "japan_ppi_may_yoy_pct": 6.3,
-    "gold_current_usd": 4130.0,
+    "gold_current_usd": 4056.3,
     "gold_prior_usd": 4175,
     "gold_change_jun18_pct": -2.5,
     "gold_fed_hangover_note": "Gold fell ~2.5% to ~$4,250 Jun 18 (from ~$4,360) — the hawkish FOMC dot-plot's real-yield headwind finally bit, the exact scenario fed_policy_risk_flag (ELEVATED 0.59) scores. Fed-driven, not a demand break; GS $5,400 / JPM $6,000 medium-term targets intact.",
@@ -587,7 +587,7 @@
       "_MS_UBS_status": "STALE_JUN2026_UNVERIFIED (MS 5200 / UBS 5500 above current $4,000-4,900 consensus)"
     },
     "scbgolde_estimated_nav_thb": 4.31,
-    "usd_thb": 33.46,
+    "usd_thb": 33.58,
     "usd_jpy": 160.0,
     "vn_index": 1857,
     "india_senset_ytd_note": "Sensex 74,559 (+0.98% Jun 12); BSE down ~12.9% YTD through early June but oil drop is a structural tailwind.",
@@ -1350,7 +1350,7 @@
   },
   "last_updated": "2026-08-14T02:45:00+07:00",
   "engine_snapshot": {
-    "as_of": "2026-11-09T02:30+07:00",
+    "as_of": "2026-11-10T02:30+07:00",
     "source": "engine GET /watchlist",
     "items": [
       {
@@ -1371,16 +1371,16 @@
       },
       {
         "ticker": "MSFT",
-        "last_price": 530.609985,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 545.044983,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": 66.0,
         "price_stale": false
       },
       {
         "ticker": "VNM",
-        "last_price": 17.129999,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 17.105,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": 66.0,
         "price_stale": false
@@ -1435,8 +1435,8 @@
       },
       {
         "ticker": "IAU",
-        "last_price": 76.379997,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 77.095001,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": 55.0,
         "price_stale": false
@@ -1451,16 +1451,16 @@
       },
       {
         "ticker": "GDX",
-        "last_price": 87.599998,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 90.925003,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": 50.0,
         "price_stale": false
       },
       {
         "ticker": "SPY",
-        "last_price": 735.289978,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 752.380005,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": 49.0,
         "price_stale": false
@@ -1475,64 +1475,64 @@
       },
       {
         "ticker": "AVGO",
-        "last_price": 293.690002,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 318.570007,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "EWJ",
-        "last_price": 88.260002,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 91.245003,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "FXI",
-        "last_price": 34.950001,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 34.605,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "GLDM",
-        "last_price": 80.410004,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 81.175797,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "GOOGL",
-        "last_price": 284.779999,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 289.954987,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "IEF",
-        "last_price": 91.860001,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 91.739998,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "INDA",
-        "last_price": 50.889999,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 51.369999,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "JEPQ",
-        "last_price": 54.34,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 55.985001,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
@@ -1547,40 +1547,40 @@
       },
       {
         "ticker": "MU",
-        "last_price": 690.0,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 727.859985,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "NVDA",
-        "last_price": 186.639999,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 176.300003,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "QQQ",
-        "last_price": 656.099976,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 677.27002,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "SGOV",
-        "last_price": 100.489998,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 100.495003,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
       },
       {
         "ticker": "SHY",
-        "last_price": 81.629997,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 81.57,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
@@ -1595,8 +1595,8 @@
       },
       {
         "ticker": "TIP",
-        "last_price": 106.269997,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 106.010002,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false
@@ -1611,8 +1611,8 @@
       },
       {
         "ticker": "TSM",
-        "last_price": 375.440002,
-        "price_as_of": "2026-11-06T05:00:00+00:00",
+        "last_price": 389.187714,
+        "price_as_of": "2026-11-09T05:00:00+00:00",
         "status": "watching",
         "score": null,
         "price_stale": false

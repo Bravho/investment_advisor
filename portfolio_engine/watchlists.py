@@ -38,6 +38,7 @@ COUNCIL_REPORTS = PROJECT_DIR / "data" / "council" / "reports"
 STATUS_FILE = PROJECT_DIR / "data" / "watchlists_status.json"
 SECRETARY_DIR = Path(os.getenv("SECRETARY_DIR", "/Users/admin/Projects/ai_secretary_brain"))
 LINE_NOTIFY = PROJECT_DIR / "ops" / "line_notify.py"
+DIGEST_HOUR_ICT = 8  # watch-list LINE digest: at most one message per ICT day, from this hour
 STALE_PRICE_DAYS = 7
 HOLDINGS_FALLBACK = ["PTTEP.BK", "SCB.BK", "SCBGOLDE"]
 
@@ -393,6 +394,63 @@ def _send_line(text: str) -> tuple[bool, str]:
         return False, f"{type(exc).__name__}: {exc}"
 
 
+MARKET_SNAPSHOT = [("^GSPC", "S&P 500"), ("^SET.BK", "SET index"), ("GC=F", "Gold (USD/oz)"),
+                   ("BZ=F", "Brent oil (USD/bbl)"), ("BTC-USD", "Bitcoin (USD)")]
+WATCH_MOVE_PCT = 3.0        # watch-list items moved at least this much in 1 day go in the digest
+PRICE_MAX_AGE_DAYS = 7      # older prices are reported as stale, never shown as current
+
+
+def _market_snapshot_sync() -> list[dict[str, Any]]:
+    """Latest close and change vs the previous close for the digest markets."""
+    try:
+        closes = download_closes([t for t, _ in MARKET_SNAPSHOT], None, "10d", ttl=900)
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("digest market snapshot failed: %s", exc)
+        return [{"name": n, "error": "download failed"} for _, n in MARKET_SNAPSHOT]
+    today = datetime.now(ICT).date()
+    out: list[dict[str, Any]] = []
+    for ticker, name in MARKET_SNAPSHOT:
+        s = closes[ticker].dropna() if ticker in closes.columns else pd.Series(dtype=float)
+        if s.empty:
+            out.append({"name": name, "error": "no data"})
+            continue
+        last_d, last_v = s.index[-1].date(), float(s.iloc[-1])
+        if (today - last_d).days > PRICE_MAX_AGE_DAYS:
+            out.append({"name": name, "error": f"stale, last {last_d.isoformat()}"})
+            continue
+        prev_d = s.index[-2].date() if len(s) > 1 else None
+        prev_v = float(s.iloc[-2]) if len(s) > 1 else None
+        chg = (last_v / prev_v - 1) * 100 if prev_v else None
+        out.append({"name": name, "value": last_v, "as_of": last_d, "prev": prev_d, "chg": chg})
+    return out
+
+
+def _fmt_market(m: dict[str, Any]) -> str:
+    if "error" in m:
+        return f"• {m['name']}: unavailable ({m['error']})"
+    chg = f", {m['chg']:+.2f}% vs {m['prev'].isoformat()}" if m["chg"] is not None else ""
+    return f"• {m['name']}: {m['value']:,.2f}{chg} (close {m['as_of'].isoformat()})"
+
+
+def _watch_lines(rows: list[dict[str, Any]]) -> list[str]:
+    """Dashboard watch-list items that are ready or moved >= WATCH_MOVE_PCT today (fresh prices only)."""
+    notable: list[str] = []
+    quiet = 0
+    for r in rows:
+        if r.get("status") == "dropped" or r.get("last_price") is None or r.get("price_stale"):
+            continue
+        chg = (r.get("metrics") or {}).get("change_1d_pct")
+        if r.get("status") == "ready" or (chg is not None and abs(float(chg)) >= WATCH_MOVE_PCT):
+            ch = f", {float(chg):+.2f}% 1d" if chg is not None else ""
+            notable.append(f"• {r['ticker']} {float(r['last_price']):,.2f}{ch} [{r['status']}]")
+        else:
+            quiet += 1
+    lines = notable or [f"• No watch-list item ready or moved {WATCH_MOVE_PCT:g}%+ in 1 day"]
+    if quiet:
+        lines.append(f"• {quiet} other item(s) without a big move (see dashboard)")
+    return lines
+
+
 async def evaluate_alerts(pool: Any) -> dict[str, Any]:
     """Alert once when a condition becomes active (deduped in watch_alert_state).
 
@@ -435,19 +493,36 @@ async def evaluate_alerts(pool: Any) -> dict[str, Any]:
         if first_run:
             await conn.execute("INSERT INTO watch_alert_state (alert_key, active, message, primed) VALUES ('__primed__', TRUE, $1, TRUE) ON CONFLICT DO NOTHING",
                                f"primed {datetime.now(ICT):%Y-%m-%d %H:%M} ICT with {len(active)} active conditions")
+        # Daily digest: at most ONE LINE message per ICT day, sent once the digest hour is reached
+        # (and before the 22:00 quiet hours). New/re-activated conditions are queued in `pending`
+        # and held until the digest, so flip-flopping indicators do not each trigger a message.
         sent, result = False, "nothing to send"
-        hour = datetime.now(ICT).hour
-        if pending and (hour >= 22 or hour < 7):
-            result = f"quiet hours: {len(pending)} alert(s) held until 07:00 ICT"
-        elif pending:
-            text = "👀 Watch list alert\n" + "\n".join(f"• {m}" for _, m in pending[:10])
-            if len(pending) > 10:
-                text += f"\n…and {len(pending) - 10} more (see dashboard)"
-            text += "\n(Not advice to trade. Check the dashboard before acting.)"
-            sent, result = await asyncio.to_thread(_send_line, text)
+        now_ict = datetime.now(ICT)
+        today = now_ict.date().isoformat()
+        last_row = await conn.fetchrow("SELECT message FROM watch_alert_state WHERE alert_key='__last_digest__'")
+        last_digest = last_row["message"] if last_row else None
+        if last_digest == today:
+            result = f"daily digest already sent {today}; {len(pending)} queued for next day"
+        elif now_ict.hour < DIGEST_HOUR_ICT or now_ict.hour >= 22:
+            result = f"digest waits for {DIGEST_HOUR_ICT:02d}:00 ICT; {len(pending)} queued"
+        else:
+            # One message every day: market closes, dashboard watch list, and alerts queued since the last digest.
+            snapshot = await asyncio.to_thread(_market_snapshot_sync)
+            lines = [f"📊 Daily digest {today} ({now_ict:%H:%M} ICT)", "", "Markets (latest close):"]
+            lines += [_fmt_market(m) for m in snapshot]
+            lines += ["", "Watch list (dashboard):"] + _watch_lines(rows)
+            lines += ["", "Alerts since last digest:"]
+            lines += [f"• {m}" for _, m in pending[:25]] or ["• None"]
+            if len(pending) > 25:
+                lines.append(f"…and {len(pending) - 25} more (see dashboard)")
+            lines += ["", "(Not advice to trade. Check the dashboard before acting.)"]
+            sent, result = await asyncio.to_thread(_send_line, "\n".join(lines))
             if sent:
                 for key, _ in pending:
                     await conn.execute("UPDATE watch_alert_state SET alerted_at=now() WHERE alert_key=$1", key)
+                await conn.execute(
+                    "INSERT INTO watch_alert_state (alert_key, active, message, primed) VALUES ('__last_digest__', FALSE, $1, TRUE) "
+                    "ON CONFLICT (alert_key) DO UPDATE SET message=EXCLUDED.message, last_change=now()", today)
     return {"active": len(active), "pending": len(pending), "first_run": first_run, "sent": sent, "result": result,
             "active_conditions": list(active.values())}
 

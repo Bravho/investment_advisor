@@ -302,8 +302,8 @@
     "surprise_pct": 19.23
    }
   ],
-  "fetched_at": "2026-11-09T06:47:19+07:00",
-  "fetched_epoch": 1794181639.496796,
+  "fetched_at": "2026-11-10T06:47:39+07:00",
+  "fetched_epoch": 1794268059.100707,
   "error": null
  },
  "GOOGL": {
@@ -609,8 +609,8 @@
     "surprise_pct": -2.6
    }
   ],
-  "fetched_at": "2026-11-09T06:47:46+07:00",
-  "fetched_epoch": 1794181666.176167,
+  "fetched_at": "2026-11-10T06:47:16+07:00",
+  "fetched_epoch": 1794268036.879196,
   "error": null
  },
  "MSFT": {
@@ -916,8 +916,8 @@
     "surprise_pct": 19.92
    }
   ],
-  "fetched_at": "2026-11-09T06:47:31+07:00",
-  "fetched_epoch": 1794181651.261342,
+  "fetched_at": "2026-11-10T06:47:20+07:00",
+  "fetched_epoch": 1794268040.8372748,
   "error": null
  },
  "MU": {
@@ -1223,8 +1223,8 @@
     "surprise_pct": 0.83
    }
   ],
-  "fetched_at": "2026-11-09T06:47:33+07:00",
-  "fetched_epoch": 1794181653.0881221,
+  "fetched_at": "2026-11-10T06:47:23+07:00",
+  "fetched_epoch": 1794268043.0611908,
   "error": null
  },
  "NVDA": {
@@ -1530,8 +1530,8 @@
     "surprise_pct": 21.16
    }
   ],
-  "fetched_at": "2026-11-09T06:47:35+07:00",
-  "fetched_epoch": 1794181655.585057,
+  "fetched_at": "2026-11-10T06:47:25+07:00",
+  "fetched_epoch": 1794268045.209069,
   "error": null
  },
  "TSM": {
@@ -1837,20 +1837,20 @@
     "surprise_pct": -0.3
    }
   ],
-  "fetched_at": "2026-11-09T06:47:26+07:00",
-  "fetched_epoch": 1794181646.038033,
+  "fetched_at": "2026-11-10T06:47:44+07:00",
+  "fetched_epoch": 1794268064.009804,
   "error": null
  },
  "QQQ": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:29+07:00",
-  "fetched_epoch": 1794181649.409645,
+  "fetched_at": "2026-11-10T06:47:18+07:00",
+  "fetched_epoch": 1794268038.587521,
   "error": null
  },
  "SPY": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:52+07:00",
-  "fetched_epoch": 1794181672.1138098,
+  "fetched_at": "2026-11-10T06:47:37+07:00",
+  "fetched_epoch": 1794268057.0458272,
   "error": null
  },
  "INTC": {
@@ -3697,50 +3697,50 @@
  },
  "VNM": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:37+07:00",
-  "fetched_epoch": 1794181657.26988,
+  "fetched_at": "2026-11-10T06:47:50+07:00",
+  "fetched_epoch": 1794268070.654589,
   "error": null
  },
  "EWJ": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:40+07:00",
-  "fetched_epoch": 1794181660.3067021,
+  "fetched_at": "2026-11-10T06:47:31+07:00",
+  "fetched_epoch": 1794268051.588756,
   "error": null
  },
  "INDA": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:47+07:00",
-  "fetched_epoch": 1794181667.927957,
+  "fetched_at": "2026-11-10T06:47:42+07:00",
+  "fetched_epoch": 1794268062.403275,
   "error": null
  },
  "FXI": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:41+07:00",
-  "fetched_epoch": 1794181661.927579,
+  "fetched_at": "2026-11-10T06:47:49+07:00",
+  "fetched_epoch": 1794268069.115066,
   "error": null
  },
  "GLDM": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:44+07:00",
-  "fetched_epoch": 1794181664.849031,
+  "fetched_at": "2026-11-10T06:47:53+07:00",
+  "fetched_epoch": 1794268073.518198,
   "error": null
  },
  "IAU": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:27+07:00",
-  "fetched_epoch": 1794181647.9237928,
+  "fetched_at": "2026-11-10T06:47:33+07:00",
+  "fetched_epoch": 1794268053.7043378,
   "error": null
  },
  "GDX": {
   "events": [],
-  "fetched_at": "2026-11-09T06:47:43+07:00",
-  "fetched_epoch": 1794181663.4078872,
+  "fetched_at": "2026-11-10T06:47:52+07:00",
+  "fetched_epoch": 1794268072.093141,
   "error": null
  },
  "JEPQ": {
   "events": [],
-  "fetched_at": "2026-11-09T06:55:08+07:00",
-  "fetched_epoch": 1794182108.236219,
+  "fetched_at": "2026-11-10T06:55:08+07:00",
+  "fetched_epoch": 1794268508.436695,
   "error": null
  },
  "V": {
@@ -4660,8 +4660,8 @@
     "surprise_pct": -1.19
    }
   ],
-  "fetched_at": "2026-11-09T06:47:23+07:00",
-  "fetched_epoch": 1794181643.135663,
+  "fetched_at": "2026-11-10T06:47:56+07:00",
+  "fetched_epoch": 1794268076.374896,
   "error": null
  }
 }
